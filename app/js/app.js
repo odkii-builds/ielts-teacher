@@ -1009,7 +1009,7 @@
         await start(r.data.session.user);
       } catch (err) {
         const m = String(err.message || err);
-        $('#aerr').style.color = ''; $('#aerr').textContent = /Invalid login/i.test(m) ? 'Неверный email или пароль' : /not confirmed/i.test(m) ? 'Сначала подтверди email по ссылке из письма' : /already registered/i.test(m) ? 'Такой аккаунт уже есть — войди' : /fetch|network/i.test(m) ? 'Нет связи с сервером' : m;
+        $('#aerr').style.color = ''; $('#aerr').textContent = /Invalid login/i.test(m) ? 'Неверный email или пароль' : /rate limit/i.test(m) ? 'Слишком много запросов на отправку писем. Подожди час и попробуй снова. Мы уже чиним это.' : /already registered/i.test(m) ? 'Этот email уже зарегистрирован — нажми «Войти».' : /not confirmed/i.test(m) ? 'Сначала подтверди email по ссылке из письма' : /already registered/i.test(m) ? 'Такой аккаунт уже есть — войди' : /fetch|network/i.test(m) ? 'Нет связи с сервером' : m;
         b.disabled = false;
       }
     };
