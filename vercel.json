@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/:path(.*)",
-      "has": [{ "type": "host", "value": "ielts-teacher-theta.vercel.app" }],
+      "has": [{ "type": "host", "value": "ielts-teacher-(theta|beta)\\.vercel\\.app" }],
       "destination": "https://ielts.odkii-builds.ru/:path",
       "permanent": false
     }
