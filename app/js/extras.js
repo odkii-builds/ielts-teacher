@@ -5,7 +5,7 @@
 
   const C = () => window.Ctx;
   const esc = (s) => C().esc(s);
-  const CLUB = { spots: 3, dm: 'https://ig.me/m/odkii.builds' };
+  const CLUB = { spots: 2, dm: 'https://ig.me/m/odkii.builds' };
   const ST = { unk: 'Не знаю значение', pas: 'Понимаю, но не использую', str: 'Не понимаю конструкцию' };
   const DST = { use: 'Знаю и использую', some: 'Иногда использую', pas: 'Понимаю, но не употребляю', fgt: 'Забыл', new: 'Вижу впервые', unsure: 'Затрудняюсь' };
   const KIND = { t2: 'Task 2', t1: 'Task 1', gt: 'Письмо' };
