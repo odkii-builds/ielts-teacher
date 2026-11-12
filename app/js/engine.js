@@ -618,8 +618,8 @@
   // ---------- Таймер учёбы ----------
   const STUDY_IDLE = 30;
   /** Один тик в секунду: считаем, только если вкладка видна и с последнего касания прошло ≤ 30 с. Возвращает новое число секунд. */
-  function studyTick(sec, lastTouchMs, nowMs, visible) {
-    return visible && nowMs - lastTouchMs <= STUDY_IDLE * 1000 ? sec + 1 : sec;
+  function studyTick(sec, lastTouchMs, nowMs, visible, idleSec) {
+    return visible && nowMs - lastTouchMs <= (idleSec || STUDY_IDLE) * 1000 ? sec + 1 : sec;
   }
 
   // ---------- Разнообразие предложений (для Task 2) ----------

@@ -149,7 +149,7 @@
   setInterval(() => {
     if (!user || !DB.active || !P()) return;
     const p = P(); p.study = p.study || {}; const d = today(); const cur = p.study[d] || 0;
-    const nx = E.studyTick(cur, lastTouch, Date.now(), !document.hidden);
+    const nx = E.studyTick(cur, lastTouch, Date.now(), !document.hidden, /^#(read|write|t2|vw)\b/.test(location.hash) ? 1800 : 0);
     if (nx === cur) return;
     p.study[d] = nx; studyDirty++; showStudy();
     if (studyDirty >= 20) { studyDirty = 0; save(); }

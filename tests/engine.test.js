@@ -273,6 +273,8 @@ test('studyTick: считает только при активности и ви
   assert.equal(E.studyTick(5, 1000, 11000, true), 6);
   assert.equal(E.studyTick(5, 1000, 32000, true), 5);
   assert.equal(E.studyTick(5, 1000, 2000, false), 5);
+  assert.equal(E.studyTick(5, 1000, 1201000, true, 1800), 6);
+  assert.equal(E.studyTick(5, 1000, 1901000, true, 1800), 5);
 });
 
 test('sentenceTypes: находит шесть типов и связки', () => {
