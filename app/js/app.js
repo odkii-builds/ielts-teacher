@@ -102,6 +102,7 @@
     const v = $('#view'); v.innerHTML = html; v.classList.remove('enter');
     if (animate !== false) { void v.offsetWidth; v.classList.add('enter'); }
     const ai = v.querySelector('[data-ai]'); if (ai) ai.onclick = () => importSheet(P(), 't2', '');
+    if (window.Next) Next.after(v);
   }
 
   // ---------- профиль ----------
@@ -692,7 +693,7 @@
   function buildPrompt(kind, q, text) {
     return 'You are a strict, experienced IELTS examiner. Use the public IELTS band descriptors for this task type. Be conservative: if unsure, choose the LOWER band. Do not inflate scores.\n\n' + RUBRIC[kind] +
       '\n\nQUESTION:\n' + q + '\n\nCANDIDATE ' + (kind === 'sp' ? 'TRANSCRIPT' : 'RESPONSE') + ' (' + text.trim().split(/\s+/).filter(Boolean).length + ' words):\n' + text +
-      (kind === 't2' ? '\n\nFor Grammatical Range and Accuracy, also state which sentence types the candidate used (simple, compound, complex, passive, question, conditional), how many are error-free, and which structure to attempt next.' : '') + '\n\nReturn:\n1) A band RANGE for each of the 4 criteria (e.g. 6.0–6.5), each with 1–2 short quotes from the text as evidence.\n2) An overall range.\n3) The 3 highest-impact fixes.\n4) One rewritten paragraph one band higher.\n5) 3 collocations to learn.\n6) A list of errors, ONE per line, in EXACTLY this format: CODE: <the complete original sentence containing the error, copied verbatim> || <wrong fragment, copied verbatim from that sentence> → <corrected fragment>. Codes: W-ART, W-WF, W-SVA, W-PUNCT, W-COLL, W-REP, W-TR, W-CC; for speaking S-FC, S-LR, S-GRA. Example: W-TR: Did you ever needed a break? || Did you ever needed → Have you ever needed.\n\nACCURACY RULES for every correction: (a) put the corrected fragment back into the full sentence and re-read it: the sentence must be fully correct, natural English with the SAME meaning; (b) check tense and aspect carefully: present perfect with ever/never/already/yet/just/since/for/so far, past simple only with finished-time markers, no future will after if/when/as soon as in time or conditional clauses, correct sequence of tenses; (c) check subject-verb agreement, articles, countable/uncountable nouns, prepositions, word forms and collocations; (d) include enough words in the fragment (e.g. the auxiliary verb) so the whole fix is visible; (e) if you are not 100% sure, SEARCH THE WEB (Cambridge Dictionary and Cambridge Grammar, Oxford Collocations Dictionary, British Council LearnEnglish) and follow them; never invent a rule; (f) if a sentence is acceptable, do not list it as an error.\nFinish with one JSON line: {"c1":x,"c2":x,"c3":x,"c4":x} using the LOWER end of each range.';
+      (kind === 't2' ? '\n\nFor Grammatical Range and Accuracy, also state which sentence types the candidate used (simple, compound, complex, passive, question, conditional), how many are error-free, and which structure to attempt next.' : '') + '\n\nReturn:\n1) A band RANGE for each of the 4 criteria (e.g. 6.0–6.5), one short comment each.\n2) An overall range.\n3) The 3 highest-impact fixes.\n4) A list of errors, ONE per line, in EXACTLY this format: CODE: <the complete original sentence containing the error, copied verbatim> || <wrong fragment, copied verbatim from that sentence> → <corrected fragment>. Codes: W-ART, W-WF, W-SVA, W-PUNCT, W-COLL, W-REP, W-TR, W-CC; for speaking S-FC, S-LR, S-GRA. Example: W-TR: Did you ever needed a break? || Did you ever needed → Have you ever needed.\n\nACCURACY RULES for every correction: (a) put the corrected fragment back into the full sentence and re-read it: the sentence must be fully correct, natural English with the SAME meaning; (b) check tense and aspect carefully: present perfect with ever/never/already/yet/just/since/for/so far, past simple only with finished-time markers, no future will after if/when/as soon as in time or conditional clauses, correct sequence of tenses; (c) check subject-verb agreement, articles, countable/uncountable nouns, prepositions, word forms and collocations; (d) include enough words in the fragment (e.g. the auxiliary verb) so the whole fix is visible; (e) if you are not 100% sure, SEARCH THE WEB (Cambridge Dictionary and Cambridge Grammar, Oxford Collocations Dictionary, British Council LearnEnglish) and follow them; never invent a rule; (f) if a sentence is acceptable, do not list it as an error.\nFinish with one JSON line: {"c1":x,"c2":x,"c3":x,"c4":x} using the LOWER end of each range.';
   }
   const KINDS = [['t2', 'Задание 2 (эссе)'], ['t1', 'Задание 1 (график)'], ['gt', 'Письмо'], ['sp', 'Говорение']];
   const back = (href) => '<a class="ib" href="' + href + '" aria-label="Назад">' + ico('left') + '</a>';
@@ -837,7 +838,7 @@
     bindTimer(mins, 'w' + id);
     const pl = $('#wplan'); if (pl) pl.querySelector('.tbody').onclick = () => pl.classList.toggle('open');
     const cnt = () => { const a = E.analyseText($('#wt').value, id === 'free' ? segVal('fk') : kind); $('#wc').textContent = a.words + ' слов · цель ' + a.minWords + '+'; $('#wc').style.color = a.words && a.short ? 'var(--warn)' : ''; $('#wp').textContent = a.paras + ' абз.'; };
-    let dt = null; $('#wt').oninput = () => { cnt(); clearTimeout(dt); dt = setTimeout(() => { p.drafts[id] = $('#wt').value; save(); }, 800); };
+    let dt = null; $('#wt').oninput = () => { cnt(); clearTimeout(dt); const dv = $('#wt').value; dt = setTimeout(() => { p.drafts[id] = dv; save(); }, 800); };
     cnt();
     $('#wchk').onclick = () => {
       const text = $('#wt').value; if (!text.trim()) { toast('Сначала напиши текст'); return; }
@@ -851,7 +852,7 @@
         (k === 't2' ? row(a.hasConclusion, a.hasConclusion ? 'Есть вывод' : 'Нет явного вывода (in conclusion…)') : k === 't1' ? row(a.hasOverview, a.hasOverview ? 'Есть общий вывод (overview)' : 'Нет общего вывода (начни с Overall, …)') : '') + '</div>' + (k === 't2' ? typesHtml(text) : '') +
         '<h3>Ошибки и сочетания слов</h3><div id="ltb">' + ltHtml(text, undefined) + '</div><p class="mut">Это проверка формы, не оценка. Содержание и смысл оценит ИИ — скопируй промпт.</p><div class="stack"><button class="btn p" id="wcp">Скопировать промпт для ИИ</button><button class="btn" id="wsv">Сохранить попытку</button><button class="btn" id="wsc">Вставить ответ ИИ</button></div>', () => {
         ltCheck(text).then((ms) => { const b = $('#ltb'); if (b) b.innerHTML = ltHtml(text, ms); });
-        $('#wcp').onclick = () => copyText(buildPrompt(k, q, text));
+        $('#wcp').onclick = () => { copyText(buildPrompt(k, q, text)); };
         $('#wsv').onclick = () => { p.writes.push({ id, date: today(), words: a.words, text: text.slice(0, 6000) }); save(); closeSheet(); toast('Попытка сохранена'); };
         $('#wsc').onclick = () => importSheet(p, k, id);
       });
@@ -876,7 +877,7 @@
     const items = []; t.groups.forEach((g) => g.items.forEach((it) => items.push(Object.assign({ type: g.type }, it))));
     const ok = (it) => E.checkAnswer(it, ans[it.n]);
     let h = head(t.title, esc(t.topic), back('#reading')) + timerRow(t.minutes, 'r' + id);
-    h += '<div class="card stack">' + t.paras.map((x) => '<p style="margin:0"><b style="color:var(--acc)">' + x.k + '</b>&nbsp; ' + esc(x.t) + '</p>').join('') + '</div>';
+    h += '<div class="card stack rtext">' + t.paras.map((x) => '<p style="margin:0"><b style="color:var(--acc)">' + x.k + '</b>&nbsp; ' + esc(x.t) + '</p>').join('') + '</div>';
     t.groups.forEach((g) => {
       h += '<h3>' + esc(g.title) + '</h3><p class="mut" style="margin:-4px 0 10px">' + esc(g.instr) + '</p>';
       if (g.type === 'mh') h += '<div class="card mut" style="margin-bottom:10px">' + g.options.map((o) => '<div><b>' + esc(o[0]) + '</b>&nbsp; ' + esc(o[1]) + '</div>').join('') + '</div>';
@@ -1032,7 +1033,7 @@
     const parts = (location.hash || '#today').slice(1).split('/'); const tab = parts[0];
     if (!DB.active || !P()) { $('#tabs').hidden = true; return viewOnboarding(); }
     renderTabs(tab);
-    ({ today: viewToday, plan: viewPlan, cards: viewCards, errors: viewErrors, fix: viewFix, vw: viewVw, t2: viewT2, writing: viewWriting, write: viewWrite, reading: viewReading, read: viewRead, progress: viewProgress, res: viewRes, set: viewSet }[tab] || viewToday)(parts[1]);
+    (Object.assign({ today: viewToday, plan: viewPlan, cards: viewCards, errors: viewErrors, fix: viewFix, vw: viewVw, t2: viewT2, writing: viewWriting, write: viewWrite, reading: viewReading, read: viewRead, progress: viewProgress, res: viewRes, set: viewSet }, window.Next && Next.views)[tab] || viewToday)(parts[1]);
     if (animate === false) $('#view').classList.remove('enter');
     window.scrollTo(0, 0);
   }
@@ -1072,5 +1073,25 @@
     try { session = await Cloud.session(); } catch (e) { session = null; }
     if (session) await start(session.user); else route();
   }
+  function writeInfo(id) {
+    if (id === 'free') return { kind: segVal('fk'), q: ($('#wq') || {}).value || '' };
+    let t; if ((t = WRITING.task2.find((x) => x.id === id))) return { kind: 't2', q: t.q || t.title };
+    if ((t = WRITING.task1.find((x) => x.id === id))) return { kind: 't1', q: (t.q || t.title) + '\nDATA (' + t.kind + '): ' + dataText(t) };
+    t = WRITING.gt.find((x) => x.id === id); return { kind: 'gt', q: t ? (t.q || t.title) : '' };
+  }
+  const wordKnown = (term) => { const k = term.toLowerCase(); return P().cards.some((c) => c.t && c.t.toLowerCase() === k && (c.seen || !DECKIDS.has(c.id))); };
+  async function addFromReading(term, ctx) {
+    const p = P(); if (wordKnown(term)) return 'dup';
+    const lx = await lexLoad(); const e = lx[term.toLowerCase()] || []; let tr = e[1] || '';
+    if (!tr) { try { tr = (await onlineTr(term)) || ''; } catch (er) { tr = ''; } }
+    addWordCard(p, term, tr || 'перевод не найден', ctx); sess = null; save(); return 'ok';
+  }
+  function addDiagWords(list) {
+    const p = P(); let n = 0;
+    list.forEach((w) => { if (wordKnown(w.t)) return; addWordCard(p, w.t, w.ru, w.ex); n++; });
+    if (n) { sess = null; save(); } return n;
+  }
+  window.Ctx = { writeInfo, addFromReading, addDiagWords, userId: () => user && user.id, P, save, paint, head, back, esc, ico, toast, openSheet, closeSheet, today, uid, $, $$, E, route, get DECK() { return DECK; }, get READ() { return READ; } };
+  if (window.Next && Next.more.length) MORE.splice(MORE.length - 1, 0, ...Next.more);
   init();
 })();
