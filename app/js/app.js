@@ -184,7 +184,8 @@
       const q = it.k === 'v' ? 'Что значит слово <b>' + esc(it.q) + '</b>?' : esc(it.q).replace('___', '<mark class="gap">&nbsp;&nbsp;&nbsp;&nbsp;</mark>');
       paint(head('Вопрос ' + (i + 1) + ' из ' + items.length, it.k === 'v' ? 'Слова' : 'Грамматика') + '<div class="bar" style="margin-bottom:16px"><i style="width:' + Math.round(100 * i / items.length) + '%"></i></div>' +
         '<div class="card" style="font-size:18px;margin-bottom:12px">' + q + '</div><div class="list">' + it.opts.map((o, k) => '<button class="rowi" data-k="' + k + '"><span class="grow">' + esc(o) + '</span></button>').join('') +
-        '<button class="rowi" data-k="-1"><span class="grow mut">Не знаю</span></button></div>', false);
+        '<button class="rowi" data-k="-1"><span class="grow mut">Не знаю</span></button></div><div style="text-align:center;margin-top:8px"><button class="link" id="pback">← ' + (i ? 'Назад к предыдущему вопросу' : 'Назад') + '</button></div>', false);
+      $('#pback').onclick = () => { if (i) { ans.pop(); i--; step(); } else intro(); };
       $$('.rowi[data-k]').forEach((b) => { b.onclick = () => { ans.push({ lv: it.lv, topic: it.topic, ok: Number(b.dataset.k) === it.a }); i++; step(); }; });
     };
     const fin = () => {
@@ -417,7 +418,7 @@
     const re = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'); let c;
     if (ex && re.test(ex)) { c = E.newCard('', '', uid()); Object.assign(c, { t: term, ru, ex: ex.replace(re, (m) => '[[' + m + ']]'), pos: 'phr', dom: 'my', lv: 0 }); }
     else c = E.newCard(term, ru + (ex ? ' — ' + ex : ''));
-    p.cards.push(c);
+    p.cards.push(c); return c;
   }
   function viewCards() {
     const p = P(); ensureSess(p); refill(p);
@@ -1084,14 +1085,14 @@
     const p = P(); if (wordKnown(term)) return 'dup';
     const lx = await lexLoad(); const e = lx[term.toLowerCase()] || []; let tr = e[1] || '';
     if (!tr) { try { tr = (await onlineTr(term)) || ''; } catch (er) { tr = ''; } }
-    addWordCard(p, term, tr || 'перевод не найден', ctx); sess = null; save(); return 'ok';
+    const nc = addWordCard(p, term, tr || 'перевод не найден', ctx); sess = null; save(); return nc.id;
   }
   function addDiagWords(list) {
     const p = P(); let n = 0;
     list.forEach((w) => { if (wordKnown(w.t)) return; addWordCard(p, w.t, w.ru, w.ex); n++; });
     if (n) { sess = null; save(); } return n;
   }
-  window.Ctx = { writeInfo, addFromReading, addDiagWords, userId: () => user && user.id, P, save, paint, head, back, esc, ico, toast, openSheet, closeSheet, today, uid, $, $$, E, route, get DECK() { return DECK; }, get READ() { return READ; } };
+  window.Ctx = { writeInfo, addFromReading, removeCard: (id) => { const p = P(); p.cards = p.cards.filter((c) => c.id !== id); sess = null; save(); }, addDiagWords, userId: () => user && user.id, P, save, paint, head, back, esc, ico, toast, openSheet, closeSheet, today, uid, $, $$, E, route, get DECK() { return DECK; }, get READ() { return READ; } };
   if (window.Next && Next.more.length) MORE.splice(MORE.length - 1, 0, ...Next.more);
   init();
 })();
