@@ -29,10 +29,10 @@
     const p = C().P(); const lvl = p.placement ? p.placement.cefr + (p.placement.band ? ' (≈ band ' + p.placement.band + ')' : '') : '';
     const goal = p.target && p.target.overall ? p.target.overall : '';
     const form = 'Привет! Хочу в IELTS Teacher Club.\n1. Мой уровень / результат IELTS сейчас: ' + (lvl || '…') + '\n2. Цель по IELTS: ' + (goal || '…') + '\n3. Куда хочу поступать: …\n4. В каком году: …';
-    C().openSheet('<h2 style="margin:0 0 6px">Как попасть в клуб</h2><p class="mut" style="margin:0 0 12px">Отбор бесплатный. Напиши мне в личные сообщения Instagram и коротко расскажи:</p>' +
+    C().openSheet('<h2 style="margin:0 0 6px">Как попасть в клуб</h2><p class="mut" style="margin:0 0 12px">Отбор бесплатный. Напиши мне в личные сообщения Telegram и коротко расскажи:</p>' +
       '<div class="list"><div class="rowi"><span class="grow">Свой уровень английского или результат IELTS</span></div><div class="rowi"><span class="grow">Куда хочешь поступать</span></div><div class="rowi"><span class="grow">В каком году</span></div></div>' +
       '<p class="mut" style="margin:12px 0">Шаблон уже подставил данные из твоего профиля — проверь и допиши.</p>' +
-      '<div class="stack"><button class="btn" id="ncp">Скопировать шаблон</button><a class="btn p" style="display:grid;place-items:center;text-decoration:none" href="' + CLUB.dm + '" target="_blank" rel="noopener">Написать в Instagram</a></div>',
+      '<div class="stack"><button class="btn" id="ncp">Скопировать шаблон</button><a class="btn p" style="display:grid;place-items:center;text-decoration:none" href="https://t.me/odkii" target="_blank" rel="noopener">Написать в Telegram</a></div>',
     (el) => { el.querySelector('#ncp').onclick = () => copy(form, 'Шаблон скопирован'); });
   }
   function bindBanner(v) {
@@ -59,11 +59,32 @@
     s.marks.push({ id: C().uid(), text: info.text, ctx: info.ctx, st, src: m[1], date: C().today() });
     window.getSelection().removeAllRanges(); bar.hidden = true; decorate(document.getElementById('view'));
     const r = await C().addFromReading(info.text, info.ctx);
-    C().toast(r === 'dup' ? 'Уже есть в карточках' : 'Добавлено в карточки на повторение');
+    if (r === 'dup') { C().toast('Уже есть в карточках'); return; }
+    const mk = s.marks.find((x) => x.src === m[1] && x.text.toLowerCase() === key); if (mk) { mk.cid = r; C().save(); showDel(mk); }
   }
+  let delT = 0;
+  function showDel(mk) {
+    bar.dataset.mode = 'del';
+    bar.innerHTML = '<div class="sb-w">«' + esc(mk.text) + '» добавлено в карточки</div><div class="sb-b"><button id="ndel">Удалить из карточек</button><button id="nkeep">Оставить</button></div>';
+    bar.hidden = false; clearTimeout(delT); delT = setTimeout(hideDel, 8000);
+    bar.querySelector('#nkeep').onclick = hideDel;
+    bar.querySelector('#ndel').onclick = () => {
+      const s = S(); s.marks = s.marks.filter((x) => x.id !== mk.id); if (mk.cid) C().removeCard(mk.cid); C().save();
+      document.querySelectorAll('.rtext mark.hl').forEach((el) => { if (el.textContent.toLowerCase() === mk.text.toLowerCase()) el.replaceWith(document.createTextNode(el.textContent)); });
+      const h = document.querySelector('.rtext'); if (h) h.normalize(); hideDel(); C().toast('Удалено из карточек');
+    };
+  }
+  function hideDel() { clearTimeout(delT); delete bar.dataset.mode; bar.hidden = true; }
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest && e.target.closest('.rtext mark.hl'); if (!el || !/^#read\//.test(location.hash)) return;
+    const m = /^#read\/(.+)$/.exec(location.hash); const mk = S().marks.find((x) => x.src === m[1] && x.text.toLowerCase() === el.textContent.toLowerCase());
+    if (mk && mk.cid) showDel(mk);
+  });
   let selT = 0;
   function refreshBar() {
-    if (!/^#read\//.test(location.hash)) { bar.hidden = true; return; }
+    if (!/^#read\//.test(location.hash)) { hideDel(); return; }
+    if (bar.dataset.mode === 'del' && !selInfo()) return;
+    delete bar.dataset.mode;
     const i = selInfo(); if (!i) { bar.hidden = true; return; }
     bar.innerHTML = '<div class="sb-w">«' + esc(i.text) + '» → в карточки</div><div class="sb-b">' + Object.keys(ST).map((k) => '<button data-k="' + k + '">' + ST[k] + '</button>').join('') + '</div>';
     bar.hidden = false;
