@@ -2,7 +2,7 @@
  * Интерфейс совместим с прежним: signIn/signUp/signOut/session/onAuth/pull/push. Запросы — простые POST (text/plain), без preflight. */
 window.Cloud = (function () {
   'use strict';
-  const API = 'https://functions.yandexcloud.net/__FUNCTION_ID__';
+  const API = 'https://functions.yandexcloud.net/d4ea11hmfpfku2eldtqo';
   const TK = 'ielts_tok';
   const subs = [];
   let lastSent = '';
