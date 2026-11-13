@@ -29,7 +29,7 @@
     const p = C().P(); const lvl = p.placement ? p.placement.cefr + (p.placement.band ? ' (≈ band ' + p.placement.band + ')' : '') : '';
     const goal = p.target && p.target.overall ? p.target.overall : '';
     const form = 'Привет! Хочу в IELTS Teacher Club.\n1. Мой уровень / результат IELTS сейчас: ' + (lvl || '…') + '\n2. Цель по IELTS: ' + (goal || '…') + '\n3. Куда хочу поступать: …\n4. В каком году: …';
-    C().openSheet('<h2 style="margin:0 0 6px">Как попасть в клуб</h2><p class="mut" style="margin:0 0 12px">Отбор бесплатный. Напиши мне в личные сообщения Telegram и коротко расскажи:</p>' +
+    C().openSheet('<h2 style="margin:0 0 6px">Как попасть в клуб</h2><p class="mut" style="margin:0 0 12px">Отбор бесплатный. Напиши мне в Telegram и коротко расскажи:</p>' +
       '<div class="list"><div class="rowi"><span class="grow">Свой уровень английского или результат IELTS</span></div><div class="rowi"><span class="grow">Куда хочешь поступать</span></div><div class="rowi"><span class="grow">В каком году</span></div></div>' +
       '<p class="mut" style="margin:12px 0">Шаблон уже подставил данные из твоего профиля — проверь и допиши.</p>' +
       '<div class="stack"><button class="btn" id="ncp">Скопировать шаблон</button><a class="btn p" style="display:grid;place-items:center;text-decoration:none" href="https://t.me/odkii" target="_blank" rel="noopener">Написать в Telegram</a></div>',
