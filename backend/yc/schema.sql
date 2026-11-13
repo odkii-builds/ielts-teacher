@@ -1,0 +1,5 @@
+-- YDB serverless (Yandex Cloud). Выполнить в консоли YDB → «Навигация» → «Новый SQL-запрос».
+CREATE TABLE users (email Utf8, id Utf8, pass Utf8, created Uint64, PRIMARY KEY (email));
+CREATE TABLE data (id Utf8, d String, upd Uint64, PRIMARY KEY (id));
+-- Права и платные возможности (баланс проверок, Premium, бан)
+CREATE TABLE ent (id Utf8, credits Int64, prem Uint64, ban Uint8, free Int64, day Uint64, dcount Uint64, note Utf8, PRIMARY KEY (id));

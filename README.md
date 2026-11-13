@@ -35,7 +35,7 @@
 Или запусти локально за 10 секунд:
 
 ```bash
-git clone https://github.com/odkiii/ielts-teacher.git
+git clone https://github.com/odkii-builds/ielts-teacher.git
 cd ielts-teacher
 npm start          # http://localhost:8080  (нужен только python3)
 ```
