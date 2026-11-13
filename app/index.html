@@ -27,11 +27,11 @@
 html{background:#fafaf9}@media(prefers-color-scheme:dark){html{background:#0b0b0d}}
 #boot{position:fixed;inset:0;z-index:100;display:grid;place-content:center;justify-items:center;gap:26px;background:#fafaf9;transition:opacity .45s cubic-bezier(.32,.72,0,1),transform .45s cubic-bezier(.32,.72,0,1)}
 #boot.out{opacity:0;transform:scale(1.05);pointer-events:none}
-#boot img{width:96px;height:96px;border-radius:22%;display:block;animation:bin .6s cubic-bezier(.32,.72,0,1) both,bp 1.8s ease-in-out .6s infinite}
+#boot img{width:96px;height:96px;display:block;animation:bin .6s cubic-bezier(.32,.72,0,1) both,bp 1.8s ease-in-out .6s infinite}
 #boot i{display:flex;gap:7px}#boot i b{width:7px;height:7px;border-radius:50%;background:#0045fd;opacity:.25;animation:bd 1.1s ease-in-out infinite}
 #boot i b:nth-child(2){animation-delay:.16s}#boot i b:nth-child(3){animation-delay:.32s}
 @keyframes bin{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
-@keyframes bp{0%,100%{transform:scale(1);box-shadow:0 6px 22px rgba(0,69,253,.25)}50%{transform:scale(1.045);box-shadow:0 10px 38px rgba(0,69,253,.55)}}
+@keyframes bp{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 rgba(30,110,255,0))}50%{transform:scale(1.06);filter:drop-shadow(0 0 12px rgba(30,110,255,.5))}}
 @keyframes bd{0%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-4px)}}
 @media(prefers-color-scheme:dark){#boot{background:#0b0b0d}#boot i b{background:#4f86ff}}
 @media(prefers-reduced-motion:reduce){#boot,#boot *{animation:none!important;transition:opacity .2s!important}#boot.out{transform:none}}
@@ -41,17 +41,17 @@ html{background:#fafaf9}@media(prefers-color-scheme:dark){html{background:#0b0b0
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-<div id="boot" role="status" aria-label="Загрузка"><img src="img/logo.png" alt="IELTS" width="96" height="96"><i><b></b><b></b><b></b></i></div>
+<div id="boot" role="status" aria-label="Загрузка"><img src="img/logo.png?v=2" alt="IELTS" width="96" height="96"><i><b></b><b></b><b></b></i></div>
 <main id="view"></main>
 <nav id="tabs" hidden></nav>
 <div id="sheets"></div>
 <div id="toasts" aria-live="polite"></div>
-<script src="vendor/number-flow.js"></script>
-<script src="js/cloud.js"></script>
-<script src="js/rules.js"></script>
-<script src="js/engine.js"></script>
-<script src="js/extras.js"></script>
+<script src="vendor/number-flow.js?v=20261113b"></script>
+<script src="js/cloud.js?v=20261113b"></script>
+<script src="js/rules.js?v=20261113b"></script>
+<script src="js/engine.js?v=20261113b"></script>
+<script src="js/extras.js?v=20261113b"></script>
 <script>setTimeout(function(){var b=document.getElementById("boot");if(b){b.classList.add("out");setTimeout(function(){b.remove()},600)}},12000)</script>
-<script src="js/app.js"></script>
+<script src="js/app.js?v=20261113b"></script>
 </body>
 </html>
