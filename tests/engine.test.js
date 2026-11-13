@@ -133,6 +133,16 @@ test('mcq: правильный вариант на месте, дистракт
   const q = Eg.mcq(cards[0], cards, () => 0.3);
   assert.equal(q.opts.length, 4); assert.equal(q.opts[q.answer], 'plunge'); assert.ok(!q.opts.includes('issue')); assert.ok(q.text.includes('_____'));
 });
+test('checkSentence: правила английского ловят ошибки (без сети)', () => {
+  const bad = Eg.checkSentence({ t: 'emphasize', ex: 'x' }, 'I want to emphasize important this point!');
+  assert.equal(bad.ok, false);
+  assert.equal(bad.issues.length, 1);
+  assert.equal(bad.issues[0].replacements[0].value, 'this important');
+  assert.equal('I want to emphasize important this point!'.substr(bad.issues[0].offset, bad.issues[0].length), 'important this');
+  assert.equal(Eg.checkSentence({ t: 'emphasize', ex: 'x' }, 'I want to emphasize this important point!').ok, true);
+  assert.equal(Eg.checkSentence({ t: 'emphasize', ex: 'x' }, 'Today i want to emphasize this important point!').ok, false, 'маленькая «i»');
+});
+
 test('checkSentence', () => {
   const c = { t: 'play a crucial role in', ex: 'x' };
   assert.equal(Eg.checkSentence(c, 'Teachers play a crucial role in shaping young minds.').ok, true);

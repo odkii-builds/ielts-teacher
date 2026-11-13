@@ -1,6 +1,7 @@
 /* IELTS Teacher — движок плана. Чистые функции, работает в браузере и в Node (тесты). */
 (function (root) {
   'use strict';
+  const Rules = typeof module !== 'undefined' && module.exports && typeof require === 'function' ? require('./rules.js') : root.Rules;
   const SK = ['L', 'R', 'W', 'S'];
   const PHASES = [
     { id: 'P0', name: 'Диагностика', from: 1, to: 2, goal: 'стартовый профиль' },
@@ -424,7 +425,8 @@
     if (!used) tips.push('используй «' + c.t + '» в предложении');
     if (words.length < 5) tips.push('сделай предложение подробнее (минимум 5 слов)');
     if (txt && !/[.!?]$/.test(txt)) tips.push('поставь точку в конце');
-    return { used, words: words.length, ok: used && tips.length === 0, tips };
+    const issues = Rules ? Rules.check(txt) : [];
+    return { used, words: words.length, ok: used && tips.length === 0 && issues.length === 0, tips, issues };
   }
 
 
