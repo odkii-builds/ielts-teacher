@@ -99,7 +99,8 @@
   const plusBtn = (id, label) => '<button class="ib" id="' + id + '" aria-label="' + esc(label) + '">' + ico('plus') + '</button>';
   function paint(html, animate) {
     document.body.classList.remove('drilling');
-    const v = $('#view'); v.innerHTML = html; v.classList.remove('enter');
+    const v = $('#view'); v.innerHTML = html; v.classList.remove('enter', 'first');
+    const bootEl = document.getElementById('boot'); if (bootEl && !bootEl.classList.contains('out')) { bootEl.classList.add('out'); setTimeout(() => bootEl.remove(), 600); animate = true; v.classList.add('first'); }
     if (animate !== false) { void v.offsetWidth; v.classList.add('enter'); }
     const ai = v.querySelector('[data-ai]'); if (ai) ai.onclick = () => importSheet(P(), 't2', '');
     if (window.Next) Next.after(v);
