@@ -41,7 +41,7 @@
   function save() {
     if (!user) return;
     ver++; syncState = 'pending'; writeLocal(true);
-    clearTimeout(pushTimer); pushTimer = setTimeout(push, 700);
+    clearTimeout(pushTimer); pushTimer = setTimeout(push, 30000); // реже пишем в облако: локально сохраняется сразу
   }
   async function push() {
     clearTimeout(pushTimer);
@@ -57,6 +57,7 @@
     }
   }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && syncState !== 'ok') push(); });
+  window.addEventListener('pagehide', () => { if (syncState !== 'ok') push(); });
 
   // ---------- UI-примитивы ----------
   function toast(msg) {
