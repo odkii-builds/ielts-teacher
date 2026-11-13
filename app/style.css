@@ -94,7 +94,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke
 .toast.show{opacity:1;transform:none}
 .auth{padding-top:8vh}.logo{display:block;border-radius:22%;box-shadow:0 6px 20px rgba(0,69,253,.25)}.auth .logo{width:88px;height:88px;margin-bottom:18px}.head .hl{display:flex;align-items:center;gap:12px}.head .hl .logo{width:40px;height:40px;flex:none;box-shadow:none}
 .auth form{margin-top:24px}
-.auth input{margin-bottom:10px}
+.auth input{margin-bottom:10px}.pw{position:relative}.pw input{padding-right:48px}.eye{position:absolute;right:2px;top:0;width:46px;height:46px;display:grid;place-items:center;background:none;border:0;color:var(--mut,#888);cursor:pointer;-webkit-tap-highlight-color:transparent}.eye .sl{opacity:0}.eye.on{color:var(--acc)}.eye.on .sl{opacity:1}
 .auth .err{color:#dc2626;font-size:14px;min-height:20px;margin:8px 0}
 .tile{padding:12px;text-align:center}.tile b{display:block;font-size:20px}
 @media (hover:hover) and (pointer:fine){.rowi:hover,.ib:hover{background:var(--s2)}.btn:hover{opacity:.9}}
