@@ -1092,7 +1092,7 @@
     list.forEach((w) => { if (wordKnown(w.t)) return; addWordCard(p, w.t, w.ru, w.ex); n++; });
     if (n) { sess = null; save(); } return n;
   }
-  window.Ctx = { writeInfo, addFromReading, removeCard: (id) => { const p = P(); p.cards = p.cards.filter((c) => c.id !== id); sess = null; save(); }, addDiagWords, userId: () => user && user.id, P, save, paint, head, back, esc, ico, toast, openSheet, closeSheet, today, uid, $, $$, E, route, get DECK() { return DECK; }, get READ() { return READ; } };
+  window.Ctx = { writeInfo, addFromReading, findCardId: (term) => { const k = term.toLowerCase(); const c = P().cards.find((x) => x.t && x.t.toLowerCase() === k && !DECKIDS.has(x.id)); return c ? c.id : null; }, removeCard: (id) => { const p = P(); p.cards = p.cards.filter((c) => c.id !== id); sess = null; save(); }, addDiagWords, userId: () => user && user.id, P, save, paint, head, back, esc, ico, toast, openSheet, closeSheet, today, uid, $, $$, E, route, get DECK() { return DECK; }, get READ() { return READ; } };
   if (window.Next && Next.more.length) MORE.splice(MORE.length - 1, 0, ...Next.more);
   init();
 })();
