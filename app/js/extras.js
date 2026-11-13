@@ -52,40 +52,50 @@
     const sents = para.split(/(?<=[.!?])\s+/); const ctx = sents.find((s) => s.includes(text)) || para.slice(0, 200);
     return { text, ctx: ctx.trim() };
   }
+  const markOf = (src, text) => S().marks.find((x) => x.src === src && x.text.toLowerCase() === text.toLowerCase());
+  // карточка слова: по ссылке cid, а для старых меток без cid — по самому слову среди своих карточек
+  function cardOf(mk) {
+    const c = C(); const have = c.P().cards.some((x) => x.id === mk.cid);
+    if (have) return mk.cid;
+    const id = c.findCardId(mk.text); if (id) { mk.cid = id; c.save(); return id; }
+    return null;
+  }
   async function addMark(info, st) {
     const m = /^#read\/(.+)$/.exec(location.hash); if (!m) return;
     const s = S(); const key = info.text.toLowerCase();
-    s.marks = s.marks.filter((x) => !(x.src === m[1] && x.text.toLowerCase() === key));
-    s.marks.push({ id: C().uid(), text: info.text, ctx: info.ctx, st, src: m[1], date: C().today() });
+    let mk = markOf(m[1], info.text);
+    if (mk) mk.st = st; else { mk = { id: C().uid(), text: info.text, ctx: info.ctx, st, src: m[1], date: C().today() }; s.marks.push(mk); }
     window.getSelection().removeAllRanges(); bar.hidden = true; decorate(document.getElementById('view'));
     const r = await C().addFromReading(info.text, info.ctx);
-    if (r === 'dup') { C().toast('Уже есть в карточках'); return; }
-    const mk = s.marks.find((x) => x.src === m[1] && x.text.toLowerCase() === key); if (mk) { mk.cid = r; C().save(); showDel(mk); }
+    if (r !== 'dup') { mk.cid = r; C().save(); showDel(mk); return; }
+    if (cardOf(mk)) { C().toast('Уже есть в карточках'); showDel(mk); } else C().toast('Уже есть в карточках');
   }
   let delT = 0;
   function showDel(mk) {
-    bar.dataset.mode = 'del';
+    bar.dataset.mode = 'del'; bar.dataset.mid = mk.id;
     bar.innerHTML = '<div class="sb-w">«' + esc(mk.text) + '» добавлено в карточки</div><div class="sb-b"><button id="ndel">Удалить из карточек</button><button id="nkeep">Оставить</button></div>';
     bar.hidden = false; clearTimeout(delT); delT = setTimeout(hideDel, 8000);
-    bar.querySelector('#nkeep').onclick = hideDel;
+    bar.querySelector('#nkeep').onclick = () => { window.getSelection().removeAllRanges(); hideDel(); };
     bar.querySelector('#ndel').onclick = () => {
-      const s = S(); s.marks = s.marks.filter((x) => x.id !== mk.id); if (mk.cid) C().removeCard(mk.cid); C().save();
+      const s = S(); const cid = cardOf(mk); s.marks = s.marks.filter((x) => x.id !== mk.id); if (cid) C().removeCard(cid); C().save(); window.getSelection().removeAllRanges();
       document.querySelectorAll('.rtext mark.hl').forEach((el) => { if (el.textContent.toLowerCase() === mk.text.toLowerCase()) el.replaceWith(document.createTextNode(el.textContent)); });
       const h = document.querySelector('.rtext'); if (h) h.normalize(); hideDel(); C().toast('Удалено из карточек');
     };
   }
-  function hideDel() { clearTimeout(delT); delete bar.dataset.mode; bar.hidden = true; }
+  function hideDel() { clearTimeout(delT); delete bar.dataset.mode; delete bar.dataset.mid; bar.hidden = true; }
   document.addEventListener('click', (e) => {
     const el = e.target.closest && e.target.closest('.rtext mark.hl'); if (!el || !/^#read\//.test(location.hash)) return;
-    const m = /^#read\/(.+)$/.exec(location.hash); const mk = S().marks.find((x) => x.src === m[1] && x.text.toLowerCase() === el.textContent.toLowerCase());
-    if (mk && mk.cid) showDel(mk);
+    const m = /^#read\/(.+)$/.exec(location.hash); const mk = markOf(m[1], el.textContent);
+    if (mk && cardOf(mk)) showDel(mk);
   });
   let selT = 0;
   function refreshBar() {
     if (!/^#read\//.test(location.hash)) { hideDel(); return; }
-    if (bar.dataset.mode === 'del' && !selInfo()) return;
-    delete bar.dataset.mode;
-    const i = selInfo(); if (!i) { bar.hidden = true; return; }
+    const i = selInfo();
+    if (bar.dataset.mode === 'del' && !i) return;
+    if (i) { const m = /^#read\/(.+)$/.exec(location.hash); const mk = m && markOf(m[1], i.text); if (mk && cardOf(mk)) { if (bar.dataset.mid !== mk.id || bar.hidden) showDel(mk); return; } }
+    delete bar.dataset.mode; delete bar.dataset.mid;
+    if (!i) { bar.hidden = true; return; }
     bar.innerHTML = '<div class="sb-w">«' + esc(i.text) + '» → в карточки</div><div class="sb-b">' + Object.keys(ST).map((k) => '<button data-k="' + k + '">' + ST[k] + '</button>').join('') + '</div>';
     bar.hidden = false;
     bar.querySelectorAll('button').forEach((b) => { b.onpointerdown = (e) => e.preventDefault(); b.onclick = () => { addMark(selInfo() || i, b.dataset.k); }; });
