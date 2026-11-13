@@ -1,0 +1,22 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>IELTS Teacher — админка</title>
+<style>:root{color-scheme:light dark}body{font:15px/1.5 system-ui,sans-serif;max-width:980px;margin:0 auto;padding:16px}table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid #8884;padding:6px;text-align:left;vertical-align:top}input,button{font:inherit;padding:5px 8px}button{cursor:pointer}.b{color:#c00}.s{font-size:12px;opacity:.7}</style></head><body>
+<h1>Админка</h1>
+<form id="lf"><input id="em" type="email" placeholder="email" autocomplete="username"> <input id="pw" type="password" placeholder="пароль" autocomplete="current-password"> <button>Войти</button> <span id="err" class="b"></span></form>
+<div id="app" hidden><p><input id="f" placeholder="поиск по email"> <button id="rl">Обновить</button> <span id="cnt" class="s"></span></p><table><thead><tr><th>Email</th><th>Проверки</th><th>Premium до</th><th>Статус</th><th>Действия</th></tr></thead><tbody id="tb"></tbody></table></div>
+<script>
+const API='https://functions.yandexcloud.net/d4ea11hmfpfku2eldtqo';let T='',U=[];
+const $=s=>document.querySelector(s);
+async function call(a,b){const r=await fetch(API,{method:'POST',headers:{'content-type':'text/plain'},body:JSON.stringify(Object.assign({a,token:T},b))});const j=await r.json();if(!j.ok)throw new Error(j.error||r.status);return j}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+$('#lf').onsubmit=async e=>{e.preventDefault();$('#err').textContent='';try{T=(await call('login',{email:$('#em').value,password:$('#pw').value})).token;await load();$('#lf').hidden=true;$('#app').hidden=false}catch(x){$('#err').textContent=x.message==='forbidden'?'Нет доступа':x.message}};
+async function load(){U=(await call('admin_list')).users;draw()}
+function draw(){const f=$('#f').value.toLowerCase();const L=U.filter(u=>u.email.includes(f));$('#cnt').textContent=L.length+' из '+U.length;
+$('#tb').innerHTML=L.map(u=>'<tr><td>'+esc(u.email)+'<div class="s">'+esc(u.note)+'</div></td><td>'+u.credits+' (беспл. '+u.free+')</td><td>'+(u.premium_until?u.premium_until.slice(0,10):'—')+'</td><td>'+(u.banned?'<span class="b">запрещён</span>':'ок')+'</td><td><button data-e="'+esc(u.email)+'" data-k="c">+ проверки</button> <button data-e="'+esc(u.email)+'" data-k="p">+ Premium</button> <button data-e="'+esc(u.email)+'" data-k="b">'+(u.banned?'разрешить':'запретить')+'</button> <button data-e="'+esc(u.email)+'" data-k="n">заметка</button></td></tr>').join('')}
+$('#f').oninput=draw;$('#rl').onclick=load;
+$('#tb').onclick=async e=>{const b=e.target.closest('button');if(!b)return;const email=b.dataset.e,k=b.dataset.k,u=U.find(x=>x.email===email);let p={email};
+if(k==='c'){const n=parseInt(prompt('Сколько проверок добавить (отрицательное — убрать)?','3'),10);if(!n)return;p.credits=n}
+else if(k==='p'){const n=parseInt(prompt('На сколько дней Premium?','30'),10);if(!n)return;p.premium_days=n}
+else if(k==='b'){if(!confirm((u.banned?'Разрешить':'Запретить')+' ИИ для '+email+'?'))return;p.ban=!u.banned}
+else{const t=prompt('Заметка',u.note);if(t===null)return;p.note=t}
+try{await call('admin_grant',p);await load()}catch(x){alert(x.message)}};
+</script></body></html>
