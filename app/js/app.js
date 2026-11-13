@@ -355,7 +355,7 @@
   function ltHtml(text, ms) {
     if (ms === undefined) return '<div class="mut" style="margin-top:8px">Проверяю ошибки…</div>';
     if (ms === null) return '<div class="mut" style="margin-top:8px">Проверка ошибок недоступна (нет сети)</div>';
-    if (!ms.length) return '<div style="margin-top:8px;color:var(--ok);font-weight:600">Ошибок и неудачных сочетаний не найдено ✓</div>';
+    if (!ms.length) return '<div style="margin-top:8px;color:var(--ok);font-weight:600">Ошибок по правилам не найдено ✓</div>';
     let out = '', pos = 0; ms.slice().sort((a, b) => a.offset - b.offset).forEach((m) => { if (m.offset < pos) return; out += esc(text.slice(pos, m.offset)) + '<u class="err">' + esc(text.slice(m.offset, m.offset + m.length)) + '</u>'; pos = m.offset + m.length; }); out += esc(text.slice(pos));
     return '<div style="margin-top:8px;font-weight:600;color:var(--warn)">Найдено: ' + ms.length + '</div><div style="font-size:16px;margin:4px 0;line-height:1.6">' + out + '</div><ul style="margin:6px 0 0;padding-left:18px">' + ms.map((m) => {
       const rp = (m.replacements || []).slice(0, 3).map((x) => x.value).join(' / '); const cat = LT_CAT[m.rule && m.rule.category && m.rule.category.id] || 'Ошибка';
@@ -500,7 +500,7 @@
     const nx = $('#next'); if (nx) nx.onclick = () => applyRate(p, c, cst.pick === cst.mq.answer ? 2 : 0);
     const ck = $('#chk'); if (ck) ck.onclick = () => {
       const s = $('#mys').value.trim(); if (!s) { toast('Напиши предложение'); return; }
-      cst.res = E.checkSentence(c, s); cst.mine = s; cst.lt = undefined; c.my = (c.my || []).concat([s]).slice(-3); save(); cst.step = 'a'; drawLearn();
+      cst.res = E.checkSentence(c, s); cst.mine = s; cst.lt = cst.res.issues.length ? cst.res.issues.slice() : undefined; c.my = (c.my || []).concat([s]).slice(-3); save(); cst.step = 'a'; drawLearn();
       ltCheck(s).then((ms) => { if (cst.mine === s && cst.step === 'a') { const own = (cst.res.issues || []).filter((x) => !(ms || []).some((m) => m.offset < x.offset + x.length && x.offset < m.offset + m.length)); cst.lt = ms === null && !own.length ? null : (ms || []).concat(own); drawLearn(); } });
     };
     const m = $('#mst'); if (m) m.onclick = () => { if (!c.seen) p.newToday.n += 1; E.master(c, today()); sess.last = c.id; save(); cst.cur = null; toast('Выучено — повторю через 3 дня'); refill(p); drawCards(); };
