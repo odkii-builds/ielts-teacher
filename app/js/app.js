@@ -184,7 +184,8 @@
       const q = it.k === 'v' ? 'Что значит слово <b>' + esc(it.q) + '</b>?' : esc(it.q).replace('___', '<mark class="gap">&nbsp;&nbsp;&nbsp;&nbsp;</mark>');
       paint(head('Вопрос ' + (i + 1) + ' из ' + items.length, it.k === 'v' ? 'Слова' : 'Грамматика') + '<div class="bar" style="margin-bottom:16px"><i style="width:' + Math.round(100 * i / items.length) + '%"></i></div>' +
         '<div class="card" style="font-size:18px;margin-bottom:12px">' + q + '</div><div class="list">' + it.opts.map((o, k) => '<button class="rowi" data-k="' + k + '"><span class="grow">' + esc(o) + '</span></button>').join('') +
-        '<button class="rowi" data-k="-1"><span class="grow mut">Не знаю</span></button></div>', false);
+        '<button class="rowi" data-k="-1"><span class="grow mut">Не знаю</span></button></div><div style="text-align:center;margin-top:8px"><button class="link" id="pback">← ' + (i ? 'Назад к предыдущему вопросу' : 'Назад') + '</button></div>', false);
+      $('#pback').onclick = () => { if (i) { ans.pop(); i--; step(); } else intro(); };
       $$('.rowi[data-k]').forEach((b) => { b.onclick = () => { ans.push({ lv: it.lv, topic: it.topic, ok: Number(b.dataset.k) === it.a }); i++; step(); }; });
     };
     const fin = () => {

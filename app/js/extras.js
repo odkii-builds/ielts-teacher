@@ -61,13 +61,16 @@
     const r = await C().addFromReading(info.text, info.ctx);
     C().toast(r === 'dup' ? 'Уже есть в карточках' : 'Добавлено в карточки на повторение');
   }
-  document.addEventListener('selectionchange', () => {
+  let selT = 0;
+  function refreshBar() {
     if (!/^#read\//.test(location.hash)) { bar.hidden = true; return; }
     const i = selInfo(); if (!i) { bar.hidden = true; return; }
     bar.innerHTML = '<div class="sb-w">«' + esc(i.text) + '» → в карточки</div><div class="sb-b">' + Object.keys(ST).map((k) => '<button data-k="' + k + '">' + ST[k] + '</button>').join('') + '</div>';
     bar.hidden = false;
     bar.querySelectorAll('button').forEach((b) => { b.onpointerdown = (e) => e.preventDefault(); b.onclick = () => { addMark(selInfo() || i, b.dataset.k); }; });
-  });
+  }
+  document.addEventListener('selectionchange', () => { clearTimeout(selT); selT = setTimeout(refreshBar, 120); });
+  ['touchend', 'pointerup', 'mouseup'].forEach((ev) => document.addEventListener(ev, () => { clearTimeout(selT); selT = setTimeout(refreshBar, 250); }, { passive: true }));
   function decorate(v) {
     const m = /^#read\/(.+)$/.exec(location.hash); const host = v.querySelector('.rtext'); if (!m || !host) return;
     const marks = S().marks.filter((x) => x.src === m[1]); if (!marks.length) return;
