@@ -1,5 +1,5 @@
-:root{--bg:#fafaf9;--s:#fff;--s2:#f4f4f2;--line:#e8e8e5;--fg:#18181b;--mut:#71717a;--acc:#4f46e5;--accfg:#fff;--ok:#16a34a;--warn:#b45309;--r:16px;--ease:cubic-bezier(.32,.72,0,1);--tab:64px}
-@media(prefers-color-scheme:dark){:root{--bg:#0b0b0d;--s:#151518;--s2:#1c1c20;--line:#26262b;--fg:#f4f4f5;--mut:#a1a1aa;--acc:#818cf8;--accfg:#0b0b0d;--ok:#4ade80;--warn:#fbbf24}}
+:root{--bg:#fafaf9;--s:#fff;--s2:#f4f4f2;--line:#e8e8e5;--fg:#18181b;--mut:#71717a;--acc:#0045fd;--accfg:#fff;--ok:#16a34a;--warn:#b45309;--r:16px;--ease:cubic-bezier(.32,.72,0,1);--tab:64px}
+@media(prefers-color-scheme:dark){:root{--bg:#0b0b0d;--s:#151518;--s2:#1c1c20;--line:#26262b;--fg:#f4f4f5;--mut:#a1a1aa;--acc:#4f86ff;--accfg:#0b0b0d;--ok:#4ade80;--warn:#fbbf24}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
@@ -92,7 +92,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke
 #toasts{position:fixed;left:0;right:0;top:calc(12px + env(safe-area-inset-top));z-index:60;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
 .toast{background:var(--fg);color:var(--bg);padding:11px 16px;border-radius:14px;font-size:14px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;transform:translateY(-12px) scale(.96);transition:opacity .25s,transform .3s var(--ease);max-width:88vw}
 .toast.show{opacity:1;transform:none}
-.auth{padding-top:12vh}
+.auth{padding-top:8vh}.logo{display:block;border-radius:22%;box-shadow:0 6px 20px rgba(0,69,253,.25)}.auth .logo{width:88px;height:88px;margin-bottom:18px}.boot{display:grid;justify-items:center;gap:14px;padding-top:28vh;color:var(--mut)}.boot .logo{width:88px;height:88px}.head .hl{display:flex;align-items:center;gap:12px}.head .hl .logo{width:40px;height:40px;flex:none;box-shadow:none}
 .auth form{margin-top:24px}
 .auth input{margin-bottom:10px}
 .auth .err{color:#dc2626;font-size:14px;min-height:20px;margin:8px 0}
@@ -149,7 +149,7 @@ number-flow.nf{--number-flow-char-height:.95em}
 .list.cta .rowi:active{filter:brightness(.92)}
 
 /* --- клуб, слова из Reading, диагностика --- */
-.nbanner{position:relative;display:flex;flex-direction:column;gap:6px;align-items:flex-start;margin:0 0 16px;padding:0;overflow:hidden;border-radius:20px;color:#fff;background:radial-gradient(120% 140% at 0% 0%,#6366f1 0%,#4338ca 55%,#312e81 100%);box-shadow:0 8px 24px rgba(67,56,202,.28)}
+.nbanner{position:relative;display:flex;flex-direction:column;gap:6px;align-items:flex-start;margin:0 0 16px;padding:0;overflow:hidden;border-radius:20px;color:#fff;background:radial-gradient(120% 140% at 0% 0%,#3d7bff 0%,#0045fd 55%,#0a2a9c 100%);box-shadow:0 8px 24px rgba(0,69,253,.28)}
 .nb-tag{font-size:12px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:12px}
 .nb-t{font-size:20px;line-height:1.2;letter-spacing:-.01em;margin-top:4px;padding-right:22px}
 .nb-s{font-size:14px;opacity:.88}
