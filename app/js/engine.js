@@ -412,6 +412,26 @@
   }
   const STOP = new Set(['a', 'an', 'the', 'of', 'to', 'in', 'on', 'for', 'with', 'by', 'at', 'be', 'is', 'as', 'or', 'and', 'from', 'up', 'out']);
   const stem = (w) => (w.length > 6 ? w.slice(0, w.length - 3) : w.length > 4 ? w.slice(0, w.length - 2) : w.length > 3 ? w.slice(0, w.length - 1) : w);
+  // Порядок слов «прилагательное + this/my/… + существительное» (important this point → this important point).
+  const WO_ADJ = new Set('important good great big small interesting useful difficult serious main major key new old young long short high low large strong clear special popular common different various huge significant essential crucial valuable effective positive negative real simple modern local social public healthy'.split(' '));
+  const WO_DET = new Set(['this', 'these', 'those', 'my', 'your', 'his', 'her', 'our', 'their']);
+  const WO_SKIP_PREV = new Set('be is are am was were been being seem seems seemed look looks looked feel feels felt become becomes became get gets got remain remains remained stay stays stayed sound sounds sounded appear appears appeared prove proves proved very so too as how quite rather really more most less least not extremely fairly pretty equally just still also even particularly especially'.split(' '));
+  const WO_TIME = new Set('day days week weeks month months year years time times morning evening night afternoon moment century decade summer winter spring autumn season semester term weekend'.split(' '));
+  /** Возвращает ошибки в формате, похожем на LanguageTool: {offset, length, message, replacements, rule}. */
+  function wordOrderIssues(text) {
+    const t = String(text || ''); const toks = []; const re = /[A-Za-z][A-Za-z'’]*/g; let m;
+    while ((m = re.exec(t))) toks.push({ w: m[0], lw: m[0].toLowerCase(), i: m.index });
+    const out = []; const gap = (a, b) => /^\s+$/.test(t.slice(a.i + a.w.length, b.i));
+    for (let k = 1; k + 2 < toks.length; k++) {
+      const prev = toks[k - 1], adj = toks[k], det = toks[k + 1], nn = toks[k + 2];
+      if (!WO_ADJ.has(adj.lw) || !WO_DET.has(det.lw) || !gap(prev, adj) || !gap(adj, det) || !gap(det, nn)) continue;
+      if (WO_SKIP_PREV.has(prev.lw) || /['’](s|re|m)$/.test(prev.lw) || WO_TIME.has(nn.lw)) continue;
+      const fix = det.lw + ' ' + adj.lw;
+      out.push({ offset: adj.i, length: det.i + det.w.length - adj.i, replacements: [{ value: fix }], rule: { category: { id: 'GRAMMAR' } },
+        message: 'Порядок слов: сначала this/my/…, потом прилагательное, потом существительное — «' + fix + ' ' + nn.w + '», а не «' + adj.w + ' ' + det.w + ' ' + nn.w + '».' });
+    }
+    return out;
+  }
   /** Грубая самопроверка своего предложения: есть ли слово/фраза, длина, заглавная буква и точка. */
   function checkSentence(c, s) {
     const txt = String(s || '').trim(); const low = txt.toLowerCase();
@@ -424,7 +444,8 @@
     if (!used) tips.push('используй «' + c.t + '» в предложении');
     if (words.length < 5) tips.push('сделай предложение подробнее (минимум 5 слов)');
     if (txt && !/[.!?]$/.test(txt)) tips.push('поставь точку в конце');
-    return { used, words: words.length, ok: used && tips.length === 0, tips };
+    const issues = wordOrderIssues(txt); issues.forEach((x) => tips.push(x.message));
+    return { used, words: words.length, ok: used && tips.length === 0, tips, issues };
   }
 
 
@@ -660,6 +681,6 @@
     return 3.5;
   }
 
-  const api = { ctxParts, findCtx, exAll, exIdx, exOf, SK, PHASES, pd, fmt, addDays, daysBetween, weekNo, phaseFor, errorSeverity, weights, dayTasks, newCard, dueCards, review, overall, rawToBand, isWord, plain, lrMode, lrRate, master, unmaster, reviewMastered, contexts, buildSession, pickFresh, GROUPS, GROUP_LABEL, MAIN_GROUPS, group, inGroup, choices, typeCheck, hintOf, drillQueue, form, pickNext, mcq, checkSentence, GAPS, analyseText, checkAnswer, parseFeedback, errDrillable, normFix, errInit, errDue, errCheck, errRate, EI, CEF, cefOf, cefRank, PL_GRAM, placementItems, placementScore, placementSkills, studyTick, STUDY_IDLE, sentenceTypes };
+  const api = { wordOrderIssues, ctxParts, findCtx, exAll, exIdx, exOf, SK, PHASES, pd, fmt, addDays, daysBetween, weekNo, phaseFor, errorSeverity, weights, dayTasks, newCard, dueCards, review, overall, rawToBand, isWord, plain, lrMode, lrRate, master, unmaster, reviewMastered, contexts, buildSession, pickFresh, GROUPS, GROUP_LABEL, MAIN_GROUPS, group, inGroup, choices, typeCheck, hintOf, drillQueue, form, pickNext, mcq, checkSentence, GAPS, analyseText, checkAnswer, parseFeedback, errDrillable, normFix, errInit, errDue, errCheck, errRate, EI, CEF, cefOf, cefRank, PL_GRAM, placementItems, placementScore, placementSkills, studyTick, STUDY_IDLE, sentenceTypes };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Engine = api;
 })(typeof window !== 'undefined' ? window : globalThis);

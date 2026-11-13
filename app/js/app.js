@@ -501,7 +501,7 @@
     const ck = $('#chk'); if (ck) ck.onclick = () => {
       const s = $('#mys').value.trim(); if (!s) { toast('Напиши предложение'); return; }
       cst.res = E.checkSentence(c, s); cst.mine = s; cst.lt = undefined; c.my = (c.my || []).concat([s]).slice(-3); save(); cst.step = 'a'; drawLearn();
-      ltCheck(s).then((ms) => { if (cst.mine === s && cst.step === 'a') { cst.lt = ms; drawLearn(); } });
+      ltCheck(s).then((ms) => { if (cst.mine === s && cst.step === 'a') { const own = (cst.res.issues || []).filter((x) => !(ms || []).some((m) => m.offset < x.offset + x.length && x.offset < m.offset + m.length)); cst.lt = ms === null && !own.length ? null : (ms || []).concat(own); drawLearn(); } });
     };
     const m = $('#mst'); if (m) m.onclick = () => { if (!c.seen) p.newToday.n += 1; E.master(c, today()); sess.last = c.id; save(); cst.cur = null; toast('Выучено — повторю через 3 дня'); refill(p); drawCards(); };
   }
