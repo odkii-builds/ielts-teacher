@@ -36,6 +36,8 @@ window.Cloud = (function () {
     signUp: (email, password) => auth('signup', email, password),
     async signOut() { out(); },
     onAuth: (fn) => { subs.push(fn); },
+    // Права и баланс ИИ-проверок — всегда с сервера (источник истины)
+    async me() { return (await call('me', { token: tok() })).ent; },
     async pull() {
       const j = await call('pull', { token: tok() });
       return j.row || null;
