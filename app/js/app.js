@@ -509,17 +509,131 @@
   }
   const grpBar = (p) => '<div class="chips" id="gf" style="margin:0 -18px 12px">' + [['main', 'Основное'], ...E.GROUPS, ['all', 'Все']].map(([k, n]) => '<button data-g="' + k + '" class="' + (k === grpOf(p) ? 'on' : '') + '">' + esc(n) + '</button>').join('') + '</div>';
   // ---------- Закрепление: мини-задания ----------
-  const MODES = [['mix', '🎲', 'Вперемешку', 'Все типы заданий подряд'], ['order', '🧩', 'Собрать предложение', 'Расставь блоки в правильном порядке'], ['pair', '🔗', 'Сопоставить перевод', 'Слова и переводы парами'], ['gap', '✏️', 'Вставить в предложение', 'Пропущенное слово в примере']];
+  const MODES = [['mix', '🎲', 'Вперемешку', 'Все типы заданий подряд'], ['order', '🧩', 'Собрать предложение', 'Расставь блоки в правильном порядке'], ['pair', '🔗', 'Сопоставить перевод', 'Слова и переводы парами'], ['gap', '✏️', 'Вставить в предложение', 'Пропущенное слово в примере'], ['mine', '🪄', 'Тест по моим словам', 'Бесплатно: тест от твоего ИИ']];
   function drawModes() {
     document.body.classList.remove('drilling');
     $('#cbody').innerHTML = '<div class="enter"><h2 style="margin:4px 0 12px;font-size:20px">Как закрепим слова?</h2><div class="stack">' + MODES.map(([k, ic, n, d]) => '<button class="card mode" data-m="' + k + '"><span class="mic">' + ic + '</span><span><b>' + n + '</b><span class="mut">' + d + '</span></span></button>').join('') + '</div></div>';
     $$('.mode').forEach((b) => { b.onclick = () => { cst.dmode = b.dataset.m; cst.dr = null; drawDrill(); }; });
+  }
+
+  // ---------- Тест по моим словам: свой ИИ (бесплатно) ----------
+  const shuf = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const nb = (s) => esc(s).replace(/ (\S{1,3})$/, ' $1');
+  function mineWords(p, fresh) {
+    if (!fresh && cst.mw) { const w = cst.mw.map((id) => p.cards.find((c) => c.id === id)).filter(Boolean); if (w.length) return w; }
+    const seen = p.cards.filter((c) => c.seen && c.ru);
+    const pick = (fresh ? shuf(seen) : seen.slice().sort((a, b) => (a.lv || 0) - (b.lv || 0) || String(b.ls || '').localeCompare(String(a.ls || '')))).slice(0, 12);
+    cst.mw = pick.map((c) => c.id); return pick;
+  }
+  function drawMine() {
+    const p = P(); if (cst.mr) return drawMineRun(p);
+    document.body.classList.remove('drilling');
+    const words = mineWords(p), prev = (p.practice || [])[0], paid = window.Paid && Paid.enabled && Paid.enabled();
+    const back = () => { cst.dmode = null; cst.mr = null; drawModes(); };
+    $('#cbody').innerHTML = '<div class="enter"><button class="link" id="mback" style="padding:0 0 8px">‹ Назад</button><h2 style="margin:2px 0 4px;font-size:21px">Тест по моим словам</h2>' +
+      (words.length ? '<p class="mut" style="margin:0 0 14px;font-size:14px">' + words.length + ' слов · ' + esc(words.slice(0, 3).map((c) => c.t).join(', ')) + (words.length > 3 ? ' и ещё ' + (words.length - 3) : '') + '</p><p style="margin:-8px 0 14px"><button class="link" id="mmore" style="padding:0;font-size:14px">Другие слова</button></p>' +
+        '<button class="mbtn" id="mcopy"><b>Промпт для ИИ</b><div class="d">Скопировать и вставить в ChatGPT или Claude</div></button>' +
+        '<button class="mbtn" id="mimp"><b>Загрузить ответ ИИ</b><div class="d">Вставь результат, мы соберём тест</div></button>' +
+        (paid ? '<button class="mbtn a" id="mauto"><b>Создать автоматически <span class="pr">Premium</span></b><div class="d">Приложение сделает всё само</div></button>' : '') +
+        (prev ? '<div style="text-align:center;margin-top:6px"><button class="link" id="mprev">Пройти прошлый тест (' + prev.items.length + ' заданий)</button></div>' : '')
+        : '<div class="card" style="text-align:center;padding:22px 16px"><div class="mut">Сначала пройди несколько карточек на вкладке «Учить».</div></div>') + '</div>';
+    $('#mback').onclick = back;
+    if (!words.length) return;
+    $('#mmore').onclick = () => { mineWords(p, true); drawMine(); };
+    $('#mcopy').onclick = () => copyText(Practice.buildPrompt(words, ''), 'Промпт скопирован');
+    $('#mimp').onclick = () => openSheet('<h2>Ответ ИИ</h2><p class="mut" style="margin-top:-6px">Вставь JSON, который вернул ИИ.</p><textarea id="mai" style="min-height:150px" placeholder="Вставь ответ ИИ"></textarea><div id="merr" class="mut" style="color:#dc2626;margin-top:8px"></div><div style="margin-top:12px"><button class="btn p" id="mgo">Собрать тест</button></div>', () => {
+      $('#mgo').onclick = () => {
+        const r = Practice.parseImport($('#mai').value, words);
+        if (!r.ok) { $('#merr').textContent = r.error; return; }
+        p.practice = [{ id: uid(), date: today(), items: r.items }].concat(p.practice || []).filter((x) => JSON.stringify(x).length < 30000).slice(0, 5); save(); closeSheet();
+        if (r.skipped) toast('Пропущено заданий: ' + r.skipped);
+        startMine(p, r.items);
+      };
+    });
+    if (prev) $('#mprev').onclick = () => startMine(p, prev.items);
+    if (paid) $('#mauto').onclick = () => Paid.generate(words, (items) => startMine(p, items));
+  }
+  function startMine(p, items) { cst.mr = { items: items.map((x) => Object.assign({}, x)), i: 0, bad: {}, ids: {}, done: false }; drawMine(); }
+  function mineIds(p, it) {
+    const txt = it.type === 'context' ? [it.word] : it.type === 'gap' || it.type === 'choose' ? it.answers : it.type === 'write' ? it.words : it.type === 'order' ? it.blocks : [].concat.apply([], it.pairs);
+    const out = []; p.cards.forEach((c) => { if (c.seen && txt.some((t) => Practice.matches(t, [{ t: c.t }]).length)) out.push(c.id); }); return out;
+  }
+  function drawMineRun(p) {
+    const body = $('#cbody'), d = cst.mr; document.body.classList.add('drilling');
+    const it = d.items[d.i];
+    if (!it) {
+      document.body.classList.remove('drilling');
+      if (!d.done) { d.done = true; const t0 = today(); Object.keys(d.ids).forEach((id) => { const c = p.cards.find((x) => x.id === id); if (!c) return; c.fs = c.fs || t0; c.ls = t0; c.lv = d.bad[id] ? Math.max(0, (c.lv || 0) - 1) : Math.min(5, (c.lv || 0) + 1); }); save(); }
+      const all = Object.keys(d.ids), weak = all.filter((id) => d.bad[id]).map((id) => p.cards.find((x) => x.id === id)).filter(Boolean);
+      body.innerHTML = '<div class="card enter" style="text-align:center;padding:22px 16px"><div class="big">' + (weak.length ? '👍' : '🎉') + '</div><div style="font-weight:600;margin:6px 0">Слов без ошибок: ' + (all.length - weak.length) + ' из ' + all.length + '</div>' +
+        (weak.length ? '<div class="mut" style="margin:6px 0 4px">Эти слова стоит повторить:</div><div class="stack" style="text-align:left">' + weak.map((c) => '<div class="card" style="padding:10px 12px"><b>' + esc(c.t) + '</b> — ' + esc(c.ru) + '</div>').join('') + '</div>' : '') +
+        '<div style="margin-top:16px"><button class="btn p" id="mnew">Новый тест</button></div><div style="margin-top:8px"><button class="btn" id="mgol">К карточкам</button></div></div>';
+      $('#mnew').onclick = () => { cst.mr = null; drawMine(); }; $('#mgol').onclick = () => { cst.tab = 'learn'; cst.mr = null; cst.dmode = null; sess = null; viewCards(); };
+      return;
+    }
+    const ent = it.shown ? '' : ' enter'; it.shown = true;
+    if (!it.ids) it.ids = mineIds(p, it); it.ids.forEach((id) => { d.ids[id] = 1; });
+    const mark = () => it.ids.forEach((id) => { d.bad[id] = true; });
+    const next = () => { d.i += 1; drawMineRun(p); };
+    const top = '<div class="dtop"><span class="mut">' + (d.i + 1) + ' из ' + d.items.length + '</span><button class="link" id="mx">Выйти</button></div>';
+    const wrap = (inner) => { body.innerHTML = '<div class="drill' + ent + '">' + top + inner + '</div>'; $('#mx').onclick = () => { cst.mr = null; drawMine(); }; };
+    if (it.type === 'context') {
+      wrap('<div class="flash"><small>Слово в разных контекстах</small><div class="exm" style="font-size:22px;font-weight:700;margin:6px 0 10px">' + esc(it.word) + '</div>' + it.sentences.map((s) => '<div class="exm" style="font-size:17px;margin:8px 0">' + esc(s) + '</div>').join('') + '</div><div style="margin-top:12px"><button class="btn p" id="mn">Дальше</button></div>');
+      $('#mn').onclick = next; return;
+    }
+    if (it.type === 'gap' || it.type === 'choose') {
+      if (!it.fill) { it.fill = it.answers.map(() => null); it.res = null; it.bk = shuf(it.bank); }
+      const parts = it.text.split(/__\d+__/);
+      const sent = parts.map((t, i) => esc(t) + (i < it.answers.length ? '<button class="slot' + (it.res ? (it.res[i] ? ' ok' : ' bad') : '') + '" data-k="' + i + '"' + (it.res ? ' disabled' : '') + '>' + (it.fill[i] != null ? esc(it.bk[it.fill[i]]) : '&nbsp;') + '</button>' : '')).join('');
+      wrap('<div class="flash"><small>Вставь слова в предложение</small><div class="exm" style="font-size:19px;line-height:1.9">' + sent + '</div></div><div class="blks" style="margin-top:14px">' + it.bk.map((b, i) => '<button class="opt" data-b="' + i + '"' + (it.fill.includes(i) || it.res ? ' style="visibility:hidden" disabled' : '') + '>' + esc(b) + '</button>').join('') + '</div><div style="margin-top:14px;min-height:52px">' + (it.res ? '<button class="btn p" id="mn">Дальше</button>' : it.fill.every((x) => x != null) ? '<button class="btn p" id="mc">Проверить</button>' : '') + '</div>');
+      $$('.slot').forEach((b) => { b.onclick = () => { it.fill[+b.dataset.k] = null; drawMineRun(p); }; });
+      $$('[data-b]').forEach((b) => { b.onclick = () => { const k = it.fill.indexOf(null); if (k >= 0) { it.fill[k] = +b.dataset.b; drawMineRun(p); } }; });
+      if ($('#mc')) $('#mc').onclick = () => { it.res = it.fill.map((f, i) => it.bk[f].toLowerCase() === it.answers[i].toLowerCase()); if (it.res.includes(false)) mark(); drawMineRun(p); };
+      if ($('#mn')) $('#mn').onclick = next; return;
+    }
+    if (it.type === 'match_def' || it.type === 'match_parts') {
+      if (!it.mt) { it.mt = {}; it.sel = null; it.rt = shuf(it.pairs.map((_, i) => i)); }
+      const L = it.pairs.map((pr, i) => [i, pr[0]]), R = it.rt.map((i) => [i, it.pairs[i][1]]);
+      const b = (x, s) => '<button class="opt" data-s="' + s + '" data-id="' + x[0] + '">' + nb(x[1]) + '</button>';
+      wrap('<div class="mut" style="text-align:center;margin:6px 0 12px">' + (it.type === 'match_def' ? 'Слово и определение' : 'Собери словосочетание') + '</div><div class="pair">' + L.map((l, i) => b(l, 'l') + b(R[i], 'r')).join('') + '</div><div id="pnext" style="margin-top:12px;min-height:52px"></div>');
+      const refresh = () => {
+        $$('.pair .opt').forEach((e) => { const id = e.dataset.id, m = !!it.mt[id]; e.classList.toggle('ok', m); e.classList.toggle('sel', !m && e.dataset.s === 'l' && it.sel === id); e.disabled = m; });
+        $('#pnext').innerHTML = Object.keys(it.mt).length === it.pairs.length ? '<button class="btn p" id="mn">Дальше</button>' : ''; if ($('#mn')) $('#mn').onclick = next;
+      };
+      $$('.pair .opt').forEach((e) => { e.onclick = () => {
+        const id = e.dataset.id;
+        if (e.dataset.s === 'l') { it.sel = it.sel === id ? null : id; refresh(); return; }
+        if (it.sel == null) { toast('Сначала выбери слева'); return; }
+        if (it.sel === id) { it.mt[id] = 1; it.sel = null; refresh(); return; }
+        mark(); e.classList.add('bad'); setTimeout(() => e.classList.remove('bad'), 450);
+      }; }); refresh(); return;
+    }
+    if (it.type === 'order') {
+      if (!it.pl) { it.pl = []; it.res = null; let pm = shuf(it.blocks.map((_, i) => i)); if (pm.every((v, i) => v === i)) pm = pm.reverse(); it.pm = pm; }
+      const line = it.pl.map((i) => '<button class="opt' + (it.res ? (it.res === 'ok' ? ' ok' : ' bad') : '') + '" data-r="' + i + '"' + (it.res ? ' disabled' : '') + '>' + esc(it.blocks[i]) + '</button>').join('');
+      const pool = it.pm.map((i) => '<button class="opt" data-a="' + i + '"' + (it.pl.includes(i) || it.res ? ' style="visibility:hidden" disabled' : '') + '>' + esc(it.blocks[i]) + '</button>').join('');
+      wrap('<div class="mut" style="text-align:center;margin:6px 0">Собери предложение</div><div class="blkline">' + line + '</div><div class="blks">' + pool + '</div><div style="margin-top:14px;min-height:52px">' + (it.res ? (it.res === 'bad' ? '<div class="flash" style="margin-bottom:10px"><small>Верно</small><div><div class="exm">' + esc(it.blocks.join(' ')) + '</div></div></div>' : '') + '<button class="btn p" id="mn">Дальше</button>' : it.pl.length === it.blocks.length ? '<button class="btn p" id="mc">Проверить</button>' : '') + '</div>');
+      $$('[data-r]').forEach((e) => { e.onclick = () => { it.pl = it.pl.filter((x) => x !== +e.dataset.r); drawMineRun(p); }; });
+      $$('[data-a]').forEach((e) => { e.onclick = () => { it.pl.push(+e.dataset.a); drawMineRun(p); }; });
+      if ($('#mc')) $('#mc').onclick = () => { it.res = it.pl.every((x, k) => it.blocks[x].toLowerCase() === it.blocks[k].toLowerCase()) ? 'ok' : 'bad'; if (it.res === 'bad') mark(); drawMineRun(p); };
+      if ($('#mn')) $('#mn').onclick = next; return;
+    }
+    if (it.type === 'write') {
+      wrap('<div class="flash"><small>Напиши одно предложение со словами' + (it.min < it.words.length ? ' (минимум ' + it.min + ')' : '') + '</small><div class="chips" style="margin:8px 0 0">' + it.words.map((w) => '<span class="chip on" style="flex:none">' + esc(w) + '</span>').join('') + '</div></div><textarea id="mt" style="min-height:96px;margin-top:12px" placeholder="Твоё предложение"' + (it.res ? ' disabled' : '') + '>' + esc(it.txt || '') + '</textarea><div id="mfb" class="mut" style="margin-top:8px;min-height:20px"></div><div style="margin-top:8px">' + (it.res ? '<button class="btn p" id="mn">Дальше</button>' : '<button class="btn p" id="mc">Проверить</button>') + '</div>');
+      const sm = (w) => { const f = w.toLowerCase().replace(/^to /, '').split(/\s+/)[0]; return f.length > 4 ? f.slice(0, -2) : f; };
+      const used = (t) => it.words.map((w) => t.toLowerCase().indexOf(sm(w)) >= 0);
+      if (it.res) { $('#mfb').textContent = it.res; $('#mn').onclick = next; }
+      else $('#mc').onclick = () => { const t = $('#mt').value.trim(); if (t.split(/\s+/).length < 4) { toast('Напиши целое предложение'); return; } const u = used(t), n = u.filter(Boolean).length; it.txt = t; it.res = n >= it.min ? 'Использовано слов: ' + n + ' из ' + it.words.length : 'Не хватает слов: ' + it.words.filter((_, i) => !u[i]).join(', '); if (n < it.min) mark(); drawMineRun(p); };
+      return;
+    }
+    cst.mr.i += 1; drawMineRun(p);
   }
   function startDrill(p) {
     const q = E.drillQueue(p.cards, today(), 12, null, cst.dmode);
     cst.dr = { q, i: 0, bad: {}, ids: Array.from(new Set(q.map((x) => x.id))), done: false };
   }
   function drawDrill() {
+    if (cst.dmode === 'mine') return drawMine();
     const p = P(); const body = $('#cbody'); if (!cst.dr && !cst.dmode) return drawModes(); if (!cst.dr) startDrill(p); const d = cst.dr;
     document.body.classList.remove('drilling');
     if (!d.q.length) { body.innerHTML = '<div class="card" style="text-align:center;padding:26px 16px"><div class="big">📚</div><div class="mut" style="margin:8px 0 16px">Пока нечего закреплять: сначала пройди несколько карточек на вкладке «Учить».</div><button class="btn p" id="gol">К карточкам</button></div>'; $('#gol').onclick = () => { cst.tab = 'learn'; viewCards(); }; return; }
@@ -863,8 +977,8 @@
       };
     });
   }
-  function copyText(t) {
-    const ok = () => toast('Промпт скопирован');
+  function copyText(t, msg) {
+    const ok = () => toast(msg || 'Промпт скопирован');
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, () => toast('Не удалось скопировать'));
     else { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); ok(); } catch (e) { toast('Не удалось скопировать'); } ta.remove(); }
   }
