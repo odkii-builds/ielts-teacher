@@ -48,7 +48,26 @@ module.exports.spend = spend; module.exports.refund = refund;
 
 const actions = {};
 actions.me = async (b, me) => ok({ ent: view(await getEnt(me.id), me) });
+// Лист ожидания клуба. join=true: встать в очередь (повтор не меняет место); join=false: только статус.
+actions.club_wait = async (b, me) => {
+  const I = { $i: TypedValues.utf8(me.id) };
+  const mine = await q('DECLARE $i AS Utf8; SELECT ts FROM waitlist WHERE id = $i;', I);
+  let ts = mine[0] ? num(mine[0].ts) : 0;
+  if (!ts && b.join === true) {
+    ts = Date.now();
+    await q('DECLARE $i AS Utf8; DECLARE $e AS Utf8; DECLARE $t AS Uint64; UPSERT INTO waitlist (id, email, ts) VALUES ($i, $e, $t);', { ...I, $e: TypedValues.utf8(String(me.email || '')), $t: TypedValues.uint64(ts) });
+  }
+  const total = num((await q('SELECT COUNT(*) AS c FROM waitlist;'))[0].c);
+  if (!ts) return ok({ joined: false, total });
+  const pos = num((await q('DECLARE $t AS Uint64; SELECT COUNT(*) AS c FROM waitlist WHERE ts <= $t;', { $t: TypedValues.uint64(ts) }))[0].c);
+  return ok({ joined: true, pos, total });
+};
 const needAdmin = (me) => { if (!isAdmin(me)) throw bad('forbidden', 403); };
+actions.club_list = async (b, me) => {
+  needAdmin(me);
+  const r = await q('SELECT email, ts FROM waitlist ORDER BY ts LIMIT 1000;');
+  return ok({ list: r.map((x) => ({ email: x.email, ts: num(x.ts) })) });
+};
 actions.admin_list = async (b, me) => {
   needAdmin(me);
   const users = await q('SELECT email, id, created FROM users ORDER BY created DESC LIMIT 500;');
