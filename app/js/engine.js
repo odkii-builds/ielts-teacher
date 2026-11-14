@@ -407,12 +407,19 @@
     return { left: shuffled(items, rnd).map((c) => ({ id: c.id, text: c.t })), right: shuffled(items, rnd).map((c) => ({ id: c.id, text: c.ru })) };
   }
   /** Очередь мини-заданий: 3 раунда (вставь слово → выбери по переводу/слову → впиши), слабые карточки первыми. */
-  function drillQueue(cards, today, max, rnd) {
-    rnd = rnd || Math.random;
+  function drillQueue(cards, today, max, rnd, mode) {
+    rnd = rnd || Math.random; mode = mode || 'mix';
     const ok = cards.filter((c) => isWord(c) && c.seen);
     const todays = ok.filter((c) => c.ls === today).sort((a, b) => (a.lv || 0) - (b.lv || 0));
     const rest = ok.filter((c) => c.ls !== today).sort((a, b) => (a.lv || 0) - (b.lv || 0));
     const pick = todays.concat(rest).slice(0, max);
+    if (mode === 'gap') return shuffled(pick, rnd).map((c) => ({ id: c.id, type: 'gap' }));
+    if (mode === 'order') return shuffled(todays.concat(rest).filter((c) => orderChunks(c, rnd)).slice(0, 8), rnd).map((c) => ({ id: c.id, type: 'order' }));
+    if (mode === 'pair') {
+      const sh0 = shuffled(pick.filter((c) => c.ru), rnd), out = [];
+      for (let i = 0; i + 4 <= sh0.length; i += 4) out.push({ id: sh0[i].id, ids: sh0.slice(i, i + 4).map((c) => c.id), type: 'pair' });
+      return out;
+    }
     const q = []; shuffled(pick, rnd).forEach((c) => q.push({ id: c.id, type: 'gap' }));
     const sh = shuffled(pick, rnd);
     for (let i = 0; i + 4 <= sh.length; i += 4) q.push({ id: sh[i].id, ids: sh.slice(i, i + 4).map((c) => c.id), type: 'pair' });

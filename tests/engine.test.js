@@ -322,3 +322,10 @@ test('drillQueue: есть задания «сопоставь» и «собер
   const q = E.drillQueue(D, 5, 12);
   assert.ok(q.some((x) => x.type === 'pair' && x.ids.length === 4)); assert.ok(q.some((x) => x.type === 'order'));
 });
+
+test('drillQueue: режимы выбирают только нужный тип заданий', () => {
+  const D = require('../app/data/deck.json').filter((d) => d.pos === 'v').slice(0, 20).map((d) => Object.assign({ seen: true, ls: 0, lv: 1 }, d));
+  const only = (mode, type) => { const q = E.drillQueue(D, 5, 12, null, mode); assert.ok(q.length > 0, mode); assert.ok(q.every((x) => x.type === type), mode); return q; };
+  only('gap', 'gap'); only('order', 'order'); const pq = only('pair', 'pair'); assert.equal(pq.length, 3);
+  assert.ok(E.drillQueue(D, 5, 12).some((x) => x.type === 'gap') && E.drillQueue(D, 5, 12, null, 'mix').some((x) => x.type === 'pair'));
+});
