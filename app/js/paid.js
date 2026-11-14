@@ -48,6 +48,8 @@ window.Paid = (function () {
   const VOCAB = [['help', 'support / assist'], ['very expensive', 'prohibitively high'], ['bring benefit', 'contribute'], ['problem', 'drawback / downside'], ['limited', 'finite / restricted'], ['good students', 'academically strong students']];
 
   const DAILY = 10;
+  const goal = () => { const g = Number(H && H.target && H.target()); return g >= 4 && g <= 9 ? g : 7; };
+  const gs = () => goal().toFixed(1);
   const TYPES = [['Грамматика', 8], ['Лексика', 3], ['Орфография', 1]];
   const PARAS = [
     ['Абзац 1 · вступление', 'Позиция названа сразу, это плюс. Но «In my opinion, I partly agree» дублирует мысль, а «free education has some advantages» слишком общо: назовите, какие именно.'],
@@ -57,7 +59,7 @@ window.Paid = (function () {
   ];
   const STEPS = [['Согласование подлежащего и сказуемого', 'ещё +0.5 к Grammatical Range & Accuracy', '15 минут'], ['Развернуть идею из вывода в основной части', 'до +0.5 к Task Response', '20 минут'], ['Заменить 6 слабых слов на сильные', '+0.5 к Lexical Resource', '10 минут']];
   const BAND8 = 'While free tuition would widen access for low-income families, it carries a hidden cost: when funding is spread across every student, per-student resources shrink, and the quality of teaching is the first casualty. Countries with fee-free systems often report overcrowded lecture halls and outdated laboratories, which suggests that access without quality is only a partial victory.';
-  const LOCKS = [['Все 12 ошибок', 'по всем абзацам, с объяснением правила'], ['Ваш текст на уровне Band 7', 'ваши идеи, переписанные сильнее'], ['Разбор аргументации', 'где мысль не доведена и что добавить'], ['Образец сильного абзаца', 'под ваш вопрос, на Band 8'], ['План на неделю', '3 шага, которые дают +0.5 band'], ['Словарь для карточек', 'слабые слова и замены в один клик']];
+  const LOCKS = [['Все 12 ошибок', 'по всем абзацам, с объяснением правила'], ['Ваш текст, переписанный сильнее', 'ваши идеи на уровне Band 7'], ['Разбор аргументации', 'где мысль не доведена и что добавить'], ['Образец сильного абзаца', 'под ваш вопрос, на Band 8'], ['План на неделю', '3 шага, которые дают +0.5 band'], ['Словарь для карточек', 'слабые слова и замены в один клик']];
 
   // ---------- стили ----------
   const css = document.createElement('style');
@@ -136,7 +138,7 @@ window.Paid = (function () {
     let h = '<div class="pd-head"><h2>Расширенный разбор</h2><span class="pd-hp">' + (full ? 'Полный' : 'Бесплатная часть') + '</span></div><p class="mut" style="margin:-6px 0 12px">Демо-пример · оценка приблизительная, это не официальный результат IELTS</p>';
     h += '<div style="display:flex;align-items:flex-end;gap:12px"><div class="pd-band">≈ 6.0</div><div class="mut" style="padding-bottom:6px">диапазон 5.5–6.0</div></div>';
     h += CRIT.map((c) => '<div class="pd-row"><span>' + esc(c[0]) + '</span><b>' + c[1].toFixed(1) + '</b><div class="bar"><i style="width:' + Math.round(c[1] / 9 * 100) + '%"></i></div></div>').join('');
-    h += '<div class="pd-card"><b>До Band 7.0 не хватает ≈ 1.0</b><div class="mut" style="margin-top:4px">Это достижимо: 12 найденных ошибок и одна логическая дыра в выводе закрывают большую часть разрыва.</div></div>';
+    h += (goal() > 6 ? '<div class="pd-card"><b>До вашей цели Band ' + gs() + ' не хватает ≈ ' + (goal() - 6).toFixed(1) + '</b><div class="mut" style="margin-top:4px">Это достижимо: 12 найденных ошибок и одна логическая дыра в выводе закрывают заметную часть разрыва.</div></div>' : '<div class="pd-card"><b>Ваша цель Band ' + gs() + ' уже в зоне досягаемости</b><div class="mut" style="margin-top:4px">Закрепите результат: 12 найденных ошибок — это то, что может стоить вам баллов в день экзамена.</div></div>');
     h += '<h3>Что тянет балл вниз</h3><div class="list" style="padding:4px 16px">' +
       '<div class="rowi" style="padding:10px 0"><span style="color:var(--warn)">!</span><span class="grow"><b>Грамматика.</b> Согласование подлежащего и сказуемого сломано почти в каждом абзаце (it also <span class="pd-del">have</span>, parents <span class="pd-del">has</span>, government <span class="pd-del">pay</span>). Это держит Grammatical Range & Accuracy на 5.5.</span></div>' +
       '<div class="rowi" style="padding:10px 0"><span style="color:var(--warn)">!</span><span class="grow"><b>Позиция.</b> Вы пишете «partly agree», но идея из вывода (бесплатно только для лучших студентов) нигде не раскрыта в основной части. Это снижает Task Response.</span></div></div>';
@@ -175,7 +177,7 @@ window.Paid = (function () {
     let sel = 'prem';
     const draw = () => OPTS.map((o) => '<button class="pd-plan' + (o[5] ? ' best' : '') + (sel === o[0] ? ' on' : '') + '" data-k="' + o[0] + '">' + (o[5] ? '<span class="pd-badge">Выгоднее всего</span>' : '') + '<span class="pd-dot"></span><b>' + esc(o[1]) + '</b><span class="pr">' + esc(o[2]) + '<small>' + esc(o[3]) + '</small></span><ul>' + o[4].map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></button>').join('');
     const label = () => { const o = OPTS.find((x) => x[0] === sel); return 'Оплатить ' + o[2]; };
-    H.openSheet('<div class="pd-hero"><h2>Узнайте, что мешает вам набрать 7.0</h2><p>Покажем каждую ошибку, перепишем текст на Band 7 и дадим план на неделю. Результат сразу в приложении.</p></div>' +
+    H.openSheet('<div class="pd-hero"><h2>Узнайте, что мешает вам набрать ' + gs() + '</h2><p>Покажем каждую ошибку, перепишем текст на уровень выше и дадим план на неделю. Результат сразу в приложении.</p></div>' +
       '<div id="pdopts">' + draw() + '</div>' +
       '<div class="stack"><button class="btn pd-shine" id="pdpay">' + label() + '</button><button class="btn" id="pdback">Не сейчас</button></div>' +
       '<p class="mut" style="text-align:center;margin:12px 0 0">Карта или СБП через Robokassa · чек на e-mail · без подписки и автопродления. Нажимая «Оплатить», вы принимаете <a href="' + PAY + '/#oferta" target="_blank" rel="noopener">оферту</a> и <a href="' + PAY + '/#policy" target="_blank" rel="noopener">политику</a>.</p>', () => {

@@ -85,7 +85,7 @@
     if (mount) mount(r.querySelector('.sbody'));
   }
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
-  if (window.Paid) Paid.init({ openSheet, closeSheet, toast, esc }); // превью платных функций; в проде выключено жёстко
+  if (window.Paid) Paid.init({ openSheet, closeSheet, toast, esc, target: () => { const q = P(); return q && q.target ? q.target.overall : 7; } }); // превью платных функций; в проде выключено жёстко
   function confirmSheet(text, okLabel, fn) {
     openSheet('<h2>' + esc(text) + '</h2><div class="stack"><button class="btn danger" id="cfok">' + esc(okLabel) + '</button><button class="btn" id="cfno">Отмена</button></div>', () => {
       $('#cfok').onclick = () => { closeSheet(); fn(); }; $('#cfno').onclick = () => closeSheet();
