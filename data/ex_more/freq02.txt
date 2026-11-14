@@ -1,0 +1,169 @@
+# Частые слова (Oxford 3000), пакет 2
+potential|n|The young player has the [[potential]] to become a champion.
+potential|n|Wind farms have great [[potential]] in coastal areas.
+previous|adj|Her [[previous]] job was in a small publishing firm.
+previous|adj|In the [[previous]] chapter we discussed the causes of inflation.
+primary|adj|The [[primary]] aim of the course is to improve speaking.
+primary|adj|Reading is the [[primary]] way children learn new words.
+purchase|n|Keep the receipt as proof of [[purchase]].
+purchase|n|The [[purchase]] of a first home is a big step for most families.
+range|n|The shop sells a wide [[range]] of organic food.
+range|n|Prices [[range]] from five to fifty pounds, depending on the quality.
+region|n|The northern [[region]] is known for its cold winters.
+region|n|Several countries in the [[region]] are facing a water shortage.
+relevant|adj|Include only [[relevant]] information in your report.
+relevant|adj|Is this law still [[relevant]] in the digital age?
+resource|n|The internet is a valuable [[resource]] for students.
+resource|n|Oil is a natural [[resource]] that will eventually run out.
+secure|v|It is hard for young people to [[secure]] a loan without a stable income.
+secure|v|The team worked hard to [[secure]] a place in the final.
+seek|v|Many people [[seek]] advice from friends before making a big decision.
+seek|v|Refugees [[seek]] safety in neighbouring countries.
+select|v|Candidates were [[selected]] after two rounds of interviews.
+select|v|Please [[select]] one answer from the list.
+site|n|The museum is built on the [[site]] of an old market.
+site|n|Visitors can book tickets on the official web [[site]].
+strategy|n|The government has launched a new [[strategy]] to reduce poverty.
+strategy|n|A good revision [[strategy]] saves time and reduces stress.
+survey|n|The [[survey]] asked a thousand teenagers about their habits.
+survey|n|An online [[survey]] is a cheap way to collect opinions.
+text|n|Underline the key words in the [[text]].
+text|n|Reading a long [[text]] in a foreign language takes patience.
+tradition|n|Eating together is an old family [[tradition]].
+tradition|n|The festival is a [[tradition]] that goes back hundreds of years.
+transfer|v|Students can [[transfer]] to another university after the first year.
+transfer|v|You can [[transfer]] money between accounts using the app.
+aware|adj|Teenagers are well [[aware]] of the risks of social media.
+aware|adj|Drivers must be [[aware]] of cyclists at all times.
+capacity|n|The stadium has a [[capacity]] of fifty thousand people.
+capacity|n|The brain has a huge [[capacity]] for learning.
+challenge|n|Learning to speak fluently is a real [[challenge]].
+challenge|n|Climate change is the greatest [[challenge]] facing humanity.
+commit|v|It takes time to [[commit]] to a new habit.
+commit|v|Governments have [[committed]] to reducing carbon emissions.
+contribute|v|Every citizen should [[contribute]] to the community.
+contribute|v|Exercise and sleep both [[contribute]] to good health.
+crucial|adj|Good communication is [[crucial]] in any relationship.
+crucial|adj|The next few weeks will be [[crucial]] for the project.
+demonstrate|v|Tests [[demonstrate]] what students have learned.
+demonstrate|v|The video will [[demonstrate]] how the machine works.
+emerge|v|New trends [[emerge]] every year in the fashion industry.
+emerge|v|The truth began to [[emerge]] after the investigation.
+enable|v|Scholarships [[enable]] talented students to study abroad.
+enable|v|The app [[enables]] users to pay bills in seconds.
+ensure|v|Teachers must [[ensure]] that all pupils feel safe.
+ensure|v|Please [[ensure]] that your answers are clearly written.
+estimate|n|My [[estimate]] is that the repairs will take two weeks.
+estimate|n|The [[estimate]] for the new building was far too low.
+expand|v|The company plans to [[expand]] into Asian markets.
+expand|v|The city continues to [[expand]] into the countryside.
+expose|v|Reading [[exposes]] children to a rich variety of words.
+expose|v|The journalist [[exposed]] corruption in the local council.
+fundamental|adj|There is a [[fundamental]] difference between the two systems.
+fundamental|adj|Respect is [[fundamental]] to every healthy friendship.
+highlight|v|The report [[highlights]] the dangers of sitting all day.
+highlight|v|Use a pen to [[highlight]] key points in your notes.
+instance|n|For [[instance]], many students live far from their university.
+instance|n|There have been several [[instances]] of cheating in exams.
+internal|adj|The company has strict [[internal]] rules about spending.
+internal|adj|Doctors examine a patient's [[internal]] organs using scans.
+investigate|v|Scientists [[investigate]] how sleep affects memory.
+investigate|v|The committee will [[investigate]] the complaints.
+justify|v|How can the government [[justify]] spending so much on the project?
+justify|v|Nothing can [[justify]] violence against another person.
+mental|adj|Exercise is good for [[mental]] and physical health.
+mental|adj|Doing sums in your head is good [[mental]] training.
+objective|n|The main [[objective]] of this study is to compare two methods.
+objective|n|Set a clear [[objective]] before you start revising.
+obvious|adj|The answer is [[obvious]] once you see the pattern.
+obvious|adj|It is [[obvious]] that cities need better public transport.
+perspective|n|Living abroad gave her a new [[perspective]] on life.
+perspective|n|Try to see the problem from the customer's [[perspective]].
+phenomenon|n|Global warming is a worldwide [[phenomenon]].
+phenomenon|n|Social media is a relatively new [[phenomenon]].
+predict|v|Scientists cannot [[predict]] exactly when earthquakes will happen.
+predict|v|Experts [[predict]] that more people will work from home.
+rely|v|Many islands [[rely]] on tourism for their income.
+rely|v|You can [[rely]] on her to finish the work on time.
+retain|v|Good teachers [[retain]] students' interest with varied activities.
+retain|v|The old town has [[retained]] much of its original charm.
+reveal|v|The study [[reveals]] a link between income and health.
+reveal|v|The company refused to [[reveal]] the details of the deal.
+shift|n|The [[shift]] to remote work has changed many cities.
+shift|n|There has been a [[shift]] in public opinion on this issue.
+stable|adj|Prices have remained [[stable]] for several months.
+stable|adj|Children need a [[stable]] home environment.
+tend|v|Young people [[tend]] to spend more time online than older people.
+tend|v|Prices [[tend]] to rise before the holidays.
+graduate|n|Many [[graduates]] move to the capital to find work.
+graduate|n|The company hires a new [[graduate]] every summer.
+discipline|n|Good [[discipline]] helps students manage their time.
+discipline|n|Physics is a difficult [[discipline]] for many students.
+unemployment|n|[[Unemployment]] rises when factories close.
+unemployment|n|Long-term [[unemployment]] can damage people's confidence.
+salary|n|Teachers' [[salaries]] vary from country to country.
+salary|n|She accepted the job because of the high [[salary]].
+career|n|He started his [[career]] as a junior reporter.
+career|n|A successful [[career]] depends on both skill and luck.
+stress|n|Students often feel [[stress]] before exams.
+stress|n|Regular walks help to reduce [[stress]].
+treatment|n|The patient is responding well to [[treatment]].
+treatment|n|Animals should be given humane [[treatment]].
+recycle|v|Many countries now [[recycle]] more than half of their waste.
+recycle|v|You can [[recycle]] old clothes by giving them to charity.
+virtual|adj|Students can take a [[virtual]] tour of the museum.
+virtual|adj|[[Virtual]] classrooms are becoming more popular.
+sentence|n|The judge gave him a short prison [[sentence]].
+sentence|n|Write one [[sentence]] to summarise the main idea.
+victim|n|The [[victim]] of the crime received support from a charity.
+victim|n|Children are often the main [[victims]] of war.
+illegal|adj|Selling tickets at a higher price is [[illegal]] in some countries.
+illegal|adj|Dumping waste in rivers is [[illegal]].
+poverty|n|Millions of people still live in [[poverty]].
+poverty|n|Better schools can help to reduce [[poverty]].
+immigrant|n|Many [[immigrants]] work in hospitals and care homes.
+immigrant|n|The [[immigrant]] learned the language within a year.
+generation|n|Each [[generation]] faces different challenges.
+generation|n|The younger [[generation]] is more used to technology.
+lifestyle|n|A busy [[lifestyle]] leaves little time for cooking.
+lifestyle|n|Many people want a more sustainable [[lifestyle]].
+volunteer|v|Many retired people [[volunteer]] at local charities.
+volunteer|v|Students are encouraged to [[volunteer]] during the holidays.
+donate|v|Companies often [[donate]] money to local schools.
+donate|v|You can [[donate]] blood at the hospital.
+journey|n|The [[journey]] to work takes an hour by train.
+journey|n|Learning a language is a long [[journey]].
+tourism|n|[[Tourism]] is the main industry on the island.
+tourism|n|Eco-[[tourism]] aims to protect nature while giving visitors an experience.
+broadcast|v|The concert will be [[broadcast]] live on radio.
+broadcast|v|The news is [[broadcast]] every evening at six.
+headline|n|The [[headline]] on the front page caught my attention.
+headline|n|Many people read only the [[headlines]] and skip the article.
+viewer|n|The programme attracts millions of [[viewers]] every week.
+viewer|n|Each [[viewer]] can choose when to watch a series.
+influence|v|Advertising can [[influence]] what children want to buy.
+influence|v|Friends [[influence]] teenagers more than parents do.
+advertisement|n|The [[advertisement]] appears on buses across the city.
+advertisement|n|She saw an [[advertisement]] for the job in a newspaper.
+entertainment|n|Streaming has changed the way people watch [[entertainment]].
+entertainment|n|The hotel offers live [[entertainment]] every evening.
+museum|n|The [[museum]] is closed on Mondays.
+museum|n|Many children learn history by visiting a [[museum]].
+experiment|n|The students carried out an [[experiment]] in the laboratory.
+experiment|n|The [[experiment]] proved that plants grow better with more light.
+sample|n|The researchers took a [[sample]] of water from the river.
+sample|n|A larger [[sample]] would give more reliable results.
+decline|v|The number of visitors has [[declined]] in recent years.
+decline|v|Sales began to [[decline]] after the price rise.
+double|v|The population is expected to [[double]] by 2050.
+double|v|Prices have [[doubled]] over the past decade.
+renewable|adj|Wind and solar are [[renewable]] forms of energy.
+renewable|adj|The country wants to use more [[renewable]] resources.
+colleague|n|I asked a [[colleague]] to check my report.
+colleague|n|She gets on well with her [[colleagues]].
+graduate|v|Most students [[graduate]] after four years.
+graduate|v|She [[graduated]] with a degree in biology.
+prevent|v|Good hygiene can [[prevent]] the spread of infection.
+prevent|v|Barriers [[prevent]] cars from entering the park.
+criminal|n|The police arrested the [[criminal]] at the airport.
+criminal|n|Some [[criminals]] commit crimes because they cannot find work.

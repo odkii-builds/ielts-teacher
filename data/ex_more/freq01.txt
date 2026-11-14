@@ -1,0 +1,169 @@
+# Частые слова (Oxford 3000), пакет 1: по 2 дополнительных примера
+analyse|v|Students learn to [[analyse]] graphs before writing about them.
+analyse|v|The lab will [[analyse]] the water samples next week.
+approach|n|The school takes a creative [[approach]] to teaching maths.
+approach|n|A new [[approach]] to tackling traffic is needed in the capital.
+assume|v|We should not [[assume]] that expensive courses are always better.
+assume|v|Drivers often [[assume]] that cyclists will move out of the way.
+authority|n|The health [[authority]] closed the restaurant after an inspection.
+authority|n|Teachers need [[authority]] in the classroom, but also kindness.
+available|adj|Free language classes are [[available]] at the public library.
+available|adj|The report will be [[available]] online from Monday.
+benefit|v|Small businesses could [[benefit]] from lower interest rates.
+benefit|v|Everyone will [[benefit]] if the city builds more cycle lanes.
+concept|n|Children find the [[concept]] of time difficult to understand.
+concept|n|The [[concept]] of a four-day week is attracting more attention.
+consistent|adj|Employers value workers who are [[consistent]] and reliable.
+consistent|adj|His story was not [[consistent]] with the evidence.
+context|n|You can often guess a word from its [[context]].
+context|n|The decision makes sense in the [[context]] of rising costs.
+contract|n|She signed a two-year [[contract]] with the company.
+contract|n|Workers on a zero-hours [[contract]] have no guaranteed income.
+create|v|Tourism can [[create]] jobs in rural communities.
+create|v|Artists often [[create]] their best work under pressure.
+data|n|The survey [[data]] show that most people use public transport.
+data|n|Companies collect personal [[data]] from their online customers.
+define|v|Scientists first need to [[define]] the problem clearly.
+define|v|Different cultures [[define]] success in different ways.
+distribute|v|Charities [[distribute]] food to families in need.
+distribute|v|Wealth is not [[distributed]] fairly in many countries.
+economy|n|Tourism is vital to the island's [[economy]].
+economy|n|A weak [[economy]] makes it hard for graduates to find jobs.
+environment|n|Governments should protect the natural [[environment]].
+environment|n|A friendly working [[environment]] makes staff more productive.
+establish|v|The company hopes to [[establish]] a branch in Asia.
+establish|v|Researchers need time to [[establish]] a clear link between the two events.
+estimate|v|Officials [[estimate]] that half the population lives in cities.
+estimate|v|It is difficult to [[estimate]] the cost of repairing the bridge.
+factor|n|Age is an important [[factor]] in learning a language.
+factor|n|Several [[factors]] explain why house prices have risen.
+financial|adj|The bank offers [[financial]] advice to young people.
+financial|adj|A [[financial]] crisis can lead to higher unemployment.
+function|v|The old machine no longer [[functions]] properly.
+function|v|A healthy society cannot [[function]] without trust.
+identify|v|Teachers can [[identify]] pupils who need extra help.
+identify|v|Scientists have [[identified]] a new species of frog.
+income|n|People on a high [[income]] pay more tax.
+income|n|Many students have a part-time job as a second [[income]].
+indicate|v|The signs [[indicate]] that the economy is recovering.
+indicate|v|Red lights [[indicate]] that the machine is switched on.
+individual|n|Every [[individual]] has the right to a fair trial.
+individual|n|Society should respect the freedom of the [[individual]].
+interpret|v|Historians [[interpret]] the same events in different ways.
+interpret|v|It takes practice to [[interpret]] a complex graph.
+involve|v|The job [[involves]] working with children every day.
+involve|v|Parents should be [[involved]] in their children's education.
+issue|n|Climate change is the biggest [[issue]] of our time.
+issue|n|The magazine publishes a new [[issue]] every month.
+labour|n|Manual [[labour]] is badly paid in many countries.
+labour|n|The cost of [[labour]] has risen in the construction industry.
+legal|adj|You need [[legal]] advice before you sign this document.
+legal|adj|It is not [[legal]] to park on this road.
+major|adj|Pollution is a [[major]] problem in big cities.
+major|adj|The company is making [[major]] changes to its structure.
+method|n|The best [[method]] of learning vocabulary is regular review.
+method|n|Scientists test every new [[method]] carefully.
+occur|v|Earthquakes [[occur]] more often in some regions than others.
+occur|v|Mistakes can [[occur]] when people are tired.
+period|n|The country went through a [[period]] of rapid growth.
+period|n|Students have a short revision [[period]] before the exam.
+principle|n|The [[principle]] of free speech is central to democracy.
+principle|n|On [[principle]], she refuses to buy products tested on animals.
+process|n|Applying for a visa is a long and expensive [[process]].
+process|n|The [[process]] of recycling glass uses less energy than making new glass.
+require|v|Most degrees [[require]] students to write a final project.
+require|v|The law [[requires]] all drivers to carry insurance.
+research|n|Medical [[research]] has extended life expectancy.
+research|n|The team is carrying out [[research]] into sleep and memory.
+respond|v|Teachers must [[respond]] quickly to students' questions.
+respond|v|Many people did not [[respond]] to the survey.
+role|n|Teachers play an important [[role]] in shaping young minds.
+role|n|The [[role]] of women in the workplace has changed greatly.
+sector|n|The public [[sector]] employs thousands of nurses.
+sector|n|Growth in the tourism [[sector]] has created new jobs.
+significant|adj|There is a [[significant]] gap between rich and poor.
+significant|adj|The study found no [[significant]] difference between the two groups.
+similar|adj|The twins have [[similar]] interests but different personalities.
+similar|adj|Many cities face [[similar]] problems with traffic.
+source|n|Wind is a clean [[source]] of energy.
+source|n|Always check the [[source]] of information you find online.
+specific|adj|Give a [[specific]] example to support your argument.
+specific|adj|Some diseases affect [[specific]] groups of people.
+structure|n|The essay has a clear [[structure]] with three main parts.
+structure|n|The [[structure]] of the company was simple.
+theory|n|Darwin's [[theory]] explained how species change over time.
+theory|n|In [[theory]], the plan should work, but in practice it is hard.
+vary|v|Prices [[vary]] from shop to shop.
+vary|v|Opinions on this issue [[vary]] widely among young people.
+achieve|v|It takes hard work to [[achieve]] your goals.
+achieve|v|The school has [[achieved]] excellent exam results this year.
+acquire|v|Adults [[acquire]] new skills more slowly than children.
+acquire|v|The museum [[acquired]] several important paintings last year.
+administration|n|Hospital [[administration]] is often criticised for wasting money.
+administration|n|The [[administration]] of the exam was well organised.
+affect|v|Noise can [[affect]] children's ability to concentrate.
+affect|v|Rising prices [[affect]] poor families the most.
+appropriate|adj|Choose an [[appropriate]] title for your essay.
+appropriate|adj|Casual clothes are not [[appropriate]] for a job interview.
+aspect|n|One [[aspect]] of the problem is a lack of funding.
+aspect|n|Cost is an important [[aspect]] of any travel plan.
+assist|v|Volunteers [[assist]] elderly people with their shopping.
+assist|v|Technology can [[assist]] doctors in diagnosing illness.
+category|n|Films are divided into several [[categories]].
+category|n|This book belongs in the same [[category]] as the others.
+chapter|n|Read the first [[chapter]] before the next lesson.
+chapter|n|The move to a new city marked a new [[chapter]] in her life.
+commission|n|A [[commission]] was appointed to investigate the accident.
+commission|n|The artist received a [[commission]] to paint a portrait of the mayor.
+community|n|The local [[community]] raised money to rebuild the school.
+community|n|Young people often feel part of an online [[community]].
+complex|adj|The causes of unemployment are [[complex]].
+complex|adj|It is a [[complex]] machine with hundreds of parts.
+conclude|v|The researchers [[concluded]] that more tests were needed.
+conclude|v|You should [[conclude]] your essay with a short summary.
+conduct|v|The university will [[conduct]] a survey of its students.
+conduct|v|Experiments must be [[conducted]] under careful supervision.
+consequence|n|Skipping sleep can have serious [[consequences]] for your health.
+consequence|n|As a [[consequence]] of the storm, many flights were cancelled.
+construct|v|Engineers will [[construct]] a new bridge over the river.
+construct|v|Students must [[construct]] an argument using clear evidence.
+consume|v|Cars [[consume]] a great deal of fuel in heavy traffic.
+consume|v|People in cities [[consume]] more processed food than people in villages.
+credit|n|Shops often give [[credit]] to regular customers.
+credit|n|She deserves [[credit]] for her hard work on the project.
+culture|n|Visitors enjoy learning about the local [[culture]].
+culture|n|A company [[culture]] of trust helps staff to be creative.
+design|v|Architects [[design]] buildings that use less energy.
+design|v|The course is [[designed]] for complete beginners.
+element|n|Trust is a key [[element]] of any good team.
+element|n|The film contains an [[element]] of surprise.
+evaluate|v|Teachers [[evaluate]] students by tests and projects.
+evaluate|v|It is important to [[evaluate]] sources before using them.
+evidence|n|Police found new [[evidence]] at the scene.
+evidence|n|There is strong [[evidence]] that exercise improves mental health.
+feature|n|The camera is the main [[feature]] of the new phone.
+feature|n|A common [[feature]] of big cities is traffic congestion.
+final|adj|Students sit a [[final]] exam at the end of the course.
+final|adj|The [[final]] chapter summarises the main findings.
+focus|v|It is easier to [[focus]] in a quiet room.
+focus|v|The report [[focuses]] on the causes of youth unemployment.
+impact|n|Mobile phones have had a huge [[impact]] on daily life.
+impact|n|Plastic bags have a negative [[impact]] on the oceans.
+institute|n|The [[institute]] trains young scientists from many countries.
+institute|n|She works at a language [[institute]] in the city centre.
+invest|v|Parents often [[invest]] in their children's education.
+invest|v|Many people [[invest]] their savings in property.
+item|n|Please check each [[item]] in your luggage.
+item|n|The first [[item]] on the agenda was the budget.
+journal|n|She published her findings in a scientific [[journal]].
+journal|n|Keeping a [[journal]] can help you improve your writing.
+maintain|v|Regular exercise helps people [[maintain]] a healthy weight.
+maintain|v|Cities must [[maintain]] their parks and public spaces.
+normal|adj|It is [[normal]] to feel nervous before an exam.
+normal|adj|Rain is [[normal]] at this time of year.
+obtain|v|Foreign visitors must [[obtain]] a permit to work.
+obtain|v|It is not easy to [[obtain]] accurate data on this topic.
+participate|v|All students are encouraged to [[participate]] in class discussions.
+participate|v|Thousands of people [[participated]] in the protest.
+positive|adj|A [[positive]] attitude helps people overcome difficulties.
+positive|adj|The film received [[positive]] reviews from critics.
