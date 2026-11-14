@@ -1,0 +1,165 @@
+# Частые слова (Oxford 3000), пакет 3
+offence|n|Driving without a licence is a serious [[offence]].
+offence|n|He was fined for a minor traffic [[offence]].
+advertising|n|Online [[advertising]] is growing faster than any other kind of promotion.
+advertising|n|She works in [[advertising]] and designs posters.
+complicated|adj|The rules of the game are too [[complicated]] for young children.
+complicated|adj|Applying for a visa can be a [[complicated]] process.
+basic|adj|Everyone should have [[basic]] first-aid knowledge.
+basic|adj|Food and shelter are [[basic]] human needs.
+plain|adj|He prefers [[plain]] food without spices.
+plain|adj|The report is written in [[plain]] language that everyone can understand.
+annoyed|adj|Passengers were [[annoyed]] by the long delay.
+annoyed|adj|She was [[annoyed]] that nobody had answered her email.
+cheerful|adj|A [[cheerful]] teacher can make lessons more enjoyable.
+cheerful|adj|The waiter gave us a [[cheerful]] smile.
+wealthy|adj|[[Wealthy]] families can afford private schools.
+wealthy|adj|Some of the most [[wealthy]] countries are small and have few natural resources.
+valuable|adj|The museum keeps its most [[valuable]] paintings in a safe room.
+valuable|adj|Volunteering gives young people [[valuable]] experience.
+engaged|adj|Students learn more when they are [[engaged]] in the lesson.
+engaged|adj|The company is [[engaged]] in several research projects.
+fascinating|adj|It is [[fascinating]] to watch how children learn to speak.
+fascinating|adj|The exhibition on ancient Egypt was [[fascinating]].
+emphasize|v|Employers [[emphasize]] teamwork in job advertisements.
+emphasize|v|The speaker [[emphasized]] the need for urgent action.
+drop|n|There was a sharp [[drop]] in temperature overnight.
+drop|n|Even a small [[drop]] in prices can attract more customers.
+extraordinary|adj|Doctors showed [[extraordinary]] courage during the crisis.
+extraordinary|adj|The number of visitors this year was [[extraordinary]].
+essential|adj|Exercise is [[essential]] for a healthy lifestyle.
+essential|adj|A passport is [[essential]] for international travel.
+minor|adj|The patient suffered only [[minor]] injuries.
+minor|adj|Several [[minor]] changes were made to the schedule.
+slight|adj|There is a [[slight]] chance of rain tomorrow.
+slight|adj|The new model has only a [[slight]] advantage over the old one.
+limited|adj|The museum has [[limited]] space for new exhibitions.
+limited|adj|Offers are available for a [[limited]] time only.
+massive|adj|The company announced [[massive]] losses last year.
+massive|adj|A [[massive]] crowd gathered outside the stadium.
+aged|adj|The town has a large number of [[aged]] residents.
+aged|adj|Children [[aged]] under five travel free.
+elderly|adj|Many [[elderly]] people live alone in cities.
+elderly|adj|Volunteers visit [[elderly]] neighbours every week.
+latest|adj|The [[latest]] figures show a rise in unemployment.
+latest|adj|Teenagers often want the [[latest]] phone.
+powerful|adj|A [[powerful]] storm hit the coast overnight.
+powerful|adj|Social media is a [[powerful]] tool for spreading news.
+solid|adj|The house is built on [[solid]] ground.
+solid|adj|The team has a [[solid]] record of success.
+display|v|Shops [[display]] their best products near the entrance.
+display|v|The screen can [[display]] information in several languages.
+capable|adj|Young children are [[capable]] of learning two languages at once.
+capable|adj|She is a [[capable]] manager who solves problems quickly.
+operate|v|Only trained staff can [[operate]] this equipment.
+operate|v|The airline [[operates]] flights to forty countries.
+abandon|v|Farmers were forced to [[abandon]] their land during the drought.
+abandon|v|The company decided to [[abandon]] the project because of the cost.
+absolute|adj|There is no [[absolute]] answer to this question.
+absolute|adj|The party won an [[absolute]] majority in parliament.
+academic|n|The [[academic]] published his findings in a leading journal.
+academic|n|Many [[academics]] work abroad for a few years.
+acceptable|adj|Cheating is not [[acceptable]] in any exam.
+acceptable|adj|The hotel was cheap but [[acceptable]].
+account|v|Young people [[account]] for most of the increase in online sales.
+account|v|Bad weather may [[account]] for the fall in visitors.
+accurate|adj|Careful measurements give more [[accurate]] results.
+accurate|adj|The newspaper's report was not [[accurate]].
+accuse|v|Critics [[accused]] the government of ignoring the problem.
+accuse|v|It is unfair to [[accuse]] someone without proof.
+acknowledge|v|The minister [[acknowledged]] that mistakes had been made.
+acknowledge|v|Writers must [[acknowledge]] the sources they use.
+actual|adj|The [[actual]] cost was twice the original estimate.
+actual|adj|The film is based on [[actual]] events.
+adapt|v|Children quickly [[adapt]] to a new school.
+adapt|v|Companies must [[adapt]] to changes in technology.
+additional|adj|Schools need [[additional]] funding for new equipment.
+additional|adj|An [[additional]] charge applies for heavy bags.
+address|v|The government must [[address]] the shortage of housing.
+address|v|The president will [[address]] the nation on Friday.
+adopt|v|Many schools have [[adopted]] new technology in lessons.
+adopt|v|The couple decided to [[adopt]] a child.
+advance|adj|You need to give [[advance]] notice before you leave the job.
+advance|adj|[[Advance]] tickets are cheaper than those bought on the day.
+advance|n|[[Advances]] in medicine have helped people live longer.
+advance|n|The [[advance]] of technology has changed the way we work.
+advance|v|Computers continue to [[advance]] at an incredible speed.
+advance|v|Students who work hard will [[advance]] to the next level.
+affair|n|Foreign [[affairs]] are handled by a separate ministry.
+affair|n|The wedding was a small family [[affair]].
+agency|n|The government [[agency]] is responsible for road safety.
+agency|n|She works for an advertising [[agency]] in London.
+agenda|n|Climate change is high on the political [[agenda]].
+agenda|n|Please send the [[agenda]] before the meeting.
+aggressive|adj|[[Aggressive]] driving causes many accidents.
+aggressive|adj|The company launched an [[aggressive]] marketing campaign.
+aid|n|The government sent emergency [[aid]] to the flooded areas.
+aid|n|Visual [[aids]] make presentations easier to follow.
+aid|v|Maps [[aid]] travellers in unfamiliar cities.
+aid|v|Good lighting can [[aid]] concentration.
+aircraft|n|Modern [[aircraft]] use less fuel than older models.
+aircraft|n|The [[aircraft]] landed safely despite the storm.
+alarm|v|The sudden rise in prices has [[alarmed]] many families.
+alarm|v|The noise [[alarmed]] the children.
+alter|v|Small changes can [[alter]] the outcome of an experiment.
+alter|v|Social media has [[altered]] the way people communicate.
+amount|v|Her debts [[amount]] to more than ten thousand pounds.
+amount|v|The donations [[amounted]] to a large sum of money.
+anger|n|The new tax caused [[anger]] among small business owners.
+anger|n|He tried to control his [[anger]].
+angle|n|Photographers try to find an interesting [[angle]].
+angle|n|The report looks at the problem from a different [[angle]].
+anniversary|n|The school celebrated its fiftieth [[anniversary]] last year.
+anniversary|n|They went to Paris for their wedding [[anniversary]].
+annual|adj|The [[annual]] festival attracts tourists from all over the world.
+annual|adj|The company holds an [[annual]] meeting in the spring.
+anxious|adj|Many students feel [[anxious]] before exams.
+anxious|adj|Parents are [[anxious]] about their children's safety online.
+apparent|adj|It soon became [[apparent]] that the plan would not work.
+apparent|adj|The reason for the delay was not [[apparent]].
+appeal|n|The charity launched an [[appeal]] for winter clothes.
+appeal|n|Cheap flights have a wide [[appeal]] among young travellers.
+appeal|v|Bright colours [[appeal]] to small children.
+appeal|v|The athlete will [[appeal]] against the decision.
+approval|n|Building work cannot begin without the council's [[approval]].
+approval|n|Teenagers often seek the [[approval]] of their friends.
+approve|v|The committee will [[approve]] the plans next week.
+approve|v|Not all parents [[approve]] of long school days.
+arise|v|Problems often [[arise]] when people do not communicate.
+arise|v|A new opportunity may [[arise]] after the interview.
+armed|adj|[[Armed]] guards protect the bank.
+armed|adj|The country has a large [[armed]] force.
+arms|n|The country spends a lot of money on [[arms]].
+arms|n|Many countries have agreed to limit the sale of [[arms]].
+artificial|adj|Many sweets contain [[artificial]] flavours.
+artificial|adj|[[Artificial]] intelligence is changing many industries.
+artistic|adj|The school encourages [[artistic]] activities such as painting.
+artistic|adj|Her [[artistic]] talent was obvious from an early age.
+ashamed|adj|He felt [[ashamed]] of the way he had behaved.
+ashamed|adj|Nobody should be [[ashamed]] of asking for help.
+assessment|n|The final [[assessment]] consists of an essay and an exam.
+assessment|n|The [[assessment]] of the damage will take several weeks.
+associate|v|Many people [[associate]] summer with holidays.
+associate|v|Brands try to [[associate]] their products with success.
+associated|adj|Health problems [[associated]] with stress are increasing.
+associated|adj|The costs [[associated]] with the project are high.
+association|n|She is a member of the national teachers' [[association]].
+association|n|There is a close [[association]] between poverty and poor health.
+attempt|n|His first [[attempt]] to pass the test was unsuccessful.
+attempt|n|The government made an [[attempt]] to reduce prices.
+attempt|v|Do not [[attempt]] to repair the machine yourself.
+attempt|v|Several climbers [[attempted]] to reach the top in winter.
+back|v|Local businesses [[back]] the plan to build a new road.
+back|v|Many scientists [[back]] the new theory.
+bacteria|n|Washing your hands removes harmful [[bacteria]].
+bacteria|n|Some [[bacteria]] are useful because they help digest food.
+bar|v|Protesters [[barred]] the entrance to the building.
+bar|v|The law [[bars]] children from working in factories.
+barrier|n|Cost is the main [[barrier]] to higher education for many people.
+barrier|n|A high fence acts as a [[barrier]] between the two fields.
+battle|v|Doctors [[battle]] new diseases every year.
+battle|v|Small shops [[battle]] to survive against big supermarkets.
+bear|v|Parents cannot [[bear]] the thought of their child being in danger.
+bear|v|The old bridge cannot [[bear]] heavy lorries.
+beat|n|The song has a fast [[beat]] that is easy to dance to.
+beat|n|You can feel your heart [[beat]] after exercise.
