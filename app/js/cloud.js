@@ -20,9 +20,9 @@ window.Cloud = (function () {
     return j;
   }
   function out() { try { localStorage.removeItem(TK); } catch (e) { /* ignore */ } subs.forEach((f) => f('SIGNED_OUT', null)); }
-  async function auth(a, email, password) {
+  async function auth(a, email, password, code) {
     try {
-      const j = await call(a, { email, password });
+      const j = await call(a, { email, password, code });
       try { localStorage.setItem(TK, j.token); } catch (e) { /* ignore */ }
       const session = { user: j.user, access_token: j.token };
       subs.forEach((f) => f('SIGNED_IN', session));
@@ -33,7 +33,9 @@ window.Cloud = (function () {
     available: () => true,
     async session() { const t = tok(), u = t && who(t); return u ? { user: u, access_token: t } : null; },
     signIn: (email, password) => auth('login', email, password),
-    signUp: (email, password) => auth('signup', email, password),
+    signUp: (email, password, code) => auth('signup', email, password, code),
+    // Шаг 1 регистрации: сервер сам решает, нужен ли код (required) и отправляет письмо
+    async signupCode(email) { return call('signup_code', { email }); },
     async signOut() { out(); },
     onAuth: (fn) => { subs.push(fn); },
     // Права и баланс ИИ-проверок — всегда с сервера (источник истины)

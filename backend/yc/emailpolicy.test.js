@@ -1,0 +1,10 @@
+const assert = require('assert'); const { check } = require('./emailpolicy');
+const c = (e) => check(e).canon, bad = (e) => assert.strictEqual(check(e).ok, false, e);
+assert.strictEqual(c('A.B.c+x@Gmail.com'), 'abc@gmail.com');
+assert.strictEqual(c('ab.c@googlemail.com'), 'abc@gmail.com');
+assert.strictEqual(c('ivan-petrov@ya.ru'), 'ivan.petrov@yandex.ru');
+assert.strictEqual(c('ivan.petrov@yandex.kz'), 'ivan.petrov@yandex.ru');
+assert.strictEqual(c('x+1@me.com'), 'x@icloud.com');
+assert.strictEqual(c('user@mail.ru'), 'user@mail.ru');
+['user@odkii-builds.ru', 'user@ielts.odkii-builds.ru', 'x@abc123.privaterelay.appleid.com', 'x@privaterelay.appleid.com', 'x@mailinator.com', 'x@10minutemail.com', 'x@gmail.com.evil.com', 'x@evilgmail.com', '+a@gmail.com', 'a@b', 'нет', '', 'a b@gmail.com'].forEach(bad);
+console.log('email policy ok');
