@@ -8,6 +8,7 @@ Mod._load = function (r, ...a) {
 };
 /* Права, платные проверки и админ-действия поверх index.js. Точка входа функции: main.handler */
 const base = require('./index');
+const { fillDays } = require('./stats');
 const { q, verify, getUser, ok, bad, TypedValues, E } = base._;
 
 // ---------- Права и платные возможности (источник истины — сервер) ----------
@@ -74,6 +75,19 @@ actions.admin_list = async (b, me) => {
   const ents = await q('SELECT id, credits, prem, ban, free, note FROM ent;');
   const m = new Map(ents.map((e) => [e.id, e]));
   return ok({ users: users.map((u) => { const e = m.get(u.id); return { email: u.email, id: u.id, created: num(u.created), credits: e ? num(e.credits) : 0, premium_until: e && num(e.prem) > Date.now() ? new Date(num(e.prem)).toISOString() : null, banned: !!(e && num(e.ban)), free: e ? num(e.free) : FREE_REVIEWS, note: e ? e.note || '' : '' }; }) });
+};
+// Сводка: всего пользователей, регистрации за 30 дней, активные, Premium, лист ожидания
+actions.admin_stats = async (b, me) => {
+  needAdmin(me);
+  const now = Date.now(), since = now - 30 * 864e5, P = (t) => ({ $t: TypedValues.uint64(t) });
+  const cnt = async (sql, t) => num((await q(sql, t == null ? undefined : P(t)))[0].c);
+  const total = await cnt('SELECT COUNT(*) AS c FROM users;');
+  const reg = await q('DECLARE $t AS Uint64; SELECT (created + 10800000) / 86400000 AS d, COUNT(*) AS c FROM users WHERE created >= $t GROUP BY (created + 10800000) / 86400000 AS d;', P(since));
+  const act = (ms) => cnt('DECLARE $t AS Uint64; SELECT COUNT(*) AS c FROM data WHERE upd >= $t;', now - ms);
+  const [a1, a7, a30] = [await act(864e5), await act(7 * 864e5), await act(30 * 864e5)];
+  const prem = await cnt('DECLARE $t AS Uint64; SELECT COUNT(*) AS c FROM ent WHERE prem > $t;', now);
+  const wl = await cnt('SELECT COUNT(*) AS c FROM waitlist;');
+  return ok({ total, days: fillDays(reg.map((r) => ({ d: num(r.d), c: num(r.c) })), now, 30), active: { d1: a1, d7: a7, d30: a30 }, premium: prem, waitlist: wl, at: now });
 };
 // Выдать/изменить: credits (+/-), premium_days (+), ban (true/false), note, set_free
 actions.admin_grant = async (b, me) => {

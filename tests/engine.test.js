@@ -329,3 +329,14 @@ test('drillQueue: режимы выбирают только нужный тип
   only('gap', 'gap'); only('order', 'order'); const pq = only('pair', 'pair'); assert.equal(pq.length, 3);
   assert.ok(E.drillQueue(D, 5, 12).some((x) => x.type === 'gap') && E.drillQueue(D, 5, 12, null, 'mix').some((x) => x.type === 'pair'));
 });
+
+test('колода: у карточек с ex2 три разных примера, и в каждом есть выделенная форма', () => {
+  const deck = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '../app/data/deck.json'), 'utf8'));
+  const withMore = deck.filter((c) => c.ex2 && c.ex2.length);
+  assert.ok(withMore.length >= 2576);
+  withMore.forEach((c) => {
+    const all = [c.ex].concat(c.ex2);
+    assert.equal(new Set(all.map((s) => s.toLowerCase())).size, all.length, c.t + ': повтор предложения');
+    all.forEach((s) => assert.equal((s.match(/\[\[[^\[\]]+\]\]/g) || []).length, 1, c.t + ': нужна ровно одна форма [[…]]'));
+  });
+});
