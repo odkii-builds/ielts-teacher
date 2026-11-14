@@ -269,6 +269,8 @@
   const exIdx = (c) => (c.ex2 && c.ex2.length ? (c.rv || 0) % (1 + c.ex2.length) : 0);
   const exOf = (c) => exAll(c)[exIdx(c)];
   const isWord = (c) => !!(c && c.t && c.ex);
+  /** Слово, которого касались хоть как-то: показано, выучено, повторялось, закреплялось. */
+  const touched = (c) => isWord(c) && !!(c.seen || c.mastered || c.reps > 0 || c.lv > 0 || c.ls || c.fs || c.due || c.rv > 0);
   const MARK = /\[\[([^\[\]]+)\]\]/;
   const plain = (ex) => String(ex).replace(/\[\[([^\[\]]+)\]\]/g, '$1');
   /** Режим показа: flip → mcq → write по мере роста уровня; выученные повторяются обычной карточкой. */
@@ -409,12 +411,13 @@
   /** Очередь мини-заданий: 3 раунда (вставь слово → выбери по переводу/слову → впиши), слабые карточки первыми. */
   function drillQueue(cards, today, max, rnd, mode) {
     rnd = rnd || Math.random; mode = mode || 'mix';
-    const ok = cards.filter((c) => isWord(c) && c.seen);
-    const todays = ok.filter((c) => c.ls === today).sort((a, b) => (a.lv || 0) - (b.lv || 0));
-    const rest = ok.filter((c) => c.ls !== today).sort((a, b) => (a.lv || 0) - (b.lv || 0));
-    const pick = todays.concat(rest).slice(0, max);
+    // В пуле все слова, которых хоть как-то касались (в т.ч. выученные). Первыми идут давно не повторявшиеся,
+    // слова, уже прогнанные сегодня, уходят в конец: раунды не крутят одни и те же слова.
+    const rr = new Map(); cards.forEach((c) => rr.set(c.id, rnd()));
+    const ok = cards.filter(touched).sort((a, b) => ((a.ls === today ? 1 : 0) - (b.ls === today ? 1 : 0)) || String(a.ls || '').localeCompare(String(b.ls || '')) || (a.lv || 0) - (b.lv || 0) || rr.get(a.id) - rr.get(b.id));
+    const pick = ok.slice(0, max);
     if (mode === 'gap') return shuffled(pick, rnd).map((c) => ({ id: c.id, type: 'gap' }));
-    if (mode === 'order') return shuffled(todays.concat(rest).filter((c) => orderChunks(c, rnd)).slice(0, 8), rnd).map((c) => ({ id: c.id, type: 'order' }));
+    if (mode === 'order') return shuffled(ok.filter((c) => orderChunks(c, rnd)).slice(0, 8), rnd).map((c) => ({ id: c.id, type: 'order' }));
     if (mode === 'pair') {
       const sh0 = shuffled(pick.filter((c) => c.ru), rnd), out = [];
       for (let i = 0; i + 4 <= sh0.length; i += 4) out.push({ id: sh0[i].id, ids: sh0.slice(i, i + 4).map((c) => c.id), type: 'pair' });
@@ -698,6 +701,6 @@
     return 3.5;
   }
 
-  const api = { orderChunks, pairSet, ctxParts, findCtx, exAll, exIdx, exOf, SK, PHASES, pd, fmt, addDays, daysBetween, weekNo, phaseFor, errorSeverity, weights, dayTasks, newCard, dueCards, review, overall, rawToBand, isWord, plain, lrMode, lrRate, master, unmaster, reviewMastered, contexts, buildSession, pickFresh, GROUPS, GROUP_LABEL, MAIN_GROUPS, group, inGroup, choices, typeCheck, hintOf, drillQueue, form, pickNext, mcq, checkSentence, GAPS, analyseText, checkAnswer, parseFeedback, errDrillable, normFix, errInit, errDue, errCheck, errRate, EI, CEF, cefOf, cefRank, PL_GRAM, placementItems, placementScore, placementSkills, studyTick, STUDY_IDLE, sentenceTypes };
+  const api = { touched, orderChunks, pairSet, ctxParts, findCtx, exAll, exIdx, exOf, SK, PHASES, pd, fmt, addDays, daysBetween, weekNo, phaseFor, errorSeverity, weights, dayTasks, newCard, dueCards, review, overall, rawToBand, isWord, plain, lrMode, lrRate, master, unmaster, reviewMastered, contexts, buildSession, pickFresh, GROUPS, GROUP_LABEL, MAIN_GROUPS, group, inGroup, choices, typeCheck, hintOf, drillQueue, form, pickNext, mcq, checkSentence, GAPS, analyseText, checkAnswer, parseFeedback, errDrillable, normFix, errInit, errDue, errCheck, errRate, EI, CEF, cefOf, cefRank, PL_GRAM, placementItems, placementScore, placementSkills, studyTick, STUDY_IDLE, sentenceTypes };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Engine = api;
 })(typeof window !== 'undefined' ? window : globalThis);

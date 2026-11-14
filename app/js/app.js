@@ -395,6 +395,7 @@
     const uniq = new Map(); p.cards.forEach((c) => { const o = uniq.get(c.id); if (!o || (c.seen && !o.seen)) uniq.set(c.id, c); });
     p.cards = Array.from(uniq.values()).filter((c) => c.f || c.t || byId[c.id]);
     if (p.cards.length !== before) changed = true;
+    p.cards.forEach((c) => { if (!c.seen && E.touched(c)) { c.seen = true; changed = true; } }); // слова, которых касались, но без отметки «показано»
     p.cards.forEach((c) => { const d = byId[c.id]; if (d) { c.t = d.t; c.ru = d.ru; c.ex = d.ex; c.pos = d.pos; c.dom = d.dom; c.cef = d.cef; c.src = d.src; c.acl = d.acl; c.rec = d.rec; c.exr = d.exr; c.ex2 = d.ex2; } });
     const ids = new Set(p.cards.map((c) => c.id));
     DECK.forEach((d) => { if (!ids.has(d.id)) p.cards.push(Object.assign(E.newCard('', '', d.id), { t: d.t, ru: d.ru, ex: d.ex, pos: d.pos, dom: d.dom, cef: d.cef, src: d.src, acl: d.acl, rec: d.rec, exr: d.exr, ex2: d.ex2, lv: 0 })); });

@@ -340,3 +340,16 @@ test('колода: у карточек с ex2 три разных пример�
     all.forEach((s) => assert.equal((s.match(/\[\[[^\[\]]+\]\]/g) || []).length, 1, c.t + ': нужна ровно одна форма [[…]]'));
   });
 });
+
+test('drillQueue: раунды обходят все слова, выученные тоже, а прогнанные сегодня идут в конец', () => {
+  const cards = [];
+  for (let i = 0; i < 60; i++) cards.push({ id: 'w' + i, t: 'w' + i, ru: 'р' + i, ex: 'A [[w' + i + ']] here.', seen: true, lv: 1, ls: '2026-11-01' });
+  for (let i = 0; i < 12; i++) cards.push({ id: 'm' + i, t: 'm' + i, ru: 'м' + i, ex: 'A [[m' + i + ']] here.', seen: true, mastered: true, lv: 5, ls: '2026-10-01' });
+  cards.push({ id: 'old', t: 'old', ru: 'ст', ex: 'An [[old]] one.', seen: false, reps: 2, ls: '2026-09-01' }); // касались, но без seen
+  const cov = new Set(), t = '2026-11-14';
+  for (let r = 0; r < 6; r++) { const q = E.drillQueue(cards, t, 12, null, 'gap'); const ids = q.map((x) => x.id); assert.equal(new Set(ids).size, ids.length); ids.forEach((id) => { cov.add(id); const c = cards.find((x) => x.id === id); c.ls = t; c.lv += 1; }); }
+  assert.equal(cov.size, 72); // 6 раундов по 12 — ни одного повтора
+  assert.ok(cov.has('old') && cov.has('m0'));
+  const next = E.drillQueue(cards, t, 12, null, 'gap'); // все уже сегодня: очередь не пустеет
+  assert.equal(next.length, 12);
+});
