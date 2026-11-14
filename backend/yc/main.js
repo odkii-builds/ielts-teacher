@@ -8,21 +8,35 @@ Mod._load = function (r, ...a) {
 };
 /* Права, платные проверки и админ-действия поверх index.js. Точка входа функции: main.handler */
 const base = require('./index');
-const { q, verify, getUser, ok, bad, TypedValues, E } = base._;
+const { q, db, verify, getUser, ok, bad, TypedValues, TypedData, E } = base._;
 
 // ---------- Права и платные возможности (источник истины — сервер) ----------
 const ADMINS = (E.ADMIN_EMAILS || '').toLowerCase().split(',').map((x) => x.trim()).filter(Boolean);
 const isAdmin = (me) => !!me && ADMINS.includes(String(me.email).toLowerCase());
 const FREE_REVIEWS = 1, PREMIUM_DAILY = 10;
 const num = (x) => (x && x.toNumber ? x.toNumber() : Number(x || 0));
-async function getEnt(id) {
-  const r = await q('DECLARE $i AS Utf8; SELECT credits, prem, ban, free, day, dcount, note FROM ent WHERE id = $i;', { $i: TypedValues.utf8(id) });
+// Транзакция с полной изоляцией: чтение и запись видят один снимок; при конфликте с параллельным запросом повторяем.
+const isConflict = (e) => /abort|lock|conflict|overload|TLI|serializ/i.test(String((e && (e.constructor && e.constructor.name)) || '') + ' ' + String((e && e.message) || ''));
+async function inTx(fn) {
+  for (let i = 0; ; i++) {
+    try {
+      const d = await db();
+      return await d.tableClient.withSession(async (s) => {
+        const t = await s.beginTransaction({ serializableReadWrite: {} }), txId = t.id;
+        const run = async (text, params) => { const res = await s.executeQuery(text, params || {}, { txId }); return res.resultSets && res.resultSets[0] ? TypedData.createNativeObjects(res.resultSets[0]) : []; };
+        try { const out = await fn(run); await s.commitTransaction({ txId }); return out; } catch (e) { try { await s.rollbackTransaction({ txId }); } catch (e2) { /* ignore */ } throw e; }
+      });
+    } catch (e) { if (i < 4 && !Number.isInteger(e.code) && isConflict(e)) continue; throw e; }
+  }
+}
+async function getEnt(id, run = q) {
+  const r = await run('DECLARE $i AS Utf8; SELECT credits, prem, ban, free, day, dcount, note FROM ent WHERE id = $i;', { $i: TypedValues.utf8(id) });
   const e = r[0];
   return e ? { credits: num(e.credits), prem: num(e.prem), ban: num(e.ban), free: num(e.free), day: num(e.day), dcount: num(e.dcount), note: e.note || '' }
     : { credits: 0, prem: 0, ban: 0, free: FREE_REVIEWS, day: 0, dcount: 0, note: '', fresh: true };
 }
-async function putEnt(id, e) {
-  await q('DECLARE $i AS Utf8; DECLARE $c AS Int64; DECLARE $p AS Uint64; DECLARE $b AS Uint8; DECLARE $f AS Int64; DECLARE $d AS Uint64; DECLARE $n AS Uint64; DECLARE $t AS Utf8; UPSERT INTO ent (id, credits, prem, ban, free, day, dcount, note) VALUES ($i, $c, $p, $b, $f, $d, $n, $t);',
+async function putEnt(id, e, run = q) {
+  await run('DECLARE $i AS Utf8; DECLARE $c AS Int64; DECLARE $p AS Uint64; DECLARE $b AS Uint8; DECLARE $f AS Int64; DECLARE $d AS Uint64; DECLARE $n AS Uint64; DECLARE $t AS Utf8; UPSERT INTO ent (id, credits, prem, ban, free, day, dcount, note) VALUES ($i, $c, $p, $b, $f, $d, $n, $t);',
     { $i: TypedValues.utf8(id), $c: TypedValues.int64(e.credits), $p: TypedValues.uint64(e.prem), $b: TypedValues.uint8(e.ban), $f: TypedValues.int64(e.free), $d: TypedValues.uint64(e.day), $n: TypedValues.uint64(e.dcount), $t: TypedValues.utf8(String(e.note || '').slice(0, 300)) });
 }
 const today = () => Math.floor(Date.now() / 864e5);
@@ -30,7 +44,8 @@ const view = (e, me) => ({ credits: e.credits, premium_until: e.prem > Date.now(
 // Списание одной ИИ-проверки. Порядок: бан -> Premium (лимит в сутки) -> оплаченные/выданные -> бесплатная первая.
 // Вызывается сервером перед обращением к ИИ; клиенту доверять нельзя.
 async function spend(id) {
-  const e = await getEnt(id);
+  return inTx(async (run) => {
+  const e = await getEnt(id, run);
   if (e.ban) throw bad('Доступ к ИИ отключён', 403);
   const t = today();
   if (e.prem > Date.now()) {
@@ -40,11 +55,12 @@ async function spend(id) {
   } else if (e.credits > 0) e.credits--;
   else if (e.free > 0) e.free--;
   else throw bad('Нет доступных проверок', 402);
-  await putEnt(id, e);
+  await putEnt(id, e, run);
   return e;
+  });
 }
-async function refund(id) { const e = await getEnt(id); if (e.dcount > 0 && e.day === today()) e.dcount--; else e.credits++; await putEnt(id, e); }
-module.exports.spend = spend; module.exports.refund = refund;
+async function refund(id) { return inTx(async (run) => { const e = await getEnt(id, run); if (e.dcount > 0 && e.day === today()) e.dcount--; else e.credits++; await putEnt(id, e, run); }); }
+module.exports.spend = spend; module.exports.refund = refund; module.exports.inTx = inTx;
 
 const actions = {};
 actions.me = async (b, me) => ok({ ent: view(await getEnt(me.id), me) });
@@ -61,15 +77,17 @@ actions.admin_grant = async (b, me) => {
   needAdmin(me);
   const u = await getUser(String(b.email || '').trim().toLowerCase());
   if (!u) throw bad('Пользователь не найден', 404);
-  const e = await getEnt(u.id);
+  return inTx(async (run) => {
+  const e = await getEnt(u.id, run);
   if (Number.isFinite(b.credits)) e.credits = Math.max(0, e.credits + Math.trunc(b.credits));
   if (Number.isFinite(b.premium_days)) e.prem = Math.max(Date.now(), e.prem) + Math.trunc(b.premium_days) * 864e5;
   if (b.premium_days === 0 && b.clear_premium) e.prem = 0;
   if (typeof b.ban === 'boolean') e.ban = b.ban ? 1 : 0;
   if (Number.isFinite(b.free)) e.free = Math.max(0, Math.trunc(b.free));
   if (typeof b.note === 'string') e.note = b.note;
-  await putEnt(u.id, e);
+  await putEnt(u.id, e, run);
   return ok({ ent: view(e, null) });
+  });
 };
 
 module.exports.handler = async (event) => {

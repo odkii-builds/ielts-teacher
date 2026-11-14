@@ -86,24 +86,28 @@ async function legacyLogin(email, password) {
 const ok = (o) => ({ ok: true, ...o });
 const bad = (m, c) => { const e = new Error(m); e.code = c || 400; return e; };
 
+const policy = require('./emailpolicy');
 const actions = {
   async signup(b) {
-    const email = String(b.email || '').trim().toLowerCase(), pw = String(b.password || '');
-    if (!/^[^@\s]{1,64}@[^@\s]{1,255}\.[^@\s]{2,}$/.test(email)) throw bad('Некорректный email');
+    const pe = policy.check(b.email), pw = String(b.password || '');
+    if (!pe.ok) throw bad(pe.msg);
+    const email = pe.canon;
     if (pw.length < 6 || pw.length > 200) throw bad('Пароль: от 6 символов');
-    if (await getUser(email)) throw bad('Этот email уже зарегистрирован. Нажмите «Войти»', 409);
-    const legacy = await legacyLogin(email, pw);
+    if ((await getUser(email)) || (pe.raw !== email && (await getUser(pe.raw)))) throw bad('Этот email уже зарегистрирован. Нажмите «Войти»', 409);
+    const legacy = await legacyLogin(pe.raw, pw);
     const u = legacy || { id: crypto.randomUUID(), email, pass: hash(pw) };
     if (!legacy) await putUser(u);
-    return ok({ token: sign(u), user: { id: u.id, email } });
+    return ok({ token: sign(u), user: { id: u.id, email: u.email } });
   },
   async login(b) {
     const email = String(b.email || '').trim().toLowerCase(), pw = String(b.password || '');
     if (throttled(email)) throw bad('Слишком много попыток. Подождите 10 минут', 429);
+    const pe = policy.check(email);
     let u = await getUser(email);
+    if (!u && pe.ok && pe.canon !== email) u = await getUser(pe.canon);
     if (u) { if (!check(pw, u.pass)) u = null; } else u = await legacyLogin(email, pw);
     if (!u) { fail(email); throw bad('Invalid login credentials', 401); }
-    return ok({ token: sign(u), user: { id: u.id, email } });
+    return ok({ token: sign(u), user: { id: u.id, email: u.email } });
   },
   async pull(b, me) { return ok({ row: await getData(me.id) }); },
   async push(b, me) {
@@ -131,4 +135,4 @@ module.exports.handler = async (event) => {
   }
 };
 
-module.exports._ = { q, verify, getUser, ok, bad, TypedValues, E };
+module.exports._ = { q, db, verify, getUser, ok, bad, TypedValues, TypedData, E };
