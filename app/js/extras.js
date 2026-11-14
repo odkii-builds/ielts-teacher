@@ -21,19 +21,33 @@
 
   // ---------- баннер набора в клуб ----------
   function bannerHtml() {
-    return '<div class="nbanner" id="nbn"><button class="nb-x" id="nbx" aria-label="Скрыть">×</button><img class="nb-i" src="img/club.jpg" alt="IELTS Teacher Club" width="768" height="512">' +
-      '<div class="nb-c"><span class="nb-tag">Набор открыт · бесплатно</span><b class="nb-t">Ищем ' + CLUB.spots + ' человека в клуб</b><span class="nb-s">Комьюнити и ручная проверка работ. Отбор бесплатный.</span>' +
-      '<button class="btn sm nb-b" id="nbo">Как попасть</button></div></div>';
+    const inq = S().wl;
+    return '<div class="nbanner" id="nbn"><button class="nb-x" id="nbx" aria-label="Скрыть">×</button><img class="nb-i" src="img/club.jpg" alt="IELTS Teacher Club" width="768" height="512" style="filter:saturate(.75) brightness(.85)">' +
+      '<div class="nb-c"><span class="nb-tag">Набор закрыт</span><b class="nb-t">' + (inq ? 'Вы в листе ожидания' : 'Запишись в лист ожидания') + '</b><span class="nb-s">' + (inq ? 'Дадим знать, когда откроем места.' : 'Места заняты. Напишем первым, когда откроем следующий набор.') + '</span>' +
+      '<button class="btn sm nb-b" id="nbo" style="' + (inq ? '' : 'background:linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2);color:#fff;') + 'width:100%">' + (inq ? 'Вы в очереди ✓' : 'Встать в очередь') + '</button></div></div>';
   }
   function clubSheet() {
-    const p = C().P(); const lvl = p.placement ? p.placement.cefr + (p.placement.band ? ' (≈ band ' + p.placement.band + ')' : '') : '';
-    const goal = p.target && p.target.overall ? p.target.overall : '';
-    const form = 'Привет! Хочу в IELTS Teacher Club.\n1. Мой уровень / результат IELTS сейчас: ' + (lvl || '…') + '\n2. Цель по IELTS: ' + (goal || '…') + '\n3. Куда хочу поступать: …\n4. В каком году: …';
-    C().openSheet('<h2 style="margin:0 0 6px">Как попасть в клуб</h2><p class="mut" style="margin:0 0 12px">Отбор бесплатный. Напиши мне в Telegram и коротко расскажи:</p>' +
-      '<div class="list"><div class="rowi"><span class="grow">Свой уровень английского или результат IELTS</span></div><div class="rowi"><span class="grow">Куда хочешь поступать</span></div><div class="rowi"><span class="grow">В каком году</span></div></div>' +
-      '<p class="mut" style="margin:12px 0">Шаблон уже подставил данные из твоего профиля — проверь и допиши.</p>' +
-      '<div class="stack"><button class="btn" id="ncp">Скопировать шаблон</button><a class="btn p" style="display:grid;place-items:center;text-decoration:none" href="https://t.me/odkii" target="_blank" rel="noopener">Написать в Telegram</a></div>',
-    (el) => { el.querySelector('#ncp').onclick = () => copy(form, 'Шаблон скопирован'); });
+    const mask = (em) => { const m = /^(.)[^@]*(@.+)$/.exec(String(em || '')); return m ? m[1] + '***' + m[2] : ''; };
+    const row = (t, d) => '<div class="rowi" style="align-items:flex-start"><span class="grow"><b>' + t + '</b><div class="mut" style="margin-top:2px;font-size:13px">' + d + '</div></span></div>';
+    const info = '<div class="list">' + row('Еженедельные созвоны', 'Живое общение с участниками раз в неделю') + row('Ежедневные цели и чек-ины', 'Каждый день фиксируешь план и результат, не бросаешь на полпути') + row('Ручная проверка работ', 'Эссе и письма смотрит человек, а не только программа') + row('Темы в группе', 'Отдельные ветки для эссе, материалов и чек-инов') + row('Отбор по целям', 'Берём тех, у кого есть конкретная цель по IELTS') + '</div>';
+    const head = '<h2 style="margin:0 0 6px">IELTS Teacher Club</h2><p class="mut" style="margin:0 0 12px">Небольшая закрытая группа для тех, кто готовится к IELTS всерьёз. Отбор бесплатный.</p>' + info;
+    const draw = (st) => {
+      let body;
+      if (st && st.joined) body = '<div class="card" style="margin-top:14px"><b>Вы в очереди · №' + st.pos + ' из ' + st.total + '</b><div class="mut" style="margin-top:4px">Когда откроем места, дадим знать в приложении и на e-mail аккаунта' + (st.email ? ' (' + esc(st.email) + ')' : '') + '.</div></div><div class="stack" style="margin-top:12px"><button class="btn" id="nwc">Закрыть</button></div>';
+      else if (st && st.err) body = '<p class="mut" style="margin:14px 0 8px">' + esc(st.err) + '</p><div class="stack"><button class="btn p" id="nwj">Попробовать ещё раз</button></div>';
+      else body = '<p class="mut" style="margin:14px 0 8px">Сейчас все места заняты. Очередь даёт приоритет: места следующего набора мы сначала предложим вам. Нажимая кнопку, вы соглашаетесь получить сообщение об открытии набора.</p><div class="stack"><button class="btn p" id="nwj" style="background:linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2);color:#fff">Встать в очередь</button></div>';
+      C().openSheet(head + body, (el) => {
+        const j = el.querySelector('#nwj'), c = el.querySelector('#nwc');
+        if (c) c.onclick = () => C().closeSheet();
+        if (j) j.onclick = async () => {
+          j.disabled = true; j.textContent = 'Записываю…';
+          try { const r = await window.Cloud.clubWait(true); S().wl = 1; C().save(); const u = await window.Cloud.session(); draw(Object.assign({ email: u ? mask(u.user.email) : '' }, r)); }
+          catch (er) { draw({ err: /Нет связи/.test(er.message) ? 'Нет связи. Проверьте интернет и попробуйте ещё раз.' : 'Не получилось записаться. Попробуйте чуть позже.' }); }
+        };
+      });
+    };
+    draw(null);
+    if (S().wl) window.Cloud.clubWait(false).then(async (r) => { if (r.joined) { const u = await window.Cloud.session(); draw(Object.assign({ email: u ? mask(u.user.email) : '' }, r)); } }).catch(() => {});
   }
   function bindBanner(v) {
     const b = v.querySelector('#nbn'); if (!b) return;
