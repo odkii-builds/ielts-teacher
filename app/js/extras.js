@@ -9,7 +9,7 @@
   const ST = { unk: 'Не знаю значение', pas: 'Понимаю, но не использую', str: 'Не понимаю конструкцию' };
   const DST = { use: 'Знаю и использую', some: 'Иногда использую', pas: 'Понимаю, но не употребляю', fgt: 'Забыл', new: 'Вижу впервые', unsure: 'Затрудняюсь' };
   const KIND = { t2: 'Task 2', t1: 'Task 1', gt: 'Письмо' };
-  const S = () => { const p = C().P(); const n = p.nx = p.nx || {}; n.marks = n.marks || []; n.diag = n.diag || {}; n.hide = n.hide || 0; return n; };
+  const S = () => { const p = C().P(); const n = p.nx = p.nx || {}; n.marks = n.marks || []; n.diag = n.diag || {}; n.hideW = n.hideW || 0; return n; };
   const copy = (t, msg) => {
     const ok = () => C().toast(msg || 'Скопировано');
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, () => C().toast('Не удалось скопировать'));
@@ -52,7 +52,7 @@
   function bindBanner(v) {
     const b = v.querySelector('#nbn'); if (!b) return;
     v.querySelector('#nbo').onclick = clubSheet;
-    v.querySelector('#nbx').onclick = () => { S().hide = Date.now() + 7 * 864e5; C().save(); b.remove(); };
+    v.querySelector('#nbx').onclick = () => { S().hideW = Date.now() + 7 * 864e5; C().save(); b.remove(); };
   }
 
   // ---------- Reading: выделил слово — оно попало в карточки на повторение ----------
@@ -167,7 +167,7 @@
 
   N.after = function (v) {
     const h = location.hash || '#today'; const p = C() && C().P(); if (!p) return; const s = S();
-    if (/^#(today)?$/.test(h) && Date.now() > s.hide) { const hd = v.querySelector('.head'); if (hd) { hd.insertAdjacentHTML('afterend', bannerHtml()); bindBanner(v); } }
+    if (/^#(today)?$/.test(h) && Date.now() > s.hideW) { const hd = v.querySelector('.head'); if (hd) { hd.insertAdjacentHTML('afterend', bannerHtml()); bindBanner(v); } }
     if (/^#read\//.test(h)) decorate(v); else bar.hidden = true;
   };
 })();
