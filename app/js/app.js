@@ -1017,17 +1017,18 @@
   // ---------- Настройки ----------
   function viewSet() {
     const p = P();
-    let h = head('Настройки', esc(user ? user.email : '')) + '<div class="list"><div class="rowi"><span class="grow">Синхронизация</span><span class="mut" id="sst">' + ({ ok: 'всё сохранено', pending: 'сохраняю…', error: 'нет связи' }[syncState]) + '</span></div><button class="rowi" id="regen"><span class="grow">Пересоздать план на сегодня</span></button><button class="rowi" id="exp"><span class="grow">Скачать копию данных</span></button><button class="rowi" id="out"><span class="grow" style="color:#dc2626">Выйти</span></button></div>';
+    const dot = { ok: '#16a34a', pending: '#d97706', error: '#dc2626' }[syncState] || '#16a34a';
+    let h = head('Настройки', esc(user ? user.email : '')) + '<div class="sl">Аккаунт</div><div class="list"><div class="rowi"><span class="grow">Синхронизация</span><span class="mut" id="sst"><i class="sd" style="background:' + dot + '"></i>' + ({ ok: 'всё сохранено', pending: 'сохраняю…', error: 'нет связи' }[syncState]) + '</span></div><button class="rowi" id="regen"><span class="grow">Пересоздать план на сегодня</span></button><button class="rowi" id="exp"><span class="grow">Скачать копию данных</span></button><button class="rowi" id="out"><span class="grow" style="color:#dc2626">Выйти</span></button></div>';
     const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    if (!standalone) h += '<div class="list" style="margin-top:12px"><button class="rowi" id="inst"><span class="grow">Установить как приложение<div class="mut" style="margin-top:2px">' + (ios ? 'Safari → Поделиться → На экран «Домой»' : 'Иконка на главном экране, работает офлайн') + '</div></span></button></div>';
-    h += '<div class="list" style="margin-top:12px"><div class="rowi"><span class="grow">Уровень карточек<div class="mut" style="margin-top:2px">Сейчас: ' + userCef(p) + ' — слова на ступень выше</div></span><select id="cefm">' + ['auto', 'B1', 'B2', 'C1', 'C2'].map((v) => '<option value="' + v + '"' + ((p.cefMode || 'auto') === v ? ' selected' : '') + '>' + (v === 'auto' ? 'Авто' : v) + '</option>').join('') + '</select></div></div>';
-    h += '<div class="list" style="margin-top:12px"><button class="rowi" id="retest"><span class="grow">Пройти входной тест заново<div class="mut" style="margin-top:2px">' + (p.placement ? 'Сейчас: ' + esc(p.placement.cefr) + ' · ' + esc(p.placement.date) : 'Определит уровень и подберёт задания') + '</div></span>' + ico('chev', 'chev') + '</button></div>';
-    h += '<div class="list" style="margin-top:12px"><button class="rowi" data-gl="1"><span class="grow">Что значат слова и буквы<div class="mut" style="margin-top:2px">Band, задания 1 и 2, пробный экзамен, сочетания слов…</div></span>' + ico('chev', 'chev') + '</button></div>';
-    h += '<h3>Профиль</h3>' + profileForm(p, 'Сохранить');
+    if (!standalone) h += '<div class="list" style="margin-top:10px"><button class="rowi" id="inst"><span class="grow">Установить как приложение<div class="mut" style="margin-top:2px">' + (ios ? 'Safari → Поделиться → На экран «Домой»' : 'Иконка на главном экране, работает офлайн') + '</div></span></button></div>';
+    h += '<div class="sl">Учёба</div><div class="list"><div class="rowc"><b>Уровень карточек</b><div class="mut" style="margin:2px 0 12px">Сейчас: ' + userCef(p) + ' — слова на ступень выше</div>' + seg('cefm', [['auto', 'Авто'], ['B1', 'B1'], ['B2', 'B2'], ['C1', 'C1'], ['C2', 'C2']], p.cefMode || 'auto') + '</div>';
+    h += '<button class="rowi" id="retest"><span class="grow">Пройти входной тест заново<div class="mut" style="margin-top:2px">' + (p.placement ? 'Сейчас: ' + esc(p.placement.cefr) + ' · ' + esc(p.placement.date) : 'Определит уровень и подберёт задания') + '</div></span>' + ico('chev', 'chev') + '</button>';
+    h += '<button class="rowi" data-gl="1"><span class="grow">Что значат слова и буквы<div class="mut" style="margin-top:2px">Band, задания 1 и 2, пробный экзамен, сочетания слов…</div></span>' + ico('chev', 'chev') + '</button></div>';
+    h += '<div class="sl">Профиль</div>' + profileForm(p, 'Сохранить');
     paint(h);
     $('#retest').onclick = () => viewPlacement((r) => { p.placement = r; p.skills = E.placementSkills(r.band); p.days = {}; syncDeck(p); sess = null; save(); toast('Уровень: ' + r.cefr); location.hash = '#set'; route(); });
-    $('#cefm').onchange = () => { p.cefMode = $('#cefm').value; syncDeck(p); sess = null; save(); toast('Уровень карточек: ' + userCef(p)); viewSet(); };
+    bindSeg('cefm', (v) => { p.cefMode = v; syncDeck(p); sess = null; save(); toast('Уровень карточек: ' + userCef(p)); viewSet(); });
     const ib = $('#inst'); if (ib) ib.onclick = async () => { if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; } else toast(ios ? 'Safari → Поделиться → На экран «Домой»' : 'Меню браузера → Установить приложение'); };
     bindSeg('f_module');
     $('#pf').onsubmit = (e) => {
