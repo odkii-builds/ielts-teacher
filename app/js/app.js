@@ -26,6 +26,7 @@
     errors: '<path d="M5 21V4m0 0h11l-2 4 2 4H5"/>',
     more: '<circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>',
     left: '<path d="M15 5l-7 7 7 7"/>',
     right: '<path d="M9 5l7 7-7 7"/>',
     chev: '<path d="M9 5l7 7-7 7"/>',
@@ -97,6 +98,8 @@
   }
   const segVal = (id) => $('#' + id).dataset.v;
   const head = (title, sub, acts) => '<div class="head"><div><h1>' + esc(title) + '</h1>' + (sub ? '<p class="sub">' + sub + '</p>' : '') + '</div><div class="acts">' + (acts || '') + '</div></div>';
+  const dtopH = (i, n) => '<div class="dtop"><span class="dcnt">' + (i + 1) + ' из ' + n + '</span><button class="ib" id="dr_x" aria-label="Выйти">' + ico('x') + '</button></div>';
+  const dh = (t) => '<h2 class="dh">' + esc(t) + '</h2>';
   const plusBtn = (id, label) => '<button class="ib" id="' + id + '" aria-label="' + esc(label) + '">' + ico('plus') + '</button>';
   function paint(html, animate) {
     document.body.classList.remove('drilling');
@@ -538,14 +541,14 @@
     document.body.classList.add('drilling');
     const c = p.cards.find((x) => x.id === it.id);
     const ent = it.shown ? '' : ' enter'; it.shown = true;
-    const dtop = '<div class="dtop"><span class="mut">' + (d.i + 1) + ' из ' + d.q.length + '</span><button class="link" id="dr_x">Выйти</button></div>';
+    const dtop = dtopH(d.i, d.q.length);
     const bindX = () => { $('#dr_x').onclick = () => { cst.tab = 'learn'; cst.dr = null; viewCards(); }; };
     if (it.type === 'pair') {
       if (!it.ps) { it.ps = E.pairSet(it.ids.map((id) => p.cards.find((x) => x.id === id)).filter(Boolean)); it.mt = {}; it.sel = null; }
       if (!it.ps) { d.i += 1; drawDrill(); return; }
       const ps = it.ps;
       const btn = (x, side) => '<button class="opt" data-s="' + side + '" data-id="' + esc(x.id) + '">' + esc(x.text).replace(/ (\S{1,3})$/, '\u00a0$1') + '</button>';
-      body.innerHTML = '<div class="drill' + ent + '">' + dtop + '<div class="mut" style="text-align:center;margin:6px 0 12px">Сопоставь слова и переводы</div><div class="pair">' + ps.left.map((l, i) => btn(l, 'l') + btn(ps.right[i], 'r')).join('') + '</div><div id="pnext" style="margin-top:12px;min-height:52px"></div></div>';
+      body.innerHTML = '<div class="drill' + ent + '">' + dtop + dh('Сопоставь слова и переводы') + '<div class="pair">' + ps.left.map((l, i) => btn(l, 'l') + btn(ps.right[i], 'r')).join('') + '</div><div id="pnext" style="margin-top:12px;min-height:52px"></div></div>';
       bindX();
       // всё обновляется на месте, без перерисовки: ничего не прыгает
       const refresh = () => {
@@ -570,7 +573,7 @@
       const line = it.pl.map((i) => '<button class="opt' + (answered ? (it.res === 'ok' ? ' ok' : ' bad') : '') + '" data-r="' + i + '"' + (answered ? ' disabled' : '') + '>' + esc(o.blocks[i]) + '</button>').join('');
       const pool = o.blocks.map((b, i) => '<button class="opt" data-a="' + i + '"' + (it.pl.includes(i) || answered ? ' style="visibility:hidden" disabled' : '') + '>' + esc(b) + '</button>').join('');
       const hint = String(c.exr || '').replace(/\[\[|\]\]/g, '') || c.ru;
-      body.innerHTML = '<div class="drill' + ent + '">' + dtop + '<div class="flash" style="min-height:0;padding:16px 18px"><small>Собери предложение</small><div style="font-size:16px;color:var(--mut)">' + esc(hint) + '</div></div>' +
+      body.innerHTML = '<div class="drill' + ent + '">' + dtop + dh('Собери предложение') + '<div class="flash" style="min-height:0;padding:16px 18px"><div style="font-size:16px;color:var(--mut)">' + esc(hint) + '</div></div>' +
         '<div class="blkline">' + (line || '<span class="mut">Нажимай на блоки по порядку</span>') + '</div><div class="blks">' + pool + '</div>' +
         (answered ? '<div class="flash back" style="min-height:0;padding:14px 16px;font-size:17px"><div>' + hl(E.exOf(c)) + '</div></div><div style="margin-top:10px"><button class="btn p" id="dr_next">Дальше</button></div>'
           : '<div style="margin-top:12px">' + (it.pl.length === n ? '<button class="btn p" id="dr_ok">Проверить</button>' : '') + (it.pl.length ? '<div style="text-align:center;margin-top:8px"><button class="link" id="dr_rs">Сбросить</button></div>' : '') + '</div>') + '</div>';
@@ -590,10 +593,10 @@
     const tr = (it.h >= 1 || answered) && (it.type === 'gap' || it.type === 'type') ? '<small>перевод: ' + esc(c.ru) + '</small>' : '';
     const lab = esc(E.GROUP_LABEL[E.group(c)]);
     let card = '';
-    if (it.type === 'gap') card = '<div class="flash">' + (tr || '<small>Вставь слово в пропуск</small>') + '<div class="exm">' + (answered ? hl(E.exOf(c)) + trLine(c) : esc(it.m.text)) + '</div></div>' + optsH(it.m);
-    else if (it.type === 'ru2en') card = '<div class="flash"><small>Как это по-английски? · ' + lab + '</small><div class="term" style="font-size:24px">' + esc(c.ru) + '</div>' + (answered ? '<div class="exm" style="font-size:16px">' + hl(E.exOf(c)) + trLine(c) + '</div>' : '') + '</div>' + optsH(it.m);
-    else if (it.type === 'en2ru') card = '<div class="flash"><small>Выбери перевод · ' + lab + '</small><div class="term">' + esc(c.t) + '</div><div class="exm" style="font-size:16px">' + hl(E.exOf(c)) + (answered ? trLine(c) : '') + '</div></div>' + optsH(it.m);
-    else card = '<div class="flash">' + (tr || '<small>Впиши пропущенное слово</small>') + '<div class="exm">' + (answered ? hl(E.exOf(c)) + trLine(c) : esc(String(E.exOf(c)).replace(/\[\[[^\[\]]+\]\]/, '_____'))) + '</div>' + (!answered && it.h >= 2 ? '<div class="mut" style="letter-spacing:2px;margin-top:6px">' + esc(E.hintOf(c)) + '</div>' : '') + (answered && it.res !== 'ok' ? '<div class="mut" style="margin-top:4px">' + (it.res === 'near' ? 'Почти — опечатка' : 'Не совсем') + '</div>' : '') + '</div>' +
+    if (it.type === 'gap') card = dh('Вставь слово в пропуск') + '<div class="flash">' + tr + '<div class="exm">' + (answered ? hl(E.exOf(c)) + trLine(c) : esc(it.m.text)) + '</div></div>' + optsH(it.m);
+    else if (it.type === 'ru2en') card = dh('Как это по-английски?') + '<div class="flash"><small>' + lab + '</small><div class="term" style="font-size:24px">' + esc(c.ru) + '</div>' + (answered ? '<div class="exm" style="font-size:16px">' + hl(E.exOf(c)) + trLine(c) + '</div>' : '') + '</div>' + optsH(it.m);
+    else if (it.type === 'en2ru') card = dh('Выбери перевод') + '<div class="flash"><small>' + lab + '</small><div class="term">' + esc(c.t) + '</div><div class="exm" style="font-size:16px">' + hl(E.exOf(c)) + (answered ? trLine(c) : '') + '</div></div>' + optsH(it.m);
+    else card = dh('Впиши пропущенное слово') + '<div class="flash">' + tr + '<div class="exm">' + (answered ? hl(E.exOf(c)) + trLine(c) : esc(String(E.exOf(c)).replace(/\[\[[^\[\]]+\]\]/, '_____'))) + '</div>' + (!answered && it.h >= 2 ? '<div class="mut" style="letter-spacing:2px;margin-top:6px">' + esc(E.hintOf(c)) + '</div>' : '') + (answered && it.res !== 'ok' ? '<div class="mut" style="margin-top:4px">' + (it.res === 'near' ? 'Почти — опечатка' : 'Не совсем') + '</div>' : '') + '</div>' +
       (it.res == null ? '<input id="dr_in" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="слово" style="margin-top:10px">' : '');
     let act = '';
     if (answered) act = '<button class="btn p" id="dr_next">Дальше</button>';
@@ -601,7 +604,7 @@
       if (it.type === 'type') act += '<button class="btn p" id="dr_ok">Проверить</button>';
       if (it.h < maxH) act += '<div style="text-align:center;margin-top:8px"><button class="link" id="dr_hint">' + (it.type === 'type' && it.h === 1 ? 'Ещё подсказка: первая буква' : 'Взять подсказку') + '</button></div>';
     }
-    body.innerHTML = '<div class="drill enter"><div class="dtop"><span class="mut">' + (d.i + 1) + ' из ' + d.q.length + '</span><button class="link" id="dr_x">Выйти</button></div>' + card + '<div style="margin-top:10px">' + act + '</div></div>';
+    body.innerHTML = '<div class="drill enter">' + dtopH(d.i, d.q.length) + card + '<div style="margin-top:10px">' + act + '</div></div>';
     const fin = (ok) => { if (!ok) { d.bad[c.id] = true; if (!it.retry) d.q.push({ id: c.id, type: it.type, retry: true }); } };
     $$('.opt').forEach((b) => { b.onclick = () => { it.pick = +b.dataset.o; fin(it.pick === it.m.answer); drawDrill(); }; });
     const ok = $('#dr_ok'); if (ok) { const go = () => { const v = $('#dr_in').value.trim(); if (!v) { toast('Впиши слово'); return; } it.res = E.typeCheck(c, v); fin(it.res !== 'bad'); drawDrill(); }; ok.onclick = go; $('#dr_in').onkeydown = (e) => { if (e.key === 'Enter') go(); }; }
