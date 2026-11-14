@@ -92,10 +92,20 @@ const actions = {
     if (!/^[^@\s]{1,64}@[^@\s]{1,255}\.[^@\s]{2,}$/.test(email)) throw bad('Некорректный email');
     if (pw.length < 6 || pw.length > 200) throw bad('Пароль: от 6 символов');
     if (await getUser(email)) throw bad('Этот email уже зарегистрирован. Нажмите «Войти»', 409);
+    const mail = require('./mail');
+    if (mail.required()) await mail.checkCode(email, b.code);
     const legacy = await legacyLogin(email, pw);
     const u = legacy || { id: crypto.randomUUID(), email, pass: hash(pw) };
     if (!legacy) await putUser(u);
     return ok({ token: sign(u), user: { id: u.id, email } });
+  },
+  // Шаг 1 регистрации: отправить код на почту (работает при REQUIRE_CODE=1)
+  async signup_code(b) {
+    const email = String(b.email || '').trim().toLowerCase();
+    if (!/^[^@\s]{1,64}@[^@\s]{1,255}\.[^@\s]{2,}$/.test(email)) throw bad('Некорректный email');
+    if (await getUser(email)) throw bad('Этот email уже зарегистрирован. Нажмите «Войти»', 409);
+    await require('./mail').sendCode(email);
+    return ok({ sent: true });
   },
   async login(b) {
     const email = String(b.email || '').trim().toLowerCase(), pw = String(b.password || '');
