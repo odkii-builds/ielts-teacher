@@ -321,7 +321,7 @@
 
   // ---------- Карточки ----------
   let DECK = [], READ = [], WRITING = null;
-  const trLine = (c) => '<div class="exr">' + (c.exr && E.exIdx(c) === 0 ? hl(c.exr) : '<mark>' + esc(c.t) + '</mark> — ' + esc(c.ru)) + '</div>';
+  const trLine = (c) => '<div class="exr">' + (E.exTr(c) ? hl(E.exTr(c)) : '<mark>' + esc(c.t) + '</mark> — ' + esc(c.ru)) + '</div>';
   const tapW = (t) => t.replace(/([A-Za-z][A-Za-z'’-]*)|([^A-Za-z]+)/g, (m, w, o) => w ? '<span class="w" data-w="' + esc(w.toLowerCase()) + '">' + esc(w) + '</span>' : esc(o));
   const hl = (ex) => String(ex == null ? '' : ex).split(/(\[\[[^\[\]]+\]\])/).map((x) => /^\[\[/.test(x) ? '<mark>' + tapW(x.slice(2, -2)) + '</mark>' : tapW(x)).join('');
   ['gesturestart', 'gesturechange', 'gestureend'].forEach((n) => document.addEventListener(n, (ev) => ev.preventDefault())); // iOS: без щипкового зума
@@ -374,7 +374,7 @@
 
   const userCef = (p) => (p.cefMode && p.cefMode !== 'auto') ? p.cefMode : E.cefOf(p.skills);
   // Колода лежит в app/data/deck.json, а не в базе пользователя: в облако уходит только прогресс по начатым карточкам.
-  const STATIC = ['t', 'ru', 'ex', 'pos', 'dom', 'cef', 'src', 'acl', 'rec', 'exr', 'ex2', 'f', 'b'];
+  const STATIC = ['t', 'ru', 'ex', 'pos', 'dom', 'cef', 'src', 'acl', 'rec', 'exr', 'ex2', 'ex2r', 'f', 'b'];
   let DECKIDS = new Set();
   function pack() {
     const out = { active: DB.active, profiles: {} };
@@ -399,9 +399,9 @@
     p.cards = Array.from(uniq.values()).filter((c) => c.f || c.t || byId[c.id]);
     if (p.cards.length !== before) changed = true;
     p.cards.forEach((c) => { if (!c.seen && E.touched(c)) { c.seen = true; changed = true; } }); // слова, которых касались, но без отметки «показано»
-    p.cards.forEach((c) => { const d = byId[c.id]; if (d) { c.t = d.t; c.ru = d.ru; c.ex = d.ex; c.pos = d.pos; c.dom = d.dom; c.cef = d.cef; c.src = d.src; c.acl = d.acl; c.rec = d.rec; c.exr = d.exr; c.ex2 = d.ex2; } });
+    p.cards.forEach((c) => { const d = byId[c.id]; if (d) { c.t = d.t; c.ru = d.ru; c.ex = d.ex; c.pos = d.pos; c.dom = d.dom; c.cef = d.cef; c.src = d.src; c.acl = d.acl; c.rec = d.rec; c.exr = d.exr; c.ex2 = d.ex2; c.ex2r = d.ex2r; } });
     const ids = new Set(p.cards.map((c) => c.id));
-    DECK.forEach((d) => { if (!ids.has(d.id)) p.cards.push(Object.assign(E.newCard('', '', d.id), { t: d.t, ru: d.ru, ex: d.ex, pos: d.pos, dom: d.dom, cef: d.cef, src: d.src, acl: d.acl, rec: d.rec, exr: d.exr, ex2: d.ex2, lv: 0 })); });
+    DECK.forEach((d) => { if (!ids.has(d.id)) p.cards.push(Object.assign(E.newCard('', '', d.id), { t: d.t, ru: d.ru, ex: d.ex, pos: d.pos, dom: d.dom, cef: d.cef, src: d.src, acl: d.acl, rec: d.rec, exr: d.exr, ex2: d.ex2, ex2r: d.ex2r, lv: 0 })); });
     const seen = p.cards.filter((c) => c.seen); const lvl = userCef(p); const rk = (c) => E.cefRank(lvl, c.cef);
     const rest = p.cards.filter((c) => !c.seen).sort((a, b) => ((b.rec ? 1 : 0) - (a.rec ? 1 : 0)) || (rk(a) - rk(b)) || (hash(a.id) - hash(b.id))); p.cards = seen.concat(rest);
     return changed;

@@ -268,6 +268,7 @@
   const exAll = (c) => [c.ex].concat(c.ex2 || []);
   const exIdx = (c) => (c.ex2 && c.ex2.length ? (c.rv || 0) % (1 + c.ex2.length) : 0);
   const exOf = (c) => exAll(c)[exIdx(c)];
+  const exTr = (c) => { const i = exIdx(c); return i === 0 ? c.exr : (c.ex2r && c.ex2r[i - 1]); };
   const isWord = (c) => !!(c && c.t && c.ex);
   /** Слово, которого касались хоть как-то: показано, выучено, повторялось, закреплялось. */
   const touched = (c) => isWord(c) && !!(c.seen || c.mastered || c.reps > 0 || c.lv > 0 || c.ls || c.fs || c.due || c.rv > 0);
@@ -701,6 +702,6 @@
     return 3.5;
   }
 
-  const api = { touched, orderChunks, pairSet, ctxParts, findCtx, exAll, exIdx, exOf, SK, PHASES, pd, fmt, addDays, daysBetween, weekNo, phaseFor, errorSeverity, weights, dayTasks, newCard, dueCards, review, overall, rawToBand, isWord, plain, lrMode, lrRate, master, unmaster, reviewMastered, contexts, buildSession, pickFresh, GROUPS, GROUP_LABEL, MAIN_GROUPS, group, inGroup, choices, typeCheck, hintOf, drillQueue, form, pickNext, mcq, checkSentence, GAPS, analyseText, checkAnswer, parseFeedback, errDrillable, normFix, errInit, errDue, errCheck, errRate, EI, CEF, cefOf, cefRank, PL_GRAM, placementItems, placementScore, placementSkills, studyTick, STUDY_IDLE, sentenceTypes };
+  const api = { touched, orderChunks, pairSet, ctxParts, findCtx, exAll, exIdx, exOf, exTr, SK, PHASES, pd, fmt, addDays, daysBetween, weekNo, phaseFor, errorSeverity, weights, dayTasks, newCard, dueCards, review, overall, rawToBand, isWord, plain, lrMode, lrRate, master, unmaster, reviewMastered, contexts, buildSession, pickFresh, GROUPS, GROUP_LABEL, MAIN_GROUPS, group, inGroup, choices, typeCheck, hintOf, drillQueue, form, pickNext, mcq, checkSentence, GAPS, analyseText, checkAnswer, parseFeedback, errDrillable, normFix, errInit, errDue, errCheck, errRate, EI, CEF, cefOf, cefRank, PL_GRAM, placementItems, placementScore, placementSkills, studyTick, STUDY_IDLE, sentenceTypes };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Engine = api;
 })(typeof window !== 'undefined' ? window : globalThis);

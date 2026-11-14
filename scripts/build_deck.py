@@ -48,22 +48,33 @@ for c0 in cards:
     r = EXR.get((c0["t"].lower(), c0["pos"]))
     if r: c0["exr"] = r
 # дополнительные примеры: data/ex_more/*.txt, строки «term|pos|English sentence with [[phrase]]» (до 2 на карточку)
+# перевод каждого: data/ex_more_ru/<тот же файл>, строка i = перевод строки i (без пустых и #). Пока перевода нет — в ex2r пустая строка, приложение покажет только слово.
 EX2 = {}
 for f in sorted(glob.glob(os.path.join(root, "data", "ex_more", "*.txt"))):
+    rf = os.path.join(root, "data", "ex_more_ru", os.path.basename(f))
+    rl = [l.rstrip("\n") for l in open(rf, encoding="utf-8")] if os.path.exists(rf) else []
+    rl = [l for l in rl if l.strip() and not l.startswith("#")]
+    k = 0
     for n, line in enumerate(open(f, encoding="utf-8"), 1):
         line = line.rstrip("\n")
         if not line.strip() or line.startswith("#"): continue
         q = line.split("|", 2)
-        if len(q) != 3 or "[[" not in q[2] or "]]" not in q[2]: errs.append(f"{os.path.basename(f)}:{n} bad ex_more line"); continue
-        EX2.setdefault((q[0].strip().lower(), q[1].strip()), []).append(q[2].strip())
+        if len(q) != 3 or "[[" not in q[2] or "]]" not in q[2]: errs.append(f"{os.path.basename(f)}:{n} bad ex_more line"); k += 1; continue
+        ru_ = rl[k].strip() if k < len(rl) else ""
+        k += 1
+        EX2.setdefault((q[0].strip().lower(), q[1].strip()), []).append((q[2].strip(), ru_))
+    if rl and len(rl) != k: errs.append(f"{os.path.basename(f)}: {k} ex lines but {len(rl)} translations")
 for c0 in cards:
     m = EX2.get((c0["t"].lower(), c0["pos"]))
     if m:
         seen_ex = {c0["ex"].lower()}; keep = []
-        for s_ in m:  # без повторов: одно и то же предложение дважды не считается новым контекстом
-            if s_.lower() not in seen_ex: seen_ex.add(s_.lower()); keep.append(s_)
-        if keep: c0["ex2"] = keep[:2]
+        for s_, r_ in m:  # без повторов: одно и то же предложение дважды не считается новым контекстом
+            if s_.lower() not in seen_ex: seen_ex.add(s_.lower()); keep.append((s_, r_))
+        if keep:
+            c0["ex2"] = [x[0] for x in keep[:2]]
+            if any(x[1] for x in keep[:2]): c0["ex2r"] = [x[1] for x in keep[:2]]
 print("cards with 3 examples:", sum(1 for c0 in cards if c0.get("ex2")), "| collocations:", sum(1 for c0 in cards if c0["pos"] == "coll"))
+print("ex2 translated:", sum(1 for c0 in cards for r_ in c0.get("ex2r", []) if r_), "of", sum(len(c0.get("ex2", [])) for c0 in cards))
 print("ex translations:", sum(1 for c0 in cards if c0.get("exr")), "of", len(cards))
 ids = [c['id'] for c in cards]
 if len(ids) != len(set(ids)):
