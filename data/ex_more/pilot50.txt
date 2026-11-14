@@ -1,0 +1,101 @@
+# Пилот: по 2 дополнительных примера (разные контексты и формы слова) для 50 слов
+devastate|v|Floods have [[devastated]] farmland across the region.
+devastate|v|The news [[devastated]] her family.
+bill|v|The lawyer [[billed]] the client for ten hours of work.
+bill|v|Hotels often [[bill]] guests for extra services at checkout.
+unfold|v|The story [[unfolds]] over three generations of one family.
+unfold|v|She watched the crisis [[unfold]] on live television.
+undergo|v|Patients must [[undergo]] several tests before the operation.
+undergo|v|Many cities are [[undergoing]] rapid change as populations grow.
+appoint|v|The university has [[appointed]] a professor to lead the project.
+appoint|v|She was [[appointed]] head of the department last spring.
+navigate|v|Sailors used the stars to [[navigate]] across the ocean.
+navigate|v|It can be hard to [[navigate]] a complicated tax system.
+boost|v|Lower taxes could [[boost]] small businesses.
+boost|v|The festival [[boosted]] tourism in the town.
+accompany|v|A guide will [[accompany]] visitors through the museum.
+accompany|v|Heavy rain often [[accompanies]] the storm season.
+resist|v|Some bacteria [[resist]] common antibiotics.
+resist|v|Local people [[resisted]] the plan to build a motorway.
+illustrate|v|Teachers use real examples to [[illustrate]] difficult ideas.
+illustrate|v|The chart clearly [[illustrates]] the rise in energy costs.
+inform|v|Schools should [[inform]] parents about any serious problems.
+inform|v|Well-[[informed]] citizens make better choices at elections.
+induce|v|Stress can [[induce]] headaches and poor sleep.
+induce|v|Nothing could [[induce]] him to change his mind.
+generate|v|The new factory will [[generate]] hundreds of jobs.
+generate|v|Solar panels [[generate]] power even on cloudy days.
+bind|v|International laws [[bind]] all countries that sign them.
+bind|v|Shared traditions [[bind]] the community together.
+defend|v|Citizens have a right to [[defend]] themselves in court.
+defend|v|The minister [[defended]] the new policy on the radio.
+consult|v|Students should [[consult]] their tutor before choosing a course.
+consult|v|The council [[consulted]] residents about the new road.
+allocate|v|Schools must [[allocate]] their budgets carefully.
+allocate|v|Time was [[allocated]] equally to each speaker.
+mobilize|v|The government [[mobilized]] the army after the earthquake.
+mobilize|v|Social media helps activists [[mobilize]] support quickly.
+blend|v|The chef [[blended]] local herbs with imported spices.
+blend|v|New buildings should [[blend]] in with the old town.
+weekly|adj|The company holds a [[weekly]] meeting every Monday.
+weekly|adj|She writes a [[weekly]] column for the local newspaper.
+literary|adj|He studied [[literary]] criticism at university.
+literary|adj|The city hosts a famous [[literary]] festival each year.
+authentic|adj|Tourists often look for [[authentic]] local experiences.
+authentic|adj|Experts confirmed that the painting was [[authentic]].
+frustrated|adj|Drivers get [[frustrated]] in heavy traffic.
+frustrated|adj|Many students feel [[frustrated]] by unclear instructions.
+prominent|adj|A [[prominent]] businessman opened the new hospital.
+prominent|adj|Education plays a [[prominent]] role in the debate.
+beloved|adj|The [[beloved]] author died at the age of ninety.
+beloved|adj|The town restored its [[beloved]] old theatre.
+agricultural|adj|Climate change threatens [[agricultural]] production in dry regions.
+agricultural|adj|The college offers courses in [[agricultural]] science.
+profitable|adj|Online shops can be very [[profitable]] if costs stay low.
+profitable|adj|Recycling is becoming a [[profitable]] industry.
+administrative|adj|Too much [[administrative]] work leaves teachers less time for lessons.
+administrative|adj|The city moved its [[administrative]] offices to the suburbs.
+hostile|adj|The climate in the far north is [[hostile]] to most crops.
+hostile|adj|Employees were [[hostile]] to the idea of longer working hours.
+vulnerable|adj|Elderly people are especially [[vulnerable]] to extreme heat.
+vulnerable|adj|Small islands are [[vulnerable]] to rising sea levels.
+instant|adj|Many people expect [[instant]] answers from the internet.
+instant|adj|The film was an [[instant]] success with young audiences.
+infamous|adj|The road is [[infamous]] for its dangerous bends.
+infamous|adj|He became [[infamous]] after the scandal.
+urban|adj|[[Urban]] planners try to reduce traffic in city centres.
+urban|adj|More young people are moving to [[urban]] areas for work.
+conversion|n|The [[conversion]] of old offices into homes could ease the housing shortage.
+conversion|n|The [[conversion]] of sunlight into electricity is becoming cheaper.
+reminder|n|The museum sent a [[reminder]] about the booking.
+reminder|n|The ruins are a powerful [[reminder]] of the war.
+shelter|n|Volunteers provide food and [[shelter]] for refugees.
+shelter|n|The hikers built a simple [[shelter]] from branches.
+gathering|n|The annual [[gathering]] attracts thousands of visitors.
+gathering|n|Data [[gathering]] takes months in large studies.
+compassion|n|The doctor treated every patient with [[compassion]].
+compassion|n|Teachers should show [[compassion]] to students who are struggling.
+proof|n|Scientists need strong [[proof]] before they accept a new theory.
+proof|n|You must show [[proof]] of address to open an account.
+grip|n|Good tyres give the car a better [[grip]] on wet roads.
+grip|n|The country is slowly escaping the [[grip]] of recession.
+audit|n|The firm must pass an annual financial [[audit]].
+audit|n|An energy [[audit]] showed where the building was losing heat.
+assess|v|Examiners [[assess]] both accuracy and fluency in speaking.
+assess|v|Engineers will [[assess]] the damage to the bridge.
+tackle|v|Governments must [[tackle]] air pollution in large cities.
+tackle|v|Volunteers [[tackled]] the fire before help arrived.
+implement|v|Schools were slow to [[implement]] the new curriculum.
+implement|v|The company [[implemented]] a recycling scheme last year.
+sustain|v|Farmers cannot [[sustain]] high yields without enough water.
+sustain|v|A balanced diet helps [[sustain]] energy through the day.
+enhance|v|Good lighting can [[enhance]] the look of a room.
+enhance|v|Online tools [[enhance]] learning when used carefully.
+obstacle|n|Language is often the biggest [[obstacle]] for new immigrants.
+obstacle|n|Poor roads remain a serious [[obstacle]] to rural development.
+policy|n|The company has a strict [[policy]] on working from home.
+policy|n|Opposition parties criticised the government's economic [[policy]].
+consumption|n|Meat [[consumption]] has fallen in several European countries.
+consumption|n|Taxes can reduce the [[consumption]] of sugary drinks.
+awareness|n|Campaigns have raised public [[awareness]] of recycling.
+awareness|n|Children need [[awareness]] of the risks of sharing personal data.

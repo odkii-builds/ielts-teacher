@@ -58,7 +58,11 @@ for f in sorted(glob.glob(os.path.join(root, "data", "ex_more", "*.txt"))):
         EX2.setdefault((q[0].strip().lower(), q[1].strip()), []).append(q[2].strip())
 for c0 in cards:
     m = EX2.get((c0["t"].lower(), c0["pos"]))
-    if m: c0["ex2"] = m[:2]
+    if m:
+        seen_ex = {c0["ex"].lower()}; keep = []
+        for s_ in m:  # без повторов: одно и то же предложение дважды не считается новым контекстом
+            if s_.lower() not in seen_ex: seen_ex.add(s_.lower()); keep.append(s_)
+        if keep: c0["ex2"] = keep[:2]
 print("cards with 3 examples:", sum(1 for c0 in cards if c0.get("ex2")), "| collocations:", sum(1 for c0 in cards if c0["pos"] == "coll"))
 print("ex translations:", sum(1 for c0 in cards if c0.get("exr")), "of", len(cards))
 ids = [c['id'] for c in cards]
