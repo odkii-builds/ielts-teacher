@@ -426,7 +426,7 @@
     const p = P(); ensureSess(p); refill(p);
     const mastered = p.cards.filter((c) => c.mastered).length, work = p.cards.filter((c) => c.seen && !c.mastered).length;
     paint(head('Карточки', '<span id="csub"></span>', plusBtn('cplus', 'Добавить')) + seg('ctab', [['learn', 'Учить'], ['drill', 'Закрепить'], ['deck', 'Колода']], cst.tab) + (p.cards.filter((c) => c.seen).length >= 4 ? '<div class="list cta" id="vwlink" style="margin-top:12px"><a class="rowi" href="#vw"><div class="grow"><b>Задание IELTS со своими словами</b><div class="mut" style="margin-top:2px">Эссе, график или письмо — с выученными словами</div></div></a></div>' : '') + '<div id="cbody" style="margin-top:16px"></div>');
-    bindSeg('ctab', (v) => { cst.tab = v; if (v === 'drill') cst.dr = null; drawCards(); });
+    bindSeg('ctab', (v) => { cst.tab = v; if (v === 'drill') { cst.dr = null; cst.dmode = null; } drawCards(); });
     $('#cplus').onclick = () => openSheet('<h2>Новая карточка</h2><div class="stack"><input id="cf" placeholder="Слово или фраза (English)" autocomplete="off"><input id="cb" placeholder="Перевод" autocomplete="off"><input id="cx" placeholder="Предложение с этим словом" autocomplete="off"><button class="btn p" id="cadd">Добавить</button></div>' +
       '<h3>Импорт</h3><textarea id="csv" placeholder="слово;перевод;пример — по одной на строку (или front;back)"></textarea><div style="margin-top:10px"><button class="btn" id="cimp">Импортировать</button></div>', () => {
       $('#cadd').onclick = () => { const f = $('#cf').value.trim(), b = $('#cb').value.trim(); if (!f || !b) { toast('Заполни слово и перевод'); return; } addWordCard(p, f, b, $('#cx').value.trim()); sess = null; save(); closeSheet(); toast('Добавлено'); route(); };
@@ -461,7 +461,7 @@
     if (!id) {
       body.innerHTML = grpBar(p) + '<div class="card enter" style="text-align:center;padding:30px 16px"><div class="big">✓</div><div class="mut" style="margin:6px 0 16px">На сейчас всё. Новых сегодня: ' + p.newToday.n + '</div><button class="btn p" id="cdrill">Закрепить мини-заданиями</button><div style="height:10px"></div><button class="btn" id="cmore">Ещё 10 новых слов</button></div>';
       $$('#gf button').forEach((b) => { b.onclick = () => { p.cgrp = b.dataset.g; sess = null; cst.cur = null; save(); ensureSess(p); refill(p); drawCards(); }; });
-      $('#cdrill').onclick = () => { cst.tab = 'drill'; cst.dr = null; viewCards(); };
+      $('#cdrill').onclick = () => { cst.tab = 'drill'; cst.dr = null; cst.dmode = null; viewCards(); };
       $('#cmore').onclick = () => { p.newToday.extra = (p.newToday.extra || 0) + 10; save(); sess = null; ensureSess(p); refill(p); drawCards(); };
       return;
     }
@@ -509,12 +509,18 @@
   }
   const grpBar = (p) => '<div class="chips" id="gf" style="margin:0 -18px 12px">' + [['main', 'Основное'], ...E.GROUPS, ['all', 'Все']].map(([k, n]) => '<button data-g="' + k + '" class="' + (k === grpOf(p) ? 'on' : '') + '">' + esc(n) + '</button>').join('') + '</div>';
   // ---------- Закрепление: мини-задания ----------
+  const MODES = [['mix', '🎲', 'Вперемешку', 'Все типы заданий подряд'], ['order', '🧩', 'Собрать предложение', 'Расставь блоки в правильном порядке'], ['pair', '🔗', 'Сопоставить перевод', 'Слова и переводы парами'], ['gap', '✏️', 'Вставить в предложение', 'Пропущенное слово в примере']];
+  function drawModes() {
+    document.body.classList.remove('drilling');
+    $('#cbody').innerHTML = '<div class="enter"><h2 style="margin:4px 0 12px;font-size:20px">Как закрепим слова?</h2><div class="stack">' + MODES.map(([k, ic, n, d]) => '<button class="card mode" data-m="' + k + '"><span class="mic">' + ic + '</span><span><b>' + n + '</b><span class="mut">' + d + '</span></span></button>').join('') + '</div></div>';
+    $$('.mode').forEach((b) => { b.onclick = () => { cst.dmode = b.dataset.m; cst.dr = null; drawDrill(); }; });
+  }
   function startDrill(p) {
-    const q = E.drillQueue(p.cards, today(), 12);
+    const q = E.drillQueue(p.cards, today(), 12, null, cst.dmode);
     cst.dr = { q, i: 0, bad: {}, ids: Array.from(new Set(q.map((x) => x.id))), done: false };
   }
   function drawDrill() {
-    const p = P(); const body = $('#cbody'); if (!cst.dr) startDrill(p); const d = cst.dr;
+    const p = P(); const body = $('#cbody'); if (!cst.dr && !cst.dmode) return drawModes(); if (!cst.dr) startDrill(p); const d = cst.dr;
     document.body.classList.remove('drilling');
     if (!d.q.length) { body.innerHTML = '<div class="card" style="text-align:center;padding:26px 16px"><div class="big">📚</div><div class="mut" style="margin:8px 0 16px">Пока нечего закреплять: сначала пройди несколько карточек на вкладке «Учить».</div><button class="btn p" id="gol">К карточкам</button></div>'; $('#gol').onclick = () => { cst.tab = 'learn'; viewCards(); }; return; }
     const it = d.q[d.i];
@@ -523,12 +529,57 @@
       const weak = d.ids.filter((id) => d.bad[id]).map((id) => p.cards.find((x) => x.id === id)).filter(Boolean);
       body.innerHTML = '<div class="card enter" style="text-align:center;padding:22px 16px"><div class="big">' + (weak.length ? '👍' : '🎉') + '</div><div style="font-weight:600;margin:6px 0">Верно с первого раза: ' + (d.ids.length - weak.length) + ' из ' + d.ids.length + '</div>' +
         (weak.length ? '<div class="mut" style="margin:6px 0 4px">Эти слова ещё стоит повторить:</div><div class="stack" style="text-align:left">' + weak.map((c) => '<div class="card" style="padding:10px 12px"><b>' + esc(c.t) + '</b> — ' + esc(c.ru) + '</div>').join('') + '</div>' : '<div class="mut">Уровень слов повышен.</div>') +
-        '<div style="margin-top:16px"><button class="btn p" id="again">Ещё раунд</button></div><div style="margin-top:8px"><button class="btn" id="gol">К карточкам</button></div></div>';
-      $('#again').onclick = () => { cst.dr = null; drawDrill(); }; $('#gol').onclick = () => { cst.tab = 'learn'; sess = null; viewCards(); };
+        '<div style="margin-top:16px"><button class="btn p" id="again">Ещё раунд</button></div><div style="margin-top:8px"><button class="btn" id="gmode">Другой режим</button></div><div style="margin-top:8px"><button class="btn" id="gol">К карточкам</button></div></div>';
+      $('#again').onclick = () => { cst.dr = null; drawDrill(); }; $('#gmode').onclick = () => { cst.dr = null; cst.dmode = null; drawDrill(); }; $('#gol').onclick = () => { cst.tab = 'learn'; sess = null; viewCards(); };
       return;
     }
     document.body.classList.add('drilling');
     const c = p.cards.find((x) => x.id === it.id);
+    const ent = it.shown ? '' : ' enter'; it.shown = true;
+    const dtop = '<div class="dtop"><span class="mut">' + (d.i + 1) + ' из ' + d.q.length + '</span><button class="link" id="dr_x">Выйти</button></div>';
+    const bindX = () => { $('#dr_x').onclick = () => { cst.tab = 'learn'; cst.dr = null; viewCards(); }; };
+    if (it.type === 'pair') {
+      if (!it.ps) { it.ps = E.pairSet(it.ids.map((id) => p.cards.find((x) => x.id === id)).filter(Boolean)); it.mt = {}; it.sel = null; }
+      if (!it.ps) { d.i += 1; drawDrill(); return; }
+      const ps = it.ps;
+      const btn = (x, side) => '<button class="opt" data-s="' + side + '" data-id="' + esc(x.id) + '">' + esc(x.text) + '</button>';
+      body.innerHTML = '<div class="drill' + ent + '">' + dtop + '<div class="mut" style="text-align:center;margin:6px 0 12px">Сопоставь слова и переводы</div><div class="pair">' + ps.left.map((l, i) => btn(l, 'l') + btn(ps.right[i], 'r')).join('') + '</div><div id="pnext" style="margin-top:12px;min-height:52px"></div></div>';
+      bindX();
+      // всё обновляется на месте, без перерисовки: ничего не прыгает
+      const refresh = () => {
+        $$('.pair .opt').forEach((b) => { const id = b.dataset.id, m = !!it.mt[id]; b.classList.toggle('ok', m); b.classList.toggle('sel', !m && b.dataset.s === 'l' && it.sel === id); b.disabled = m; });
+        $('#pnext').innerHTML = Object.keys(it.mt).length === ps.left.length ? '<button class="btn p" id="dr_next">Дальше</button>' : '';
+        const nx = $('#dr_next'); if (nx) nx.onclick = () => { d.i += 1; drawDrill(); };
+      };
+      $$('.pair .opt').forEach((b) => { b.onclick = () => {
+        const id = b.dataset.id;
+        if (b.dataset.s === 'l') { it.sel = it.sel === id ? null : id; refresh(); return; }
+        if (!it.sel) { toast('Сначала выбери слово слева'); return; }
+        if (it.sel === id) { it.mt[id] = 1; it.sel = null; refresh(); return; }
+        d.bad[it.sel] = true; b.classList.add('bad'); setTimeout(() => b.classList.remove('bad'), 450);
+      }; });
+      refresh();
+      return;
+    }
+    if (it.type === 'order') {
+      if (!it.o) { it.o = E.orderChunks(c); it.pl = []; }
+      if (!it.o) { d.i += 1; drawDrill(); return; }
+      const o = it.o, n = o.blocks.length, answered = it.res != null;
+      const line = it.pl.map((i) => '<button class="opt' + (answered ? (it.res === 'ok' ? ' ok' : ' bad') : '') + '" data-r="' + i + '"' + (answered ? ' disabled' : '') + '>' + esc(o.blocks[i]) + '</button>').join('');
+      const pool = o.blocks.map((b, i) => '<button class="opt" data-a="' + i + '"' + (it.pl.includes(i) || answered ? ' style="visibility:hidden" disabled' : '') + '>' + esc(b) + '</button>').join('');
+      const hint = String(c.exr || '').replace(/\[\[|\]\]/g, '') || c.ru;
+      body.innerHTML = '<div class="drill' + ent + '">' + dtop + '<div class="flash" style="min-height:0;padding:16px 18px"><small>Собери предложение</small><div style="font-size:16px;color:var(--mut)">' + esc(hint) + '</div></div>' +
+        '<div class="blkline">' + (line || '<span class="mut">Нажимай на блоки по порядку</span>') + '</div><div class="blks">' + pool + '</div>' +
+        (answered ? '<div class="flash back" style="min-height:0;padding:14px 16px;font-size:17px"><div>' + hl(E.exOf(c)) + '</div></div><div style="margin-top:10px"><button class="btn p" id="dr_next">Дальше</button></div>'
+          : '<div style="margin-top:12px">' + (it.pl.length === n ? '<button class="btn p" id="dr_ok">Проверить</button>' : '') + (it.pl.length ? '<div style="text-align:center;margin-top:8px"><button class="link" id="dr_rs">Сбросить</button></div>' : '') + '</div>') + '</div>';
+      bindX();
+      $$('.blks .opt').forEach((b) => { b.onclick = () => { it.pl.push(+b.dataset.a); drawDrill(); }; });
+      $$('.blkline .opt').forEach((b) => { b.onclick = () => { it.pl = it.pl.filter((x) => x !== +b.dataset.r); drawDrill(); }; });
+      const rs = $('#dr_rs'); if (rs) rs.onclick = () => { it.pl = []; drawDrill(); };
+      const ok = $('#dr_ok'); if (ok) ok.onclick = () => { it.res = it.pl.map((i) => o.blocks[i]).join(' ') === o.answer.join(' ') ? 'ok' : 'bad'; if (it.res === 'bad') { d.bad[c.id] = true; if (!it.retry) d.q.push({ id: c.id, type: 'order', retry: true }); } drawDrill(); };
+      const nx = $('#dr_next'); if (nx) nx.onclick = () => { c.rv = (c.rv || 0) + 1; d.i += 1; drawDrill(); };
+      return;
+    }
     if (!it.m) { if (it.type === 'gap') it.m = E.mcq(c, p.cards); else if (it.type === 'ru2en') it.m = E.choices(c, p.cards, 't'); else if (it.type === 'en2ru') it.m = E.choices(c, p.cards, 'ru'); }
     it.h = it.h || 0;
     const optsH = (m) => '<div class="opts">' + m.opts.map((o, i) => '<button class="opt' + (it.pick != null ? (i === m.answer ? ' ok' : i === it.pick ? ' bad' : '') : '') + '" data-o="' + i + '"' + (it.pick != null ? ' disabled' : '') + '>' + esc(o) + '</button>').join('') + '</div>';
