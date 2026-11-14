@@ -79,15 +79,18 @@ actions.admin_list = async (b, me) => {
 // Сводка: всего пользователей, регистрации за 30 дней, активные, Premium, лист ожидания
 actions.admin_stats = async (b, me) => {
   needAdmin(me);
-  const now = Date.now(), since = now - 30 * 864e5, P = (t) => ({ $t: TypedValues.uint64(t) });
-  const cnt = async (sql, t) => num((await q(sql, t == null ? undefined : P(t)))[0].c);
-  const total = await cnt('SELECT COUNT(*) AS c FROM users;');
-  const reg = await q('DECLARE $t AS Uint64; SELECT (created + 10800000) / 86400000 AS d, COUNT(*) AS c FROM users WHERE created >= $t GROUP BY (created + 10800000) / 86400000 AS d;', P(since));
-  const act = (ms) => cnt('DECLARE $t AS Uint64; SELECT COUNT(*) AS c FROM data WHERE upd >= $t;', now - ms);
-  const [a1, a7, a30] = [await act(864e5), await act(7 * 864e5), await act(30 * 864e5)];
-  const prem = await cnt('DECLARE $t AS Uint64; SELECT COUNT(*) AS c FROM ent WHERE prem > $t;', now);
-  const wl = await cnt('SELECT COUNT(*) AS c FROM waitlist;');
-  return ok({ total, days: fillDays(reg.map((r) => ({ d: num(r.d), c: num(r.c) })), now, 30), active: { d1: a1, d7: a7, d30: a30 }, premium: prem, waitlist: wl, at: now });
+  try {
+    const now = Date.now(), since = now - 30 * 864e5, P = (t) => ({ $t: TypedValues.uint64(t) });
+    const cnt = async (sql, t) => num((await q(sql, t == null ? undefined : P(t)))[0].c);
+    const total = await cnt('SELECT COUNT(*) AS c FROM users;');
+    // дни по Москве (UTC+3): подзапрос с датой-числом, потом группировка
+    const reg = await q('DECLARE $t AS Uint64; SELECT d, COUNT(*) AS c FROM (SELECT (created + 10800000ul) / 86400000ul AS d FROM users WHERE created >= $t) GROUP BY d;', P(since));
+    const act = (ms) => cnt('DECLARE $t AS Uint64; SELECT COUNT(*) AS c FROM data WHERE upd >= $t;', now - ms);
+    const a1 = await act(864e5), a7 = await act(7 * 864e5), a30 = await act(30 * 864e5);
+    const prem = await cnt('DECLARE $t AS Uint64; SELECT COUNT(*) AS c FROM ent WHERE prem > $t;', now);
+    const wl = await cnt('SELECT COUNT(*) AS c FROM waitlist;');
+    return ok({ total, days: fillDays(reg.map((r) => ({ d: num(r.d), c: num(r.c) })), now, 30), active: { d1: a1, d7: a7, d30: a30 }, premium: prem, waitlist: wl, at: now });
+  } catch (e) { if (e.code) throw e; throw bad('stats: ' + String(e && e.message || e).slice(0, 300), 400); } // только админу: показываем причину
 };
 // Выдать/изменить: credits (+/-), premium_days (+), ban (true/false), note, set_free
 actions.admin_grant = async (b, me) => {
