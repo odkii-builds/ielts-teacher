@@ -126,7 +126,7 @@ body.drilling #cbody{margin-top:0!important}
 .drill .flash{min-height:0;padding:16px 14px;font-size:19px}
 .drill .flash .term{font-size:22px}
 .drill .opts{gap:6px;margin-top:10px}
-.drill .opt{min-height:44px;padding:8px 14px}.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pair .stack{display:grid;gap:8px;align-content:start}.pair .opt{text-align:center;min-height:52px;padding:8px 10px;font-size:15px}.blkline{min-height:60px;margin:12px 0;padding:8px;border-radius:14px;box-shadow:0 0 0 1.5px var(--line) inset;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.blks{display:flex;flex-wrap:wrap;gap:8px}.blkline .opt,.blks .opt{min-height:40px;padding:8px 12px;font-size:16px}
+.drill .opt{min-height:44px;padding:8px 14px}
 
 .w{cursor:pointer;border-bottom:1px dotted var(--mut)}
 .wpop{position:fixed;z-index:60;background:var(--s);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:0 8px 28px rgba(0,0,0,.18);font-size:15px}
