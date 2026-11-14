@@ -22,18 +22,12 @@
   // ---------- баннер набора в клуб ----------
   function bannerHtml() {
     return '<div class="nbanner" id="nbn"><button class="nb-x" id="nbx" aria-label="Скрыть">×</button><img class="nb-i" src="img/club.jpg" alt="IELTS Teacher Club" width="768" height="512">' +
-      '<div class="nb-c"><span class="nb-tag">Набор открыт · бесплатно</span><b class="nb-t">Ищем ' + CLUB.spots + ' человека в клуб</b><span class="nb-s">Комьюнити и ручная проверка работ. Отбор бесплатный.</span>' +
-      '<button class="btn sm nb-b" id="nbo">Как попасть</button></div></div>';
+      '<div class="nb-c"><span class="nb-tag">Набор закрыт</span><b class="nb-t">Все места в клубе заняты</b><span class="nb-s">Следующий набор откроем позже.</span>' +
+      '<button class="btn sm nb-b" id="nbo">Узнать о новом наборе</button></div></div>';
   }
   function clubSheet() {
-    const p = C().P(); const lvl = p.placement ? p.placement.cefr + (p.placement.band ? ' (≈ band ' + p.placement.band + ')' : '') : '';
-    const goal = p.target && p.target.overall ? p.target.overall : '';
-    const form = 'Привет! Хочу в IELTS Teacher Club.\n1. Мой уровень / результат IELTS сейчас: ' + (lvl || '…') + '\n2. Цель по IELTS: ' + (goal || '…') + '\n3. Куда хочу поступать: …\n4. В каком году: …';
-    C().openSheet('<h2 style="margin:0 0 6px">Как попасть в клуб</h2><p class="mut" style="margin:0 0 12px">Отбор бесплатный. Напиши мне в Telegram и коротко расскажи:</p>' +
-      '<div class="list"><div class="rowi"><span class="grow">Свой уровень английского или результат IELTS</span></div><div class="rowi"><span class="grow">Куда хочешь поступать</span></div><div class="rowi"><span class="grow">В каком году</span></div></div>' +
-      '<p class="mut" style="margin:12px 0">Шаблон уже подставил данные из твоего профиля — проверь и допиши.</p>' +
-      '<div class="stack"><button class="btn" id="ncp">Скопировать шаблон</button><a class="btn p" style="display:grid;place-items:center;text-decoration:none" href="https://t.me/odkii" target="_blank" rel="noopener">Написать в Telegram</a></div>',
-    (el) => { el.querySelector('#ncp').onclick = () => copy(form, 'Шаблон скопирован'); });
+    C().openSheet('<h2 style="margin:0 0 6px">Набор закрыт</h2><p class="mut" style="margin:0 0 12px">Сейчас все места в клубе заняты, новые заявки не принимаем. Когда откроем следующий набор, расскажу в Instagram.</p>' +
+      '<div class="stack"><a class="btn p" style="display:grid;place-items:center;text-decoration:none" href="https://instagram.com/odkii.builds" target="_blank" rel="noopener">Instagram @odkii.builds</a></div>');
   }
   function bindBanner(v) {
     const b = v.querySelector('#nbn'); if (!b) return;
