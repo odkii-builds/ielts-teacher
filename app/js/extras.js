@@ -28,13 +28,14 @@
   }
   function clubSheet() {
     const mask = (em) => { const m = /^(.)[^@]*(@.+)$/.exec(String(em || '')); return m ? m[1] + '***' + m[2] : ''; };
-    const info = '<div class="list"><div class="rowi"><span class="grow">Ежедневные цели и чек-ины</span></div><div class="rowi"><span class="grow">Ручная проверка работ</span></div><div class="rowi"><span class="grow">Комьюнити с темами: эссе, материалы, цели</span></div></div>';
-    const head = '<h2 style="margin:0 0 6px">IELTS Teacher Club</h2><p class="mut" style="margin:0 0 12px">Закрытая группа для тех, кто готовится к IELTS всерьёз. Отбор бесплатный.</p>' + info;
+    const row = (t, d) => '<div class="rowi" style="align-items:flex-start"><span class="grow"><b>' + t + '</b><div class="mut" style="margin-top:2px;font-size:13px">' + d + '</div></span></div>';
+    const info = '<div class="list">' + row('Еженедельные созвоны', 'Живое общение: вопросы, разбор работ, поддержка') + row('Ежедневные цели и чек-ины', 'Каждый день фиксируешь план и результат, не бросаешь на полпути') + row('Ручная проверка работ', 'Эссе и письма смотрит человек, а не только программа') + row('Темы в группе', 'Отдельные ветки для эссе, материалов и чек-инов') + row('Отбор по целям', 'Берём тех, у кого есть конкретная цель по IELTS') + '</div>';
+    const head = '<h2 style="margin:0 0 6px">IELTS Teacher Club</h2><p class="mut" style="margin:0 0 12px">Небольшая закрытая группа для тех, кто готовится к IELTS всерьёз. Отбор бесплатный.</p>' + info;
     const draw = (st) => {
       let body;
       if (st && st.joined) body = '<div class="card" style="margin-top:14px"><b>Вы в очереди · №' + st.pos + ' из ' + st.total + '</b><div class="mut" style="margin-top:4px">Когда откроем места, дадим знать в приложении и на e-mail аккаунта' + (st.email ? ' (' + esc(st.email) + ')' : '') + '.</div></div><div class="stack" style="margin-top:12px"><button class="btn" id="nwc">Закрыть</button></div>';
       else if (st && st.err) body = '<p class="mut" style="margin:14px 0 8px">' + esc(st.err) + '</p><div class="stack"><button class="btn p" id="nwj">Попробовать ещё раз</button></div>';
-      else body = '<p class="mut" style="margin:14px 0 8px">Сейчас все места заняты. Встаньте в очередь: места получат первыми. Нажимая кнопку, вы соглашаетесь получить сообщение об открытии набора.</p><div class="stack"><button class="btn p" id="nwj" style="background:linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2);color:#fff">Встать в очередь</button></div>';
+      else body = '<p class="mut" style="margin:14px 0 8px">Сейчас все места заняты. Очередь даёт приоритет: места следующего набора мы сначала предложим вам. Нажимая кнопку, вы соглашаетесь получить сообщение об открытии набора.</p><div class="stack"><button class="btn p" id="nwj" style="background:linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2);color:#fff">Встать в очередь</button></div>';
       C().openSheet(head + body, (el) => {
         const j = el.querySelector('#nwj'), c = el.querySelector('#nwc');
         if (c) c.onclick = () => C().closeSheet();
