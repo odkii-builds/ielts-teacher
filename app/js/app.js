@@ -542,7 +542,7 @@
       if (!it.ps) { it.ps = E.pairSet(it.ids.map((id) => p.cards.find((x) => x.id === id)).filter(Boolean)); it.mt = {}; it.sel = null; }
       if (!it.ps) { d.i += 1; drawDrill(); return; }
       const ps = it.ps;
-      const btn = (x, side) => '<button class="opt" data-s="' + side + '" data-id="' + esc(x.id) + '">' + esc(x.text) + '</button>';
+      const btn = (x, side) => '<button class="opt" data-s="' + side + '" data-id="' + esc(x.id) + '">' + esc(x.text).replace(/ (\S{1,3})$/, '\u00a0$1') + '</button>';
       body.innerHTML = '<div class="drill' + ent + '">' + dtop + '<div class="mut" style="text-align:center;margin:6px 0 12px">Сопоставь слова и переводы</div><div class="pair">' + ps.left.map((l, i) => btn(l, 'l') + btn(ps.right[i], 'r')).join('') + '</div><div id="pnext" style="margin-top:12px;min-height:52px"></div></div>';
       bindX();
       // всё обновляется на месте, без перерисовки: ничего не прыгает
