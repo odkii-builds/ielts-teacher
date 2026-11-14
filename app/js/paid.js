@@ -12,6 +12,8 @@ window.Paid = (function () {
   try { const s = localStorage.getItem(KEY); if (s) ent = Object.assign({}, DEF, JSON.parse(s)); } catch (e) { /* ignore */ }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(ent)); } catch (e) { /* ignore */ } };
   const PAY = 'https://pay.odkii-builds.ru';
+  const LS = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* ignore */ } return null; };
+  const DAY = 864e5, PROMO_DAYS = 7;
 
   // ---------- демо-пример разбора (не от реального ИИ) ----------
   const SAMPLE_Q = 'Some people believe that university education should be free for everyone. To what extent do you agree or disagree?';
@@ -48,6 +50,17 @@ window.Paid = (function () {
   const VOCAB = [['help', 'support / assist'], ['very expensive', 'prohibitively high'], ['bring benefit', 'contribute'], ['problem', 'drawback / downside'], ['limited', 'finite / restricted'], ['good students', 'academically strong students']];
 
   const DAILY = 10;
+  // Цены: [полная, запуск, после запуска −30%]. В реальной версии считает сервер, клиент только показывает.
+  const PRICE = { one: [99, 49, 69], five: [399, 199, 279], prem: [490, 249, 343] };
+  // Срок акции хранится на сервере для каждого пользователя от первого показа предложения. В превью имитируем через localStorage.
+  const promoStart = () => { let v = Number(LS('ielts_pd_promo')); if (!v) { v = Date.now(); LS('ielts_pd_promo', String(v)); } return v; };
+  const phase = () => { const f = LS('ielts_pd_force'); if (f) return f; return Date.now() < promoStart() + PROMO_DAYS * DAY ? 'launch' : 'after'; };
+  const price = (k) => PRICE[k][phase() === 'launch' ? 1 : phase() === 'after' ? 2 : 0];
+  const off = (k) => Math.round(100 - price(k) / PRICE[k][0] * 100);
+  const leftTxt = () => { let ms = promoStart() + PROMO_DAYS * DAY - Date.now(); if (ms < 0) ms = 0; const d = Math.floor(ms / DAY), h = Math.floor(ms % DAY / 36e5), m = Math.floor(ms % 36e5 / 6e4), sc = Math.floor(ms % 6e4 / 1e3); const z = (n) => String(n).padStart(2, '0'); return (d ? d + ' д ' : '') + z(h) + ':' + z(m) + ':' + z(sc); };
+  const promoPill = () => { const f = phase(); return f === 'launch' ? '<span class="pd-promo" data-t="1">Скидка запуска до −51% · ещё <b>' + leftTxt() + '</b></span>' : f === 'after' ? '<span class="pd-promo">Скидка −30% на все тарифы</span>' : ''; };
+  let tick = null;
+  function startTick() { clearInterval(tick); tick = setInterval(() => { const e = document.querySelector('[data-t] b'); if (!e) { clearInterval(tick); return; } e.textContent = leftTxt(); }, 1000); }
   const goal = () => { const g = Number(H && H.target && H.target()); return g >= 4 && g <= 9 ? g : 7; };
   const gs = () => goal().toFixed(1);
   const TYPES = [['Грамматика', 8], ['Лексика', 3], ['Орфография', 1]];
@@ -73,7 +86,11 @@ window.Paid = (function () {
     '.pd-card{background:var(--s);border-radius:18px;box-shadow:0 0 0 1px var(--line);padding:14px 16px;margin:10px 0}.pd-hero{margin:0 0 8px;padding:18px 16px 16px;border-radius:20px;background:radial-gradient(120% 120% at 0% 0%,rgba(61,123,255,.3),transparent 60%),radial-gradient(100% 100% at 100% 0%,rgba(255,95,162,.22),transparent 62%),var(--s2)}.pd-hero h2{margin:0 0 6px;font-size:22px;line-height:1.2}.pd-hero p{margin:0;color:var(--mut);font-size:14px}' +
     '.pd-plan{position:relative;display:grid;grid-template-columns:22px 1fr auto;gap:2px 12px;align-items:start;text-align:left;width:100%;border:1.5px solid var(--line);background:var(--s);border-radius:18px;padding:14px 16px;margin:10px 0;color:var(--fg)}.pd-plan.on{border-color:var(--acc);background:rgba(79,134,255,.09)}.pd-plan.best{border:1.5px solid transparent;background:linear-gradient(var(--s),var(--s)) padding-box,linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2) border-box}.pd-plan.best.on{background:linear-gradient(rgba(79,134,255,.12),rgba(79,134,255,.12)),linear-gradient(var(--s),var(--s)) padding-box,linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2) border-box;background-clip:padding-box,padding-box,border-box}' +
     '.pd-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);margin-top:2px;grid-row:1/3}.pd-plan.on .pd-dot{border-color:var(--acc);background:radial-gradient(circle,var(--acc) 0 4px,transparent 5px)}.pd-plan b{font-size:16px}.pd-plan .pr{grid-column:3;grid-row:1;font-weight:700;font-size:18px;text-align:right}.pd-plan .pr small{display:block;font-size:11px;font-weight:500;color:var(--mut)}.pd-plan ul{grid-column:2/4;margin:4px 0 0;padding:0;list-style:none;font-size:13px;color:var(--mut)}.pd-plan li{padding:1px 0}.pd-plan li:before{content:"✓ ";color:var(--ok);font-weight:700}.pd-badge{position:absolute;top:-10px;right:14px;font-size:11px;font-weight:700;color:#fff;padding:3px 10px;border-radius:999px;background:linear-gradient(110deg,#0045fd,#ff5fa2)}' +
-    '.pd-demo{position:fixed;left:12px;bottom:calc(var(--tab,64px) + 12px);z-index:50;background:var(--fg);color:var(--bg);border:0;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:600;opacity:.9}.lock .pd-demo{display:none}.pd-note{background:var(--s2);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--mut);margin:10px 0}.pd-dots i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--acc);margin:0 2px;animation:pdd 1s infinite}.pd-dots i:nth-child(2){animation-delay:.15s}.pd-dots i:nth-child(3){animation-delay:.3s}@keyframes pdd{0%,100%{opacity:.25}50%{opacity:1}}.pd-cf{position:fixed;inset:0;width:100%;height:100%;z-index:200;pointer-events:none}@media(prefers-reduced-motion:reduce){.btn.pd-shine{animation:none}}';
+    '.pd-demo{position:fixed;left:12px;bottom:calc(var(--tab,64px) + 12px);z-index:50;background:var(--fg);color:var(--bg);border:0;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:600;opacity:.9}.lock .pd-demo{display:none}.pd-note{background:var(--s2);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--mut);margin:10px 0}.pd-dots i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--acc);margin:0 2px;animation:pdd 1s infinite}.pd-dots i:nth-child(2){animation-delay:.15s}.pd-dots i:nth-child(3){animation-delay:.3s}@keyframes pdd{0%,100%{opacity:.25}50%{opacity:1}}.pd-cf{position:fixed;inset:0;width:100%;height:100%;z-index:200;pointer-events:none}@media(prefers-reduced-motion:reduce){.btn.pd-shine{animation:none}}' +
+    '.pd-promo{display:inline-block;margin-top:10px;font-size:12px;font-weight:600;padding:5px 11px;border-radius:999px;background:rgba(255,95,162,.16);color:#e0457f}.pd-promo b{font-variant-numeric:tabular-nums}@media(prefers-color-scheme:dark){.pd-promo{color:#ff8fbd}}' +
+    '.pd-old{text-decoration:line-through;color:var(--mut);font-weight:500;font-size:13px;margin-right:6px}.pd-off{display:inline-block;font-size:11px;font-weight:700;color:#fff;padding:1px 7px;border-radius:999px;background:#e0457f;margin-left:4px;vertical-align:2px}' +
+    '.pd-ban{position:relative;display:block;width:100%;text-align:left;color:#fff;border:0;border-radius:20px;padding:16px 16px 14px;margin:0 0 16px;overflow:hidden;background:linear-gradient(120deg,#0045fd 0%,#3d7bff 55%,#ff5fa2 130%);box-shadow:0 8px 24px rgba(0,69,253,.26)}.pd-ban:before{content:"";position:absolute;right:-40px;top:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.28),transparent 70%)}.pd-ban b{display:block;font-size:18px;line-height:1.2;margin:8px 0 4px;position:relative}.pd-ban span.s{display:block;font-size:13px;opacity:.92;position:relative;padding-right:28px}.pd-ban .go{position:absolute;right:14px;bottom:14px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:16px}.pd-ban .pp{position:relative;display:inline-block;margin-top:10px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.22)}.pd-ban .pp b{display:inline;font-size:12px;margin:0;font-variant-numeric:tabular-nums}' +
+    '.pd-chip{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.02em;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.26);color:#fff;position:relative}.pd-chip.n{background:linear-gradient(110deg,#0045fd,#ff5fa2);margin-left:8px;vertical-align:1px}.pd-nd{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff5fa2;margin-left:4px;vertical-align:6px}.btn.pd-shine{position:relative}.pd-new{position:absolute;top:-8px;right:12px;font-size:10px;font-weight:700;color:#fff;padding:2px 8px;border-radius:999px;background:#e0457f}';
 
   const esc = (s) => (H ? H.esc(s) : String(s));
   const LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
@@ -89,6 +106,14 @@ window.Paid = (function () {
   }
   const canRun = () => !ent.ban && ((ent.prem && dailyLeft() > 0) || ent.credits > 0 || ent.free > 0);
 
+  const seenW = () => LS('ielts_pd_seen_w') === '1', seenAi = () => LS('ielts_pd_seen_ai') === '1';
+  function banner(where) {
+    if (!enabled || ent.ban) return '';
+    promoStart();
+    const sub = ent.prem ? 'Сегодня осталось ' + dailyLeft() + ' из ' + DAILY + ' разборов' : (ent.credits > 0 || ent.free > 0) ? (ent.free ? 'Первый разбор бесплатно: оценка band, ошибки и текст на уровне выше' : 'У вас ' + ent.credits + ' оплаченных разборов') : 'Band, ошибки, текст на Band 7 и план на неделю';
+    return '<button class="pd-ban" data-pdb="' + where + '">' + (seenAi() ? '' : '<span class="pd-chip">Новое</span>') + '<b>Расширенный разбор эссе</b><span class="s">' + esc(sub) + '</span>' + (!ent.prem && !ent.credits && phase() === 'launch' ? promoPill().replace('class="pd-promo"', 'class="pp"').replace('pd-promo" data-t', 'pp" data-t') : '') + '<span class="go">›</span></button>';
+  }
+  function bindBanner() { const b = document.querySelector('[data-pdb]'); if (!b) return; if (phase() === 'launch') startTick(); b.onclick = () => { if (b.dataset.pdb === 'today') location.hash = '#writing'; else start(); }; }
   function privacy() { return '<div class="pd-note">Не пишите в тексте имя, контакты, адреса и другие персональные данные. Текст уходит на разбор во внешний ИИ-сервис.</div>'; }
 
   function confetti() {
@@ -106,6 +131,7 @@ window.Paid = (function () {
   }
 
   function start() {
+    LS('ielts_pd_seen_ai', '1');
     const can = canRun();
     const feats = [['Оценка по 4 критериям и итоговый band', 'как у экзаменатора, с диапазоном'], ['Что тянет балл вниз', 'и сколько band вы теряете на каждом'], ['Подробный разбор слабого абзаца', 'каждая ошибка и правило']];
     H.openSheet('<div class="pd-head"><h2>Расширенный разбор</h2><span class="pd-hp">' + esc(pill()) + '</span></div>' +
@@ -169,18 +195,21 @@ window.Paid = (function () {
   }
 
   const OPTS = [
-    ['prem', 'Premium · 30 дней', '490 ₽', '≈ 16 ₽ в день', ['До ' + DAILY + ' полных разборов в день', 'Проверка исправленной версии', 'Все будущие функции'], true],
-    ['five', 'Пакет из 5 разборов', '399 ₽', '80 ₽ за разбор', ['5 полных разборов', 'Не сгорают, тратьте когда удобно'], false],
-    ['one', 'Один полный разбор', '99 ₽', 'разово', ['Все ошибки, текст на Band 7, план'], false]
+    ['prem', 'Premium · 30 дней', ['До ' + DAILY + ' полных разборов в день', 'Проверка исправленной версии', 'Все будущие функции'], true],
+    ['five', 'Пакет из 5 разборов', ['5 полных разборов', 'Не сгорают, тратьте когда удобно'], false],
+    ['one', 'Один полный разбор', ['Все ошибки, текст на Band 7, план'], false]
   ];
+  const noteFor = (k) => k === 'prem' ? '≈ ' + Math.round(price('prem') / 30) + ' ₽ в день' : k === 'five' ? Math.round(price('five') / 5) + ' ₽ за разбор' : 'разово';
   function paywall() {
-    let sel = 'prem';
-    const draw = () => OPTS.map((o) => '<button class="pd-plan' + (o[5] ? ' best' : '') + (sel === o[0] ? ' on' : '') + '" data-k="' + o[0] + '">' + (o[5] ? '<span class="pd-badge">Выгоднее всего</span>' : '') + '<span class="pd-dot"></span><b>' + esc(o[1]) + '</b><span class="pr">' + esc(o[2]) + '<small>' + esc(o[3]) + '</small></span><ul>' + o[4].map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></button>').join('');
-    const label = () => { const o = OPTS.find((x) => x[0] === sel); return 'Оплатить ' + o[2]; };
-    H.openSheet('<div class="pd-hero"><h2>Узнайте, что мешает вам набрать ' + gs() + '</h2><p>Покажем каждую ошибку, перепишем текст на уровень выше и дадим план на неделю. Результат сразу в приложении.</p></div>' +
+    let sel = 'prem'; promoStart();
+    const priceHtml = (k) => (phase() !== 'none' ? '<span class="pd-old">' + PRICE[k][0] + ' ₽</span>' : '') + price(k) + ' ₽' + (phase() !== 'none' ? '<span class="pd-off">−' + off(k) + '%</span>' : '');
+    const draw = () => OPTS.map((o) => '<button class="pd-plan' + (o[3] ? ' best' : '') + (sel === o[0] ? ' on' : '') + '" data-k="' + o[0] + '">' + (o[3] ? '<span class="pd-badge">Выгоднее всего</span>' : '') + '<span class="pd-dot"></span><b>' + esc(o[1]) + '</b><span class="pr">' + priceHtml(o[0]) + '<small>' + esc(noteFor(o[0])) + '</small></span><ul>' + o[2].map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></button>').join('');
+    const label = () => 'Оплатить ' + price(sel) + ' ₽';
+    H.openSheet('<div class="pd-hero"><h2>Узнайте, что мешает вам набрать ' + gs() + '</h2><p>Покажем каждую ошибку, перепишем текст на уровень выше и дадим план на неделю. Результат сразу в приложении.</p>' + promoPill() + '</div>' +
       '<div id="pdopts">' + draw() + '</div>' +
       '<div class="stack"><button class="btn pd-shine" id="pdpay">' + label() + '</button><button class="btn" id="pdback">Не сейчас</button></div>' +
       '<p class="mut" style="text-align:center;margin:12px 0 0">Карта или СБП через Robokassa · чек на e-mail · без подписки и автопродления. Нажимая «Оплатить», вы принимаете <a href="' + PAY + '/#oferta" target="_blank" rel="noopener">оферту</a> и <a href="' + PAY + '/#policy" target="_blank" rel="noopener">политику</a>.</p>', () => {
+      if (phase() === 'launch') startTick();
       const wrap = document.getElementById('pdopts');
       wrap.onclick = (e) => { const b = e.target.closest('.pd-plan'); if (!b) return; sel = b.dataset.k; wrap.innerHTML = draw(); document.getElementById('pdpay').textContent = label(); };
       document.getElementById('pdback').onclick = () => H.closeSheet();
@@ -201,8 +230,9 @@ window.Paid = (function () {
 
   function demoPanel() {
     H.openSheet('<h2>Демо-состояние</h2><p class="mut" style="margin-top:-6px">Только в превью. Так будет выглядеть приложение у разных пользователей.</p><div class="stack">' +
-      '<button class="btn" data-s="new">Новый пользователь (1 бесплатный)</button><button class="btn" data-s="used">Бесплатный использован</button><button class="btn" data-s="paid">Есть 5 оплаченных разборов</button><button class="btn" data-s="prem">Premium активен (использовано 3 из 10)</button><button class="btn" data-s="ban">Доступ к ИИ запрещён админом</button></div>', (el) => {
-      el.onclick = (e) => { const b = e.target.closest('[data-s]'); if (!b) return; const s = b.dataset.s;
+      '<button class="btn" data-s="new">Новый пользователь (1 бесплатный)</button><button class="btn" data-s="used">Бесплатный использован</button><button class="btn" data-s="paid">Есть 5 оплаченных разборов</button><button class="btn" data-s="prem">Premium активен (использовано 3 из 10)</button><button class="btn" data-s="ban">Доступ к ИИ запрещён админом</button></div><h3>Акция</h3><div class="stack"><button class="btn" data-p="launch">Запуск: −50% на 7 дней</button><button class="btn" data-p="after">Акция закончилась: −30%</button><button class="btn" data-p="none">Без скидки (полная цена)</button><button class="btn" data-p="reset">Сбросить: таймер и «Новое»</button></div>', (el) => {
+      el.onclick = (e) => { const pb = e.target.closest('[data-p]'); if (pb) { const v = pb.dataset.p; if (v === 'reset') { ['ielts_pd_promo', 'ielts_pd_force', 'ielts_pd_seen_w', 'ielts_pd_seen_ai'].forEach((k) => LS(k, null)); } else { LS('ielts_pd_force', v === 'launch' ? null : v); if (v === 'launch') LS('ielts_pd_promo', String(Date.now())); } H.toast('Готово'); H.closeSheet(); return; }
+        const b = e.target.closest('[data-s]'); if (!b) return; const s = b.dataset.s;
         ent = { free: s === 'new' ? 1 : 0, credits: s === 'paid' ? 5 : 0, prem: s === 'prem', ban: s === 'ban', used: s === 'prem' ? 3 : 0 }; save(); H.toast('Состояние: ' + b.textContent); H.closeSheet(); };
     });
   }
@@ -215,7 +245,8 @@ window.Paid = (function () {
       const b = document.createElement('button'); b.className = 'pd-demo'; b.textContent = 'ПРЕВЬЮ · демо'; b.onclick = demoPanel; document.body.appendChild(b);
     },
     // HTML кнопки для листа «Анализ текста»
-    button() { return enabled && !ent.ban ? '<button class="btn pd-shine" id="pdai" style="margin-bottom:10px">✦ Расширенный разбор<span class="pd-pill">' + esc(pill()) + '</span></button>' : ''; },
+    button() { return enabled && !ent.ban ? '<button class="btn pd-shine" id="pdai" style="margin-bottom:10px">' + (seenAi() ? '' : '<span class="pd-new">Новое</span>') + '✦ Расширенный разбор<span class="pd-pill">' + esc(pill()) + '</span></button>' : ''; },
+    banner, bindBanner, newDot: () => (enabled && !seenW() ? '<i class="pd-nd"></i>' : ''), newChip: () => (enabled && !seenW() ? '<span class="pd-chip n">Новое</span>' : ''), seenWriting: () => LS('ielts_pd_seen_w', '1'),
     bind(ctx) { const b = document.getElementById('pdai'); if (b) b.onclick = () => start(); },
     _state: () => ent,
   };

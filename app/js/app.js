@@ -272,7 +272,7 @@
     const sub = esc(fmtD(date, { weekday: 'long', day: 'numeric', month: 'long' })) + ' · неделя ' + d.week + ' · ' + esc(d.phaseName);
     const nav = '<button class="ib" id="dprev" aria-label="Вчера">' + ico('left') + '</button><button class="ib" id="dnext" aria-label="Завтра">' + ico('right') + '</button>';
     let h = head(isToday ? 'Сегодня' : fmtD(date), sub, nav).replace('<div><h1>', '<div class="hl"><img class="logo" src="img/logo.png?v=2" alt="" width="40" height="40"><div><h1>').replace('</div><div class="acts">', '</div></div><div class="acts">');
-    h += '<div class="sum"><span id="sdn">' + s0.dn + ' из ' + d.total + ' мин</span><span id="spc">' + s0.pct + '%</span></div><div class="bar" style="margin-bottom:16px"><i id="sbar" style="width:' + s0.pct + '%"></i></div>';
+    h += '<div class="sum"><span id="sdn">' + s0.dn + ' из ' + d.total + ' мин</span><span id="spc">' + s0.pct + '%</span></div><div class="bar" style="margin-bottom:16px"><i id="sbar" style="width:' + s0.pct + '%"></i></div>' + (window.Paid ? Paid.banner('today') : '');
     const fdue = isToday ? E.errDue(p.errors, today()).length : 0;
     if (fdue) h += fixBanner(fdue);
     if (isToday) h += studyRow();
@@ -283,7 +283,7 @@
         '<div><button class="tbody"><div class="ttl">' + esc(t.title) + '</div><div class="tmeta">' + t.minutes + ' мин · ' + esc(SKN[t.skill] || t.skill) + '</div></button>' + (more ? '<div class="more"><div>' + more + '</div></div>' : '') + '</div></div>';
     }).join('') + '</div>';
     h += '<div style="text-align:center;margin-top:8px"><button class="link" data-gl="1">Что значат слова и буквы?</button></div>';
-    paint(h); if (isToday) initStudy();
+    paint(h); if (window.Paid) Paid.bindBanner(); if (isToday) initStudy();
     $('#dprev').onclick = () => { viewDate = E.addDays(date, -1); route(); };
     $('#dnext').onclick = () => { const n = E.addDays(date, 1); viewDate = n === today() ? null : n; route(); };
     $$('.task').forEach((row) => {
@@ -758,9 +758,9 @@
   function viewWriting() {
     const p = P(); const W = WRITING;
     const doneIds = new Set(p.writes.map((w) => w.id));
-    let h = head('Письменная часть', 'Задания в формате IELTS', '<button class="btn sm" id="wimp">Оценка ИИ</button>') + '<div class="list cta" style="margin-bottom:14px"><a class="rowi" href="#t2"><div class="grow"><b>Как писать эссе на 8+</b><div class="mut" style="margin-top:2px">Шесть типов предложений, план за 5 минут, чек-лист</div></div>' + ico('chev', 'chev') + '</a></div>' + seg('wg', [['t2', 'Задание 2 (эссе)'], ['t1', 'Задание 1 (график)'], ['gt', 'Письма'], ['free', 'Своё']], wGroup) + '<div id="wl" style="margin-top:16px"></div>';
+    let h = head('Письменная часть', 'Задания в формате IELTS', '<button class="btn sm" id="wimp">Оценка ИИ</button>') + (window.Paid ? Paid.banner('writing') : '') + '<div class="list cta" style="margin-bottom:14px"><a class="rowi" href="#t2"><div class="grow"><b>Как писать эссе на 8+</b><div class="mut" style="margin-top:2px">Шесть типов предложений, план за 5 минут, чек-лист</div></div>' + ico('chev', 'chev') + '</a></div>' + seg('wg', [['t2', 'Задание 2 (эссе)'], ['t1', 'Задание 1 (график)'], ['gt', 'Письма'], ['free', 'Своё']], wGroup) + '<div id="wl" style="margin-top:16px"></div>';
     if (p.subs.length) h += '<h3>Оценки</h3><div class="list">' + p.subs.slice().reverse().slice(0, 15).map((s) => '<div class="rowi"><div class="grow"><b>' + esc((KINDS.find((k) => k[0] === s.kind) || [0, s.kind])[1]) + '</b> <span class="mut">· ' + esc(fmtD(s.date)) + (s.note ? ' · ' + esc(s.note) : '') + '</span></div><b>' + esc(s.avg) + '</b></div>').join('') + '</div>';
-    paint(h);
+    paint(h); if (window.Paid) { Paid.bindBanner(); Paid.seenWriting(); }
     $('#wimp').onclick = () => importSheet(p, wGroup === 't1' ? 't1' : wGroup === 'gt' ? 'gt' : 't2', '');
     const row = (t, title, sub) => '<a class="rowi" href="#write/' + t.id + '"><div class="grow"><b>' + esc(title) + '</b><div class="mut" style="margin-top:2px">' + esc(sub) + '</div></div>' + (doneIds.has(t.id) ? '<span class="chip on">✓</span>' : ico('chev', 'chev')) + '</a>';
     const draw = () => {
@@ -1033,8 +1033,8 @@
     let tab = tab0;
     const t = $('#tabs'); t.hidden = false;
     tab = MORE_ALIAS[tab] || (tab === 'fix' ? 'errors' : tab === 'vw' ? 'cards' : tab === 't2' ? 'writing' : tab); const inMore = MORE.some((m) => m[0] === tab);
-    t.innerHTML = TABS.map(([k, n]) => '<a href="#' + k + '" class="' + (k === tab ? 'on' : '') + '">' + ico(k) + n + '</a>').join('') + '<button id="tmore" class="' + (inMore ? 'on' : '') + '">' + ico('more') + (inMore ? MORE.find((m) => m[0] === tab)[1] : 'Ещё') + '</button>';
-    $('#tmore').onclick = () => openSheet('<div class="list">' + MORE.map(([k, n]) => '<a class="rowi" href="#' + k + '"><span class="grow">' + n + '</span>' + ico('chev', 'chev') + '</a>').join('') + '</div>', (el) => { el.querySelectorAll('a').forEach((a) => { a.onclick = () => closeSheet(); }); });
+    t.innerHTML = TABS.map(([k, n]) => '<a href="#' + k + '" class="' + (k === tab ? 'on' : '') + '">' + ico(k) + n + '</a>').join('') + '<button id="tmore" class="' + (inMore ? 'on' : '') + '">' + ico('more') + (inMore ? MORE.find((m) => m[0] === tab)[1] : 'Ещё') + (window.Paid && !inMore ? Paid.newDot() : '') + '</button>';
+    $('#tmore').onclick = () => openSheet('<div class="list">' + MORE.map(([k, n]) => '<a class="rowi" href="#' + k + '"><span class="grow">' + n + (k === 'writing' && window.Paid ? Paid.newChip() : '') + '</span>' + ico('chev', 'chev') + '</a>').join('') + '</div>', (el) => { el.querySelectorAll('a').forEach((a) => { a.onclick = () => closeSheet(); }); });
   }
   function route(animate) {
     if (!user) return viewAuth();
