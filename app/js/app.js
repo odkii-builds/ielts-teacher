@@ -1034,7 +1034,7 @@
     const t = $('#tabs'); t.hidden = false;
     tab = MORE_ALIAS[tab] || (tab === 'fix' ? 'errors' : tab === 'vw' ? 'cards' : tab === 't2' ? 'writing' : tab); const inMore = MORE.some((m) => m[0] === tab);
     t.innerHTML = TABS.map(([k, n]) => '<a href="#' + k + '" class="' + (k === tab ? 'on' : '') + '">' + ico(k) + n + '</a>').join('') + '<button id="tmore" class="' + (inMore ? 'on' : '') + '">' + ico('more') + (inMore ? MORE.find((m) => m[0] === tab)[1] : 'Ещё') + (window.Paid && !inMore ? Paid.newDot() : '') + '</button>';
-    $('#tmore').onclick = () => openSheet('<div class="list">' + MORE.map(([k, n]) => '<a class="rowi" href="#' + k + '"><span class="grow">' + n + (k === 'writing' && window.Paid ? Paid.newChip() : '') + '</span>' + ico('chev', 'chev') + '</a>').join('') + '</div>', (el) => { el.querySelectorAll('a').forEach((a) => { a.onclick = () => closeSheet(); }); });
+    $('#tmore').onclick = () => openSheet('<div class="list">' + MORE.map(([k, n]) => '<a class="rowi" href="#' + k + '"><span class="grow">' + n + '</span>' + (k === 'writing' && window.Paid ? Paid.newChip() : '') + ico('chev', 'chev') + '</a>').join('') + '</div>', (el) => { el.querySelectorAll('a').forEach((a) => { a.onclick = () => closeSheet(); }); });
   }
   function route(animate) {
     if (!user) return viewAuth();
