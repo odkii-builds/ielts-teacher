@@ -85,6 +85,7 @@
     if (mount) mount(r.querySelector('.sbody'));
   }
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+  if (window.Paid) Paid.init({ openSheet, closeSheet, toast, esc }); // превью платных функций; в проде выключено жёстко
   function confirmSheet(text, okLabel, fn) {
     openSheet('<h2>' + esc(text) + '</h2><div class="stack"><button class="btn danger" id="cfok">' + esc(okLabel) + '</button><button class="btn" id="cfno">Отмена</button></div>', () => {
       $('#cfok').onclick = () => { closeSheet(); fn(); }; $('#cfno').onclick = () => closeSheet();
@@ -853,9 +854,10 @@
         row(a.avgLen >= 14 && a.avgLen <= 28, 'Средняя длина предложения: ' + a.avgLen + ' слов') + row(a.linkers.length >= 4, 'Связки: ' + (a.linkers.length ? a.linkers.slice(0, 8).join(', ') : 'нет') + ' (' + a.linkers.length + ')') +
         row(!a.repeats.length, a.repeats.length ? 'Повторы: ' + a.repeats.map((r) => r[0] + ' ×' + r[1]).join(', ') : 'Сильных повторов нет') +
         (k === 't2' ? row(a.hasConclusion, a.hasConclusion ? 'Есть вывод' : 'Нет явного вывода (in conclusion…)') : k === 't1' ? row(a.hasOverview, a.hasOverview ? 'Есть общий вывод (overview)' : 'Нет общего вывода (начни с Overall, …)') : '') + '</div>' + (k === 't2' ? typesHtml(text) : '') +
-        '<h3>Ошибки и сочетания слов</h3><div id="ltb">' + ltHtml(text, undefined) + '</div><p class="mut">Это проверка формы, не оценка. Содержание и смысл оценит ИИ — скопируй промпт.</p><div class="stack"><button class="btn p" id="wcp">Скопировать промпт для ИИ</button><button class="btn" id="wsv">Сохранить попытку</button><button class="btn" id="wsc">Вставить ответ ИИ</button></div>', () => {
+        '<h3>Ошибки и сочетания слов</h3><div id="ltb">' + ltHtml(text, undefined) + '</div><p class="mut">Это проверка формы, не оценка. Содержание и смысл оценит ИИ — скопируй промпт.</p>'+(window.Paid ? Paid.button() : '')+'<div class="stack"><button class="btn p" id="wcp">Скопировать промпт для ИИ</button><button class="btn" id="wsv">Сохранить попытку</button><button class="btn" id="wsc">Вставить ответ ИИ</button></div>', () => {
         ltCheck(text).then((ms) => { const b = $('#ltb'); if (b) b.innerHTML = ltHtml(text, ms); });
         $('#wcp').onclick = () => { copyText(buildPrompt(k, q, text)); };
+        if (window.Paid) Paid.bind({ kind: k, question: q, text });
         $('#wsv').onclick = () => { p.writes.push({ id, date: today(), words: a.words, text: text.slice(0, 6000) }); save(); closeSheet(); toast('Попытка сохранена'); };
         $('#wsc').onclick = () => importSheet(p, k, id);
       });
