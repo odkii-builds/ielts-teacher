@@ -529,6 +529,45 @@
     }
     document.body.classList.add('drilling');
     const c = p.cards.find((x) => x.id === it.id);
+    const dtop = '<div class="dtop"><span class="mut">' + (d.i + 1) + ' из ' + d.q.length + '</span><button class="link" id="dr_x">Выйти</button></div>';
+    const bindX = () => { $('#dr_x').onclick = () => { cst.tab = 'learn'; cst.dr = null; viewCards(); }; };
+    if (it.type === 'pair') {
+      if (!it.ps) { it.ps = E.pairSet(it.ids.map((id) => p.cards.find((x) => x.id === id)).filter(Boolean)); it.mt = {}; it.sel = null; }
+      if (!it.ps) { d.i += 1; drawDrill(); return; }
+      const ps = it.ps, all = Object.keys(it.mt).length === ps.left.length;
+      const col = (arr, side) => arr.map((x) => { const m = it.mt[x.id]; const cls = m ? ' ok' : side === 'l' && it.sel === x.id ? ' sel' : it.flash === x.id + side ? ' bad' : ''; return '<button class="opt' + cls + '" data-s="' + side + '" data-id="' + esc(x.id) + '"' + (m ? ' disabled' : '') + '>' + esc(x.text) + '</button>'; }).join('');
+      body.innerHTML = '<div class="drill enter">' + dtop + '<div class="mut" style="text-align:center;margin:6px 0 12px">Сопоставь слова и переводы</div><div class="pair"><div class="stack">' + col(ps.left, 'l') + '</div><div class="stack">' + col(ps.right, 'r') + '</div></div><div style="margin-top:12px">' + (all ? '<button class="btn p" id="dr_next">Дальше</button>' : '') + '</div></div>';
+      bindX();
+      $$('.pair .opt').forEach((b) => { b.onclick = () => {
+        const id = b.dataset.id;
+        if (b.dataset.s === 'l') { it.sel = it.sel === id ? null : id; drawDrill(); return; }
+        if (!it.sel) { toast('Сначала выбери слово слева'); return; }
+        if (it.sel === id) { it.mt[id] = 1; it.sel = null; drawDrill(); return; }
+        d.bad[it.sel] = true; it.flash = id + 'r'; drawDrill();
+        setTimeout(() => { it.flash = null; if (cst.dr === d && d.q[d.i] === it) drawDrill(); }, 450);
+      }; });
+      const nx = $('#dr_next'); if (nx) nx.onclick = () => { d.i += 1; drawDrill(); };
+      return;
+    }
+    if (it.type === 'order') {
+      if (!it.o) { it.o = E.orderChunks(c); it.pl = []; }
+      if (!it.o) { d.i += 1; drawDrill(); return; }
+      const o = it.o, n = o.blocks.length, answered = it.res != null;
+      const line = it.pl.map((i) => '<button class="opt' + (answered ? (it.res === 'ok' ? ' ok' : ' bad') : '') + '" data-r="' + i + '"' + (answered ? ' disabled' : '') + '>' + esc(o.blocks[i]) + '</button>').join('');
+      const pool = o.blocks.map((b, i) => '<button class="opt" data-a="' + i + '"' + (it.pl.includes(i) || answered ? ' style="visibility:hidden" disabled' : '') + '>' + esc(b) + '</button>').join('');
+      const hint = String(c.exr || '').replace(/\[\[|\]\]/g, '') || c.ru;
+      body.innerHTML = '<div class="drill enter">' + dtop + '<div class="flash" style="min-height:0;padding:16px 18px"><small>Собери предложение</small><div style="font-size:16px;color:var(--mut)">' + esc(hint) + '</div></div>' +
+        '<div class="blkline">' + (line || '<span class="mut">Нажимай на блоки по порядку</span>') + '</div><div class="blks">' + pool + '</div>' +
+        (answered ? '<div class="flash back" style="min-height:0;padding:14px 16px;font-size:17px"><div>' + hl(E.exOf(c)) + '</div></div><div style="margin-top:10px"><button class="btn p" id="dr_next">Дальше</button></div>'
+          : '<div style="margin-top:12px">' + (it.pl.length === n ? '<button class="btn p" id="dr_ok">Проверить</button>' : '') + (it.pl.length ? '<div style="text-align:center;margin-top:8px"><button class="link" id="dr_rs">Сбросить</button></div>' : '') + '</div>') + '</div>';
+      bindX();
+      $$('.blks .opt').forEach((b) => { b.onclick = () => { it.pl.push(+b.dataset.a); drawDrill(); }; });
+      $$('.blkline .opt').forEach((b) => { b.onclick = () => { it.pl = it.pl.filter((x) => x !== +b.dataset.r); drawDrill(); }; });
+      const rs = $('#dr_rs'); if (rs) rs.onclick = () => { it.pl = []; drawDrill(); };
+      const ok = $('#dr_ok'); if (ok) ok.onclick = () => { it.res = it.pl.map((i) => o.blocks[i]).join(' ') === o.answer.join(' ') ? 'ok' : 'bad'; if (it.res === 'bad') { d.bad[c.id] = true; if (!it.retry) d.q.push({ id: c.id, type: 'order', retry: true }); } drawDrill(); };
+      const nx = $('#dr_next'); if (nx) nx.onclick = () => { c.rv = (c.rv || 0) + 1; d.i += 1; drawDrill(); };
+      return;
+    }
     if (!it.m) { if (it.type === 'gap') it.m = E.mcq(c, p.cards); else if (it.type === 'ru2en') it.m = E.choices(c, p.cards, 't'); else if (it.type === 'en2ru') it.m = E.choices(c, p.cards, 'ru'); }
     it.h = it.h || 0;
     const optsH = (m) => '<div class="opts">' + m.opts.map((o, i) => '<button class="opt' + (it.pick != null ? (i === m.answer ? ' ok' : i === it.pick ? ' bad' : '') : '') + '" data-o="' + i + '"' + (it.pick != null ? ' disabled' : '') + '>' + esc(o) + '</button>').join('') + '</div>';

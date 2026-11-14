@@ -299,3 +299,26 @@ test('contexts: только точные формы слова', () => {
   const c = mk('1', 'plain', 'x'); const o = [mk('2', 'plan', 'The city plans a charge.', 'v'), mk('3', 'simple', 'She wore a plain dress.'), mk('4', 'durable', 'The duration is long.'), mk('5', 'x', 'A plainer look.')];
   assert.deepEqual(E.contexts(c, o, 5), ['She wore a [[plain]] dress.', 'A [[plainer]] look.']);
 });
+
+test('orderChunks: блоки собираются обратно в исходное предложение, фраза-цель цельная', () => {
+  const c = { t: 'contribute to', ex: 'Better public transport can [[contribute to]] reducing traffic congestion.' };
+  const r = E.orderChunks(c, () => 0.3);
+  assert.ok(r); assert.equal(r.answer.join(' '), 'Better public transport can contribute to reducing traffic congestion.');
+  assert.ok(r.answer.includes('contribute to')); assert.equal([...r.blocks].sort().join('|'), [...r.answer].sort().join('|'));
+  assert.notEqual(r.blocks.join(' '), r.answer.join(' '));
+  assert.equal(E.orderChunks({ t: 'tackle', ex: 'We must [[tackle]] it.' }), null); // слишком короткое
+});
+
+test('pairSet: одна пара на слово, переводы уникальны', () => {
+  const cs = [['a', 'один'], ['b', 'два'], ['c', 'три'], ['d', 'два']].map(([t, ru], i) => ({ id: 'x' + i, t, ru, ex: 'Sentence [[' + t + ']] here.' }));
+  const r = E.pairSet(cs);
+  assert.equal(r.left.length, 3); assert.equal(r.right.length, 3);
+  r.left.forEach((l) => assert.equal(r.right.find((x) => x.id === l.id).text, cs.find((c) => c.id === l.id).ru));
+  assert.equal(E.pairSet(cs.slice(0, 2)), null);
+});
+
+test('drillQueue: есть задания «сопоставь» и «собери предложение»', () => {
+  const D = require('../app/data/deck.json').filter((d) => d.pos === 'v').slice(0, 12).map((d) => Object.assign({ seen: true, ls: 0, lv: 1 }, d));
+  const q = E.drillQueue(D, 5, 12);
+  assert.ok(q.some((x) => x.type === 'pair' && x.ids.length === 4)); assert.ok(q.some((x) => x.type === 'order'));
+});
