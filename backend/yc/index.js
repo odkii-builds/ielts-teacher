@@ -87,6 +87,12 @@ const ok = (o) => ({ ok: true, ...o });
 const bad = (m, c) => { const e = new Error(m); e.code = c || 400; return e; };
 
 const policy = require('./emailpolicy');
+// Существует ли уже аккаунт для этой почты: канон, как ввёл, и вариант без +метки (старые аккаунты хранятся «как вводили»)
+async function taken(pe) {
+  const plain = pe.raw.replace(/\+[^@]*@/, '@');
+  for (const e of new Set([pe.canon, pe.raw, plain])) if (await getUser(e)) return true;
+  return false;
+}
 const actions = {
   // REQUIRE_CODE=1: только популярные почты (один человек = один ящик) + обязательный код из письма.
   async signup(b) {
@@ -95,7 +101,7 @@ const actions = {
     if (mail.required()) { const pe = policy.check(b.email); if (!pe.ok) throw bad(pe.msg); email = pe.canon; raw = pe.raw; }
     else if (!/^[^@\s]{1,64}@[^@\s]{1,255}\.[^@\s]{2,}$/.test(email)) throw bad('Некорректный email');
     if (pw.length < 6 || pw.length > 200) throw bad('Пароль: от 6 символов');
-    if ((await getUser(email)) || (raw !== email && (await getUser(raw)))) throw bad('Этот email уже зарегистрирован. Нажмите «Войти»', 409);
+    if (mail.required() ? await taken({ canon: email, raw }) : (await getUser(email))) throw bad('Этот email уже зарегистрирован. Нажмите «Войти»', 409);
     if (mail.required()) await mail.checkCode(email, b.code);
     const legacy = await legacyLogin(raw, pw);
     const u = legacy || { id: crypto.randomUUID(), email, pass: hash(pw) };
@@ -107,7 +113,7 @@ const actions = {
     const mail = require('./mail');
     if (!mail.required()) return ok({ required: false });
     const pe = policy.check(b.email); if (!pe.ok) throw bad(pe.msg);
-    if ((await getUser(pe.canon)) || (pe.raw !== pe.canon && (await getUser(pe.raw)))) throw bad('Этот email уже зарегистрирован. Нажмите «Войти»', 409);
+    if (await taken(pe)) throw bad('Этот email уже зарегистрирован. Нажмите «Войти»', 409);
     await mail.sendCode(pe.canon, pe.raw);
     return ok({ required: true, sent: true });
   },
@@ -117,6 +123,7 @@ const actions = {
     const pe = policy.check(email);
     let u = await getUser(email);
     if (!u && pe.ok && pe.canon !== email) u = await getUser(pe.canon);
+    if (!u && pe.ok) u = await getUser(pe.raw.replace(/\+[^@]*@/, '@'));
     if (u) { if (!check(pw, u.pass)) u = null; } else u = await legacyLogin(email, pw);
     if (!u) { fail(email); throw bad('Invalid login credentials', 401); }
     return ok({ token: sign(u), user: { id: u.id, email: u.email } });
