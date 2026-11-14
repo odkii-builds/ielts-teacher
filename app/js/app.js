@@ -997,6 +997,26 @@
     $('#pf').onsubmit = (e) => { e.preventDefault(); const f = readProfileForm(); if (placeDone) f.placement = placeDone; newProfile(f); placeDone = null; sess = null; location.hash = '#today'; route(); };
   }
 
+  // Шаг 2 регистрации: код из письма
+  function codeStep(em, pw) {
+    $('#af').innerHTML = '<p style="font-size:17px;margin:0 0 6px">Мы отправили код на <b>' + esc(em) + '</b></p><p class="mut" style="margin:0 0 14px">Введите 6 цифр из письма. Не пришло? Проверьте «Спам».</p><input id="acode" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="000000" style="text-align:center;font-size:24px;letter-spacing:8px" required><div class="err" id="aerr"></div><button class="btn p" id="asub" type="submit">Подтвердить</button><div style="text-align:center;margin-top:8px"><button class="link" id="ares" type="button" disabled></button></div><div style="text-align:center;margin-top:4px"><button class="link" id="aback" type="button">Изменить почту</button></div>';
+    const inp = $('#acode'); inp.focus();
+    let t = 60, iv = null;
+    const tick = () => { const r = $('#ares'); if (!r) { clearInterval(iv); return; } if (t > 0) { r.disabled = true; r.textContent = 'Отправить код ещё раз через ' + t + ' с'; t--; } else { clearInterval(iv); r.disabled = false; r.textContent = 'Отправить код ещё раз'; } };
+    iv = setInterval(tick, 1000); tick();
+    $('#ares').onclick = async () => { t = 60; iv = setInterval(tick, 1000); tick(); try { await Cloud.signupCode(em); $('#aerr').style.color = ''; $('#aerr').textContent = 'Код отправлен ещё раз'; } catch (e) { $('#aerr').textContent = String(e.message || e); } };
+    $('#aback').onclick = () => { clearInterval(iv); viewAuth(); };
+    inp.oninput = () => { inp.value = inp.value.replace(/\D/g, '').slice(0, 6); };
+    $('#af').onsubmit = async (e) => {
+      e.preventDefault(); const b = $('#asub'); b.disabled = true; $('#aerr').textContent = '';
+      try {
+        const r = await Cloud.signUp(em, pw, inp.value);
+        if (r.error) throw r.error;
+        clearInterval(iv); await start(r.data.session.user);
+      } catch (err) { $('#aerr').style.color = ''; $('#aerr').textContent = /fetch|network|Нет связи/i.test(String(err.message)) ? 'Нет связи с сервером' : String(err.message || err); b.disabled = false; }
+    };
+  }
+
   // ---------- вход ----------
   function viewAuth() {
     $('#tabs').hidden = true;
@@ -1009,6 +1029,7 @@
       try {
         const em = $('#ae').value.trim(), pw = $('#ap').value;
         if (signup && !$('#acons').checked) throw new Error('Для регистрации нужно согласие на обработку данных');
+        if (signup) { const sc = await Cloud.signupCode(em); if (sc.required) { b.disabled = false; return codeStep(em, pw); } }
         const r = signup ? await Cloud.signUp(em, pw) : await Cloud.signIn(em, pw);
         if (r.error) throw r.error;
         if (!r.data.session) { $('#af').innerHTML = '<p style="font-size:17px">Письмо отправлено на <b>' + esc(em) + '</b>.</p><p class="mut">Откройте его и перейдите по ссылке, чтобы подтвердить аккаунт. После перехода вы сразу окажетесь в приложении — входить заново не нужно. Не пришло? Проверьте «Спам».</p>'; return; }

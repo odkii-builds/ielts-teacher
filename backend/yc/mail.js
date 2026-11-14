@@ -30,7 +30,7 @@ const num = (x) => (x && x.toNumber ? x.toNumber() : Number(x || 0));
 const bad = (m, c) => { const e = new Error(m); e.code = c || 400; return e; };
 
 // Отправить 6-значный код. Не чаще раза в минуту на адрес.
-async function sendCode(email) {
+async function sendCode(email, to) {
   const { q, TypedValues } = require('./index')._;
   if (!E.PB_KEY_ID || !E.PB_SECRET) throw bad('Почта временно недоступна', 503);
   const r = await q('DECLARE $e AS Utf8; SELECT last FROM codes WHERE email = $e;', { $e: TypedValues.utf8(email) });
@@ -38,7 +38,7 @@ async function sendCode(email) {
   const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
   await q('DECLARE $e AS Utf8; DECLARE $h AS Utf8; DECLARE $x AS Uint64; DECLARE $l AS Uint64; UPSERT INTO codes (email, h, exp, n, last) VALUES ($e, $h, $x, 0, $l);',
     { $e: TypedValues.utf8(email), $h: TypedValues.utf8(hcode(email, code)), $x: TypedValues.uint64(Date.now() + 600000), $l: TypedValues.uint64(Date.now()) });
-  await send(email, 'Код подтверждения IELTS Teacher: ' + code,
+  await send(to || email, 'Код подтверждения IELTS Teacher: ' + code,
     'Ваш код: ' + code + '\nОн действует 10 минут. Если вы не регистрировались в IELTS Teacher, просто проигнорируйте письмо.',
     '<div style="font-family:Arial,sans-serif;font-size:16px;color:#111"><p>Ваш код подтверждения:</p><p style="font-size:32px;letter-spacing:6px;font-weight:700">' + code + '</p><p style="color:#666">Код действует 10 минут. Если вы не регистрировались в IELTS Teacher, просто проигнорируйте письмо.</p></div>');
 }

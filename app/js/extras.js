@@ -22,9 +22,9 @@
   // ---------- баннер набора в клуб ----------
   function bannerHtml() {
     const inq = S().wl;
-    return '<div class="nbanner" id="nbn"><button class="nb-x" id="nbx" aria-label="Скрыть">×</button><img class="nb-i" src="img/club.jpg" alt="IELTS Teacher Club" width="768" height="512" style="filter:saturate(.75) brightness(.85)">' +
+    return '<div class="nbanner" id="nbn"><button class="nb-x" id="nbx" aria-label="Скрыть">×</button><img class="nb-i" src="img/club-w.jpg" alt="IELTS Teacher Club" width="768" height="512" decoding="async">' +
       '<div class="nb-c"><span class="nb-tag">Набор закрыт</span><b class="nb-t">' + (inq ? 'Вы в листе ожидания' : 'Запишись в лист ожидания') + '</b><span class="nb-s">' + (inq ? 'Дадим знать, когда откроем места.' : 'Места заняты. Напишем первым, когда откроем следующий набор.') + '</span>' +
-      '<button class="btn sm nb-b" id="nbo" style="' + (inq ? '' : 'background:linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2);color:#fff;') + 'width:100%">' + (inq ? 'Вы в очереди ✓' : 'Встать в очередь') + '</button></div></div>';
+      '<button class="btn sm nb-b" id="nbo" style="' + (inq ? '' : 'background:linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2);color:#fff;') + '">' + (inq ? 'Вы в очереди ✓' : 'Встать в очередь') + '</button></div></div>';
   }
   function clubSheet() {
     const mask = (em) => { const m = /^(.)[^@]*(@.+)$/.exec(String(em || '')); return m ? m[1] + '***' + m[2] : ''; };
@@ -33,7 +33,7 @@
     const head = '<h2 style="margin:0 0 6px">IELTS Teacher Club</h2><p class="mut" style="margin:0 0 12px">Небольшая закрытая группа для тех, кто готовится к IELTS всерьёз. Отбор бесплатный.</p>' + info;
     const draw = (st) => {
       let body;
-      if (st && st.joined) body = '<div class="card" style="margin-top:14px"><b>Вы в очереди · №' + st.pos + ' из ' + st.total + '</b><div class="mut" style="margin-top:4px">Когда откроем места, дадим знать в приложении и на e-mail аккаунта' + (st.email ? ' (' + esc(st.email) + ')' : '') + '.</div></div><div class="stack" style="margin-top:12px"><button class="btn" id="nwc">Закрыть</button></div>';
+      if (st && st.joined) body = '<div class="card" style="margin-top:14px"><b id="nwpos">' + (st.pos ? 'Вы в очереди · №' + st.pos + ' из ' + st.total : 'Вы в очереди') + '</b><div class="mut" style="margin-top:4px">Когда откроем места, дадим знать в приложении и на e-mail аккаунта' + (st.email ? ' (' + esc(st.email) + ')' : '') + '.</div></div><div class="stack" style="margin-top:12px"><button class="btn" id="nwc">Закрыть</button></div>';
       else if (st && st.err) body = '<p class="mut" style="margin:14px 0 8px">' + esc(st.err) + '</p><div class="stack"><button class="btn p" id="nwj">Попробовать ещё раз</button></div>';
       else body = '<p class="mut" style="margin:14px 0 8px">Сейчас все места заняты. Очередь даёт приоритет: места следующего набора мы сначала предложим вам. Нажимая кнопку, вы соглашаетесь получить сообщение об открытии набора.</p><div class="stack"><button class="btn p" id="nwj" style="background:linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2);color:#fff">Встать в очередь</button></div>';
       C().openSheet(head + body, (el) => {
@@ -41,13 +41,18 @@
         if (c) c.onclick = () => C().closeSheet();
         if (j) j.onclick = async () => {
           j.disabled = true; j.textContent = 'Записываю…';
-          try { const r = await window.Cloud.clubWait(true); S().wl = 1; C().save(); const u = await window.Cloud.session(); draw(Object.assign({ email: u ? mask(u.user.email) : '' }, r)); }
+          try { const r = await window.Cloud.clubWait(true); S().wl = 1; const u = await window.Cloud.session(); S().wls = { pos: r.pos, total: r.total, email: u ? mask(u.user.email) : '' }; C().save(); draw(Object.assign({ joined: true }, S().wls)); }
           catch (er) { draw({ err: /Нет связи/.test(er.message) ? 'Нет связи. Проверьте интернет и попробуйте ещё раз.' : 'Не получилось записаться. Попробуйте чуть позже.' }); }
         };
       });
     };
-    draw(null);
-    if (S().wl) window.Cloud.clubWait(false).then(async (r) => { if (r.joined) { const u = await window.Cloud.session(); draw(Object.assign({ email: u ? mask(u.user.email) : '' }, r)); } }).catch(() => {});
+    // уже в очереди: сразу рисуем итоговый вид (из кэша), без мигания «Встать в очередь»; цифры обновляем на месте
+    draw(S().wl ? Object.assign({ joined: true }, S().wls || {}) : null);
+    if (S().wl) window.Cloud.clubWait(false).then(async (r) => {
+      if (!r.joined) { S().wl = 0; draw(null); return; }
+      const u = await window.Cloud.session(); S().wls = { pos: r.pos, total: r.total, email: u ? mask(u.user.email) : '' }; C().save();
+      const el = document.getElementById('nwpos'); if (el) el.textContent = 'Вы в очереди · №' + r.pos + ' из ' + r.total;
+    }).catch(() => {});
   }
   function bindBanner(v) {
     const b = v.querySelector('#nbn'); if (!b) return;
