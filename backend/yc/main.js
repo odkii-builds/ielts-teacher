@@ -51,18 +51,36 @@ async function spend(id) {
   if (e.prem > Date.now()) {
     if (e.day !== t) { e.day = t; e.dcount = 0; }
     if (e.dcount >= PREMIUM_DAILY) throw bad('Дневной лимит Premium исчерпан', 429);
-    e.dcount++;
-  } else if (e.credits > 0) e.credits--;
-  else if (e.free > 0) e.free--;
+    e.dcount++; e.kind = 'prem';
+  } else if (e.credits > 0) { e.credits--; e.kind = 'credit'; }
+  else if (e.free > 0) { e.free--; e.kind = 'free'; }
   else throw bad('Нет доступных проверок', 402);
   await putEnt(id, e, run);
   return e;
   });
 }
-async function refund(id) { return inTx(async (run) => { const e = await getEnt(id, run); if (e.dcount > 0 && e.day === today()) e.dcount--; else e.credits++; await putEnt(id, e, run); }); }
+// Вернуть списанную проверку того же вида, что была списана (kind из spend)
+async function refund(id, kind) { return inTx(async (run) => { const e = await getEnt(id, run); if (kind === 'prem') { if (e.dcount > 0 && e.day === today()) e.dcount--; } else if (kind === 'free') e.free++; else e.credits++; await putEnt(id, e, run); return e; }); }
 module.exports.spend = spend; module.exports.refund = refund; module.exports.inTx = inTx;
 
-const actions = {};
+const R = require('./review');
+// Расширенный разбор: проверка текста -> атомарное списание -> Groq -> при любой ошибке возврат списанного.
+// Бесплатная проверка получает только обрезанный результат (остальное не покидает сервер).
+actions.review = async (b, me) => {
+  const kind = ['t1', 'gt'].includes(b.kind) ? b.kind : 't2', text = String(b.text || ''), bad0 = R.check(kind, text);
+  if (bad0) throw bad(bad0);
+  const goal = Math.min(9, Math.max(4, Number(b.goal) || 7));
+  const e = await spend(me.id);
+  let full;
+  try { full = R.shape(await R.callGroq(R.messages(kind, b.question, text, goal)), text); }
+  catch (err) {
+    console.error('review failed', err && (err.upstream || ''), err && err.message);
+    try { await refund(me.id, e.kind); } catch (e2) { console.error('refund failed', e2 && e2.message); }
+    throw bad('Не удалось получить разбор. Проверка возвращена, попробуйте ещё раз через минуту', 502);
+  }
+  const fin = await getEnt(me.id);
+  return ok({ result: e.kind === 'free' ? R.trim(full) : R.fullOut(full), ent: view(fin, me) });
+};
 actions.me = async (b, me) => ok({ ent: view(await getEnt(me.id), me) });
 const needAdmin = (me) => { if (!isAdmin(me)) throw bad('forbidden', 403); };
 actions.admin_list = async (b, me) => {
