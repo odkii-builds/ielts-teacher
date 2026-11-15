@@ -41,6 +41,8 @@ window.Cloud = (function () {
     // Права и баланс ИИ-проверок — всегда с сервера (источник истины)
     async me() { return (await call('me', { token: tok() })).ent; },
     // Лист ожидания клуба: join=true встаёт в очередь (повтор безопасен), join=false только статус
+    // Расширенный разбор эссе (сервер: проверка прав, списание, Groq, возврат при ошибке)
+    async review(p) { return call('review', Object.assign({ token: tok() }, p)); },
     async clubWait(join) { return call('club_wait', { token: tok(), join: !!join }); },
     async pull() {
       const j = await call('pull', { token: tok() });

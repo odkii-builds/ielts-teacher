@@ -150,49 +150,90 @@ window.Paid = (function () {
     });
   }
 
+  // ---------- запуск разбора ----------
+  // Реальный режим: ответ приходит с сервера (Groq), права и списание тоже на сервере. Включается кнопкой в демо-панели и только при входе в аккаунт.
+  const real = () => LS('ielts_pd_real') === '1';
+  let CTX = null; // { kind, question, text } из листа «Анализ текста»
+  const STEPS_TXT = ['Проверяю структуру и аргументы…', 'Оцениваю по критериям IELTS…', 'Ищу ошибки и слабые места…', 'Собираю разбор…'];
+  function syncEnt(v) { if (!v) return; ent.credits = v.credits; ent.free = v.free_left; ent.prem = !!v.premium_until; ent.ban = !!v.banned; ent.used = DAILY - (v.daily_left || 0); save(); }
   function run() {
+    if (real() && CTX && window.Cloud && Cloud.review) return runReal();
     let tier;
     if (ent.prem && dailyLeft() > 0) { ent.used = (ent.used || 0) + 1; tier = 'paid'; } else if (ent.credits > 0) { ent.credits--; tier = 'paid'; } else { ent.free--; tier = 'free'; }
     save();
-    loading('Читаю текст', ['Проверяю структуру и аргументы…', 'Оцениваю по критериям IELTS…', 'Ищу ошибки и слабые места…', 'Собираю разбор…'], 3000, () => result(tier));
+    loading('Читаю текст', STEPS_TXT, 3000, () => render(demoData(tier)));
+  }
+  async function runReal() {
+    H.openSheet('<h2>Читаю текст</h2><p class="mut" id="pdst" style="margin-top:-6px">' + esc(STEPS_TXT[0]) + '</p><p class="pd-dots" style="text-align:center;margin:30px 0">&nbsp;<i></i><i></i><i></i></p><p class="mut" style="text-align:center">Обычно 10–20 секунд. Не закрывайте окно.</p>');
+    let i = 0; const iv = setInterval(() => { const e = document.getElementById('pdst'); if (e) e.textContent = STEPS_TXT[Math.min(++i, STEPS_TXT.length - 1)]; }, 4000);
+    try {
+      const r = await Cloud.review({ kind: CTX.kind, question: CTX.question, text: CTX.text, goal: goal() });
+      clearInterval(iv); syncEnt(r.ent); render(r.result, CTX.text);
+    } catch (e) {
+      clearInterval(iv); H.closeSheet(); H.toast(String(e.message || e));
+      try { syncEnt(await Cloud.me()); } catch (e2) { /* ignore */ }
+      if (/Нет доступных/.test(String(e.message))) setTimeout(paywall, 300);
+    }
   }
 
   const blurBox = (inner, label) => '<div class="pd-lock"><div class="pd-blur">' + inner + '</div><div class="pd-tag">' + lk(label) + '</div></div>';
 
-  function result(tier) {
-    const full = tier === 'paid';
-    let h = '<div class="pd-head"><h2>Расширенный разбор</h2><span class="pd-hp">' + (full ? 'Полный' : 'Бесплатная часть') + '</span></div><p class="mut" style="margin:-6px 0 12px">Демо-пример · оценка приблизительная, это не официальный результат IELTS</p>';
-    h += '<div style="display:flex;align-items:flex-end;gap:12px"><div class="pd-band">≈ 6.0</div><div class="mut" style="padding-bottom:6px">диапазон 5.5–6.0</div></div>';
-    h += CRIT.map((c) => '<div class="pd-row"><span>' + esc(c[0]) + '</span><b>' + c[1].toFixed(1) + '</b><div class="bar"><i style="width:' + Math.round(c[1] / 9 * 100) + '%"></i></div></div>').join('');
-    h += (goal() > 6 ? '<div class="pd-card"><b>До вашей цели Band ' + gs() + ' не хватает ≈ ' + (goal() - 6).toFixed(1) + '</b><div class="mut" style="margin-top:4px">Это достижимо: 12 найденных ошибок и одна логическая дыра в выводе закрывают заметную часть разрыва.</div></div>' : '<div class="pd-card"><b>Ваша цель Band ' + gs() + ' уже в зоне досягаемости</b><div class="mut" style="margin-top:4px">Закрепите результат: 12 найденных ошибок — это то, что может стоить вам баллов в день экзамена.</div></div>');
-    h += '<h3>Что тянет балл вниз</h3><div class="list" style="padding:4px 16px">' +
-      '<div class="rowi" style="padding:10px 0"><span style="color:var(--warn)">!</span><span class="grow"><b>Грамматика.</b> Согласование подлежащего и сказуемого сломано почти в каждом абзаце (it also <span class="pd-del">have</span>, parents <span class="pd-del">has</span>, government <span class="pd-del">pay</span>). Это держит Grammatical Range & Accuracy на 5.5.</span></div>' +
-      '<div class="rowi" style="padding:10px 0"><span style="color:var(--warn)">!</span><span class="grow"><b>Позиция.</b> Вы пишете «partly agree», но идея из вывода (бесплатно только для лучших студентов) нигде не раскрыта в основной части. Это снижает Task Response.</span></div></div>';
-    h += '<h3>Разбор самого слабого абзаца (абзац 2)</h3>' +
-      '<p style="margin:0 0 8px">' + esc(SAMPLE[1]).replace(/can not|very expensive|their parents has not enough money|If the government pay|this students|improve their life|bring more benefit to the society/g, (m) => '<span class="pd-del">' + m + '</span>') + '</p>' +
-      '<p class="mut" style="margin:0 0 4px">Исправлено:</p><p style="margin:0 0 10px"><span class="pd-ins">' + esc(FIX2_TEXT) + '</span></p>' +
-      '<div class="list" style="padding:4px 16px">' + FIX2.map((f) => '<div class="rowi" style="padding:10px 0;align-items:flex-start"><span class="grow"><span class="pd-del">' + esc(f[0]) + '</span> → <span class="pd-ins">' + esc(f[1]) + '</span><div class="mut" style="margin-top:2px;font-size:13px">' + esc(f[2]) + '</div></span></div>').join('') + '</div>';
+  // Демо-данные в том же виде, в каком их отдаёт сервер
+  function demoData(tier) {
+    const e2 = (f, i) => ({ para: 2, wrong: f[0], right: f[1], rule: f[2], type: 'Грамматика' });
+    const base = { band: 6, range: [5.5, 6], criteria: { TR: 6, CC: 6, LR: 5.5, GRA: 5.5 }, weakest_para: 2, weakest_fixed: FIX2_TEXT, demo: true,
+      pull_down: [{ title: 'Грамматика', text: 'Согласование подлежащего и сказуемого сломано почти в каждом абзаце (it also have, parents has, government pay). Это держит Grammatical Range & Accuracy на 5.5.' }, { title: 'Позиция', text: 'Вы пишете «partly agree», но идея из вывода (бесплатно только для лучших студентов) нигде не раскрыта в основной части. Это снижает Task Response.' }] };
+    if (tier !== 'paid') return Object.assign(base, { tier: 'free', errors: FIX2.map(e2), total_errors: 12, shown_errors: 7, locked: { errors: 5, paras: 4, band7: true, band8: true, vocab: 6, plan: 5 } });
+    return Object.assign(base, { tier: 'paid', errors: FIX2.map(e2).concat(ALLFIX.map((f) => ({ para: 1, wrong: f[0], right: f[1], rule: f[3], type: f[2] === 'LR' ? 'Лексика' : 'Грамматика' }))), total_errors: 12,
+      error_types: TYPES.map((t) => ({ name: t[0], count: t[1] })), paras: PARAS.map((x) => ({ title: x[0], note: x[1] })), band7_text: BAND7, band8_para: BAND8, vocab: VOCAB, plan: STEPS.map((x) => ({ title: x[0], gain: x[1], time: x[2] })) });
+  }
+
+  // Подсветка ошибок в исходном абзаце (всё экранируется, подсвечиваются только дословные цитаты)
+  function mark(par, errs) {
+    let h = esc(par);
+    errs.forEach((e) => { const w = esc(e.wrong); if (w && h.indexOf(w) >= 0) h = h.replace(w, '<span class="pd-del">' + w + '</span>'); });
+    return h;
+  }
+  const paragraphs = (t) => String(t || '').split(/\n\s*\n|\n/).map((x) => x.trim()).filter(Boolean);
+
+  function render(d, essay) {
+    const full = d.tier === 'paid', crit = [['Task Response', d.criteria.TR], ['Coherence & Cohesion', d.criteria.CC], ['Lexical Resource', d.criteria.LR], ['Grammatical Range & Accuracy', d.criteria.GRA]];
+    const band = d.band, gap = goal() - band, n = d.total_errors;
+    let h = '<div class="pd-head"><h2>Расширенный разбор</h2><span class="pd-hp">' + (full ? 'Полный' : 'Бесплатная часть') + '</span></div><p class="mut" style="margin:-6px 0 12px">' + (d.demo ? 'Демо-пример · ' : '') + 'оценка приблизительная, это не официальный результат IELTS</p>';
+    h += '<div style="display:flex;align-items:flex-end;gap:12px"><div class="pd-band">≈ ' + band.toFixed(1) + '</div><div class="mut" style="padding-bottom:6px">диапазон ' + d.range[0].toFixed(1) + '–' + d.range[1].toFixed(1) + '</div></div>';
+    h += crit.map((c) => '<div class="pd-row"><span>' + esc(c[0]) + '</span><b>' + c[1].toFixed(1) + '</b><div class="bar"><i style="width:' + Math.round(c[1] / 9 * 100) + '%"></i></div></div>').join('');
+    h += gap > 0 ? '<div class="pd-card"><b>До вашей цели Band ' + gs() + ' не хватает ≈ ' + gap.toFixed(1) + '</b><div class="mut" style="margin-top:4px">Это достижимо: ' + (n ? 'найдено ' + n + ' ' + plural(n) + ', и каждая закрывает часть разрыва.' : 'главное закрыть слабые места ниже.') + '</div></div>'
+      : '<div class="pd-card"><b>Ваша цель Band ' + gs() + ' уже в зоне досягаемости</b><div class="mut" style="margin-top:4px">Закрепите результат' + (n ? ': ' + n + ' ' + plural(n) + ' могут стоить вам баллов в день экзамена.' : '.') + '</div></div>';
+    if (d.pull_down.length) h += '<h3>Что тянет балл вниз</h3><div class="list" style="padding:4px 16px">' + d.pull_down.map((x) => '<div class="rowi" style="padding:10px 0"><span style="color:var(--warn)">!</span><span class="grow"><b>' + esc(x.title) + '.</b> ' + esc(x.text) + '</span></div>').join('') + '</div>';
+    const wp = d.weakest_para, orig = essay ? paragraphs(essay)[wp - 1] : (d.demo ? SAMPLE[1] : '');
+    h += '<h3>Разбор самого слабого абзаца (абзац ' + wp + ')</h3>' + (orig ? '<p style="margin:0 0 8px">' + mark(orig, d.errors.filter((e) => e.para === wp)) + '</p>' : '') +
+      (d.weakest_fixed ? '<p class="mut" style="margin:0 0 4px">Исправлено:</p><p style="margin:0 0 10px"><span class="pd-ins">' + esc(d.weakest_fixed) + '</span></p>' : '');
+    const fixRow = (f, tail) => '<div class="rowi" style="padding:10px 0;align-items:flex-start"><span class="grow"><span class="pd-del">' + esc(f.wrong) + '</span> → <span class="pd-ins">' + esc(f.right) + '</span><div class="mut" style="margin-top:2px;font-size:13px">' + esc(f.rule) + (tail || '') + '</div></span></div>';
+    const wpErr = d.errors.filter((e) => e.para === wp);
+    if (wpErr.length) h += '<div class="list" style="padding:4px 16px">' + wpErr.map((f) => fixRow(f)).join('') + '</div>';
     if (full) {
-      h += '<h3>Какие у вас ошибки</h3><div class="pd-card">' + TYPES.map((t) => '<div class="pd-row" style="margin:6px 0"><span>' + esc(t[0]) + '</span><b>' + t[1] + '</b><div class="bar"><i style="width:' + Math.round(t[1] / 12 * 100) + '%"></i></div></div>').join('') + '</div>';
-      h += '<h3>Остальные ошибки</h3><div class="list" style="padding:4px 16px">' + ALLFIX.map((f) => '<div class="rowi" style="padding:10px 0;align-items:flex-start"><span class="grow"><span class="pd-del">' + esc(f[0]) + '</span> → <span class="pd-ins">' + esc(f[1]) + '</span><div class="mut" style="margin-top:2px;font-size:13px">' + esc(f[3]) + ' · ' + esc(f[2]) + '</div></span></div>').join('') + '</div>';
-      h += '<h3>Разбор аргументации по абзацам</h3><div class="list" style="padding:4px 16px">' + PARAS.map((x) => '<div class="rowi" style="padding:10px 0;align-items:flex-start"><span class="grow"><b>' + esc(x[0]) + '</b><div class="mut" style="margin-top:2px;font-size:13px">' + esc(x[1]) + '</div></span></div>').join('') + '</div>';
-      h += '<h3>Ваш текст на уровне Band 7</h3>' + BAND7.map((p) => '<p style="margin:0 0 8px"><span class="pd-ins">' + esc(p) + '</span></p>').join('');
-      h += '<h3>Образец сильного абзаца (Band 8)</h3><p style="margin:0 0 8px"><span class="pd-ins">' + esc(BAND8) + '</span></p><p class="mut" style="margin:0">Образец написан под ваш вопрос. Не заучивайте, а возьмите структуру: уступка, неожиданный вывод, вывод.</p>';
-      h += '<h3>Словарь: что заменить</h3><div class="list" style="padding:4px 16px">' + VOCAB.map((v) => '<div class="rowi" style="padding:8px 0"><span class="grow">' + esc(v[0]) + ' → <b>' + esc(v[1]) + '</b></span></div>').join('') + '</div>';
-      h += '<h3>План на неделю</h3><div class="list" style="padding:4px 16px">' + STEPS.map((x, i) => '<div class="rowi" style="padding:10px 0;align-items:flex-start"><span style="font-weight:700;color:var(--acc)">' + (i + 1) + '</span><span class="grow"><b>' + esc(x[0]) + '</b><div class="mut" style="margin-top:2px;font-size:13px">' + esc(x[1]) + ' · ' + esc(x[2]) + '</div></span></div>').join('') + '</div>';
-      h += '<div class="pd-note">Ошибки и слова из разбора можно сохранить в журнал ошибок и повторять карточками. (В превью не сохраняется.)</div>';
+      const rest = d.errors.filter((e) => e.para !== wp);
+      if (d.error_types && d.error_types.length) h += '<h3>Какие у вас ошибки</h3><div class="pd-card">' + d.error_types.map((t) => '<div class="pd-row" style="margin:6px 0"><span>' + esc(t.name) + '</span><b>' + t.count + '</b><div class="bar"><i style="width:' + Math.round(t.count / Math.max(1, n) * 100) + '%"></i></div></div>').join('') + '</div>';
+      if (rest.length) h += '<h3>Остальные ошибки</h3><div class="list" style="padding:4px 16px">' + rest.map((f) => fixRow(f, ' · Абзац ' + f.para)).join('') + '</div>';
+      if (d.paras && d.paras.length) h += '<h3>Разбор аргументации по абзацам</h3><div class="list" style="padding:4px 16px">' + d.paras.map((x) => '<div class="rowi" style="padding:10px 0;align-items:flex-start"><span class="grow"><b>' + esc(x.title) + '</b><div class="mut" style="margin-top:2px;font-size:13px">' + esc(x.note) + '</div></span></div>').join('') + '</div>';
+      if (d.band7_text && d.band7_text.length) h += '<h3>Ваш текст на уровне Band 7</h3>' + d.band7_text.map((p) => '<p style="margin:0 0 8px"><span class="pd-ins">' + esc(p) + '</span></p>').join('');
+      if (d.band8_para) h += '<h3>Образец сильного абзаца (Band 8)</h3><p style="margin:0 0 8px"><span class="pd-ins">' + esc(d.band8_para) + '</span></p><p class="mut" style="margin:0">Образец написан под ваш вопрос. Не заучивайте, а возьмите структуру.</p>';
+      if (d.vocab && d.vocab.length) h += '<h3>Словарь: что заменить</h3><div class="list" style="padding:4px 16px">' + d.vocab.map((v) => '<div class="rowi" style="padding:8px 0"><span class="grow">' + esc(v[0]) + ' → <b>' + esc(v[1]) + '</b></span></div>').join('') + '</div>';
+      if (d.plan && d.plan.length) h += '<h3>План на неделю</h3><div class="list" style="padding:4px 16px">' + d.plan.map((x, i) => '<div class="rowi" style="padding:10px 0;align-items:flex-start"><span style="font-weight:700;color:var(--acc)">' + (i + 1) + '</span><span class="grow"><b>' + esc(x.title) + '</b><div class="mut" style="margin-top:2px;font-size:13px">' + esc(x.gain) + (x.time ? ' · ' + esc(x.time) : '') + '</div></span></div>').join('') + '</div>';
+      h += '<div class="pd-note">Ошибки и слова из разбора можно сохранить в журнал ошибок и повторять карточками. (Пока не сохраняется.)</div>';
       if (!ent.prem) h += '<div class="pd-card" style="display:flex;align-items:center;gap:12px"><div style="flex:1"><b>Проверка исправленной версии</b><div class="mut" style="font-size:13px">Перепишите текст и получите новый band. Входит в Premium.</div></div>' + lk('Premium', true) + '</div>';
     } else {
+      const L = d.locked || {}, pct = Math.round(d.shown_errors / Math.max(1, d.total_errors) * 100);
       h += '<h3>Что ещё в полном разборе</h3>' +
-        '<div class="pd-card"><b>Найдено 12 ошибок, открыто 7</b><div class="pd-meter"><i style="width:58%"></i></div><div class="mut" style="font-size:12.5px">Бесплатно разобран 1 абзац из 4. Остальные 5 ошибок и логика других абзацев скрыты.</div></div>' +
-        blurBox('<b>Ваш текст на уровне Band 7</b><p>' + esc(BAND7[0]) + '</p><p>' + esc(BAND7[2]) + '</p>', 'Только в полном разборе') +
-        '<div class="pd-card" style="padding:4px 16px">' + LOCKS.map((f) => '<div class="pd-feat"><div class="g"><b>' + esc(f[0]) + '</b><span class="d">' + esc(f[1]) + '</span></div>' + lk('закрыто', true) + '</div>').join('') + '</div>' +
+        (d.total_errors ? '<div class="pd-card"><b>Найдено ' + d.total_errors + ' ' + plural(d.total_errors) + ', открыто ' + d.shown_errors + '</b><div class="pd-meter"><i style="width:' + pct + '%"></i></div><div class="mut" style="font-size:12.5px">Бесплатно разобран 1 абзац. Остальные ' + (L.errors || 0) + ' и логика других абзацев скрыты.</div></div>' : '') +
+        '<div class="pd-card" style="padding:4px 16px">' + [['Все ' + d.total_errors + ' ' + plural(d.total_errors), 'по всем абзацам, с объяснением правила'], ['Ваш текст, переписанный сильнее', 'ваши идеи на уровне Band 7 и образец Band 8'], ['Разбор аргументации по абзацам', 'где мысль слабая и как её усилить'], ['План на неделю', 'что тренировать и сколько band это даст']].map((f) => '<div class="pd-feat"><div class="g"><b>' + esc(f[0]) + '</b><span class="d">' + esc(f[1]) + '</span></div>' + lk('закрыто', true) + '</div>').join('') + '</div>' +
         '<div class="stack" style="margin-top:14px"><button class="btn pd-shine" id="pdup">Открыть полный разбор<span class="pd-pill">от 99 ₽</span></button></div>' +
         '<p class="mut" style="text-align:center;margin:8px 0 0">Premium: до ' + DAILY + ' разборов в день</p>';
     }
     h += '<div class="stack" style="margin-top:10px"><button class="btn" id="pdx">Закрыть</button></div>';
     H.openSheet(h, () => { const u = document.getElementById('pdup'); if (u) u.onclick = paywall; document.getElementById('pdx').onclick = () => H.closeSheet(); setTimeout(confetti, 250); });
   }
+  const plural = (n) => { const m = n % 100, k = n % 10; return m > 10 && m < 15 ? 'ошибок' : k === 1 ? 'ошибка' : k >= 2 && k <= 4 ? 'ошибки' : 'ошибок'; };
 
   const OPTS = [
     ['prem', 'Premium · 30 дней', ['До ' + DAILY + ' полных разборов в день', 'Проверка исправленной версии', 'Все будущие функции'], true],
@@ -230,8 +271,8 @@ window.Paid = (function () {
 
   function demoPanel() {
     H.openSheet('<h2>Демо-состояние</h2><p class="mut" style="margin-top:-6px">Только в превью. Так будет выглядеть приложение у разных пользователей.</p><div class="stack">' +
-      '<button class="btn" data-s="new">Новый пользователь (1 бесплатный)</button><button class="btn" data-s="used">Бесплатный использован</button><button class="btn" data-s="paid">Есть 5 оплаченных разборов</button><button class="btn" data-s="prem">Premium активен (использовано 3 из 10)</button><button class="btn" data-s="ban">Доступ к ИИ запрещён админом</button></div><h3>Акция</h3><div class="stack"><button class="btn" data-p="launch">Запуск: −50% на 7 дней</button><button class="btn" data-p="after">Акция закончилась: −30%</button><button class="btn" data-p="none">Без скидки (полная цена)</button><button class="btn" data-p="reset">Сбросить: таймер и «Новое»</button></div>', (el) => {
-      el.onclick = (e) => { const pb = e.target.closest('[data-p]'); if (pb) { const v = pb.dataset.p; if (v === 'reset') { ['ielts_pd_promo', 'ielts_pd_force', 'ielts_pd_seen_w', 'ielts_pd_seen_ai'].forEach((k) => LS(k, null)); } else { LS('ielts_pd_force', v === 'launch' ? null : v); if (v === 'launch') LS('ielts_pd_promo', String(Date.now())); } H.toast('Готово'); H.closeSheet(); return; }
+      '<button class="btn" data-s="new">Новый пользователь (1 бесплатный)</button><button class="btn" data-s="used">Бесплатный использован</button><button class="btn" data-s="paid">Есть 5 оплаченных разборов</button><button class="btn" data-s="prem">Premium активен (использовано 3 из 10)</button><button class="btn" data-s="ban">Доступ к ИИ запрещён админом</button></div><h3>Режим</h3><div class="stack"><button class="btn" data-r="1">Реальный ИИ (нужен вход в аккаунт)</button><button class="btn" data-r="0">Демо-пример</button></div><h3>Акция</h3><div class="stack"><button class="btn" data-p="launch">Запуск: −50% на 7 дней</button><button class="btn" data-p="after">Акция закончилась: −30%</button><button class="btn" data-p="none">Без скидки (полная цена)</button><button class="btn" data-p="reset">Сбросить: таймер и «Новое»</button></div>', (el) => {
+      el.onclick = (e) => { const rb = e.target.closest('[data-r]'); if (rb) { LS('ielts_pd_real', rb.dataset.r === '1' ? '1' : null); H.toast(rb.dataset.r === '1' ? 'Реальный ИИ включён' : 'Демо-пример'); H.closeSheet(); return; } const pb = e.target.closest('[data-p]'); if (pb) { const v = pb.dataset.p; if (v === 'reset') { ['ielts_pd_promo', 'ielts_pd_force', 'ielts_pd_seen_w', 'ielts_pd_seen_ai'].forEach((k) => LS(k, null)); } else { LS('ielts_pd_force', v === 'launch' ? null : v); if (v === 'launch') LS('ielts_pd_promo', String(Date.now())); } H.toast('Готово'); H.closeSheet(); return; }
         const b = e.target.closest('[data-s]'); if (!b) return; const s = b.dataset.s;
         ent = { free: s === 'new' ? 1 : 0, credits: s === 'paid' ? 5 : 0, prem: s === 'prem', ban: s === 'ban', used: s === 'prem' ? 3 : 0 }; save(); H.toast('Состояние: ' + b.textContent); H.closeSheet(); };
     });
@@ -247,7 +288,7 @@ window.Paid = (function () {
     // HTML кнопки для листа «Анализ текста»
     button() { return enabled && !ent.ban ? '<button class="btn pd-shine" id="pdai" style="margin-bottom:10px">' + (seenAi() ? '' : '<span class="pd-new">Новое</span>') + '✦ Расширенный разбор<span class="pd-pill">' + esc(pill()) + '</span></button>' : ''; },
     banner, bindBanner, newDot: () => (enabled && !seenAi() ? '<i class="pd-nd"></i>' : ''), newChip: () => (enabled && !seenAi() ? '<span class="pd-chip n">Новое</span>' : ''), seenWriting: () => LS('ielts_pd_seen_w', '1'),
-    bind(ctx) { const b = document.getElementById('pdai'); if (b) b.onclick = () => start(); },
-    _state: () => ent,
+    bind(ctx) { CTX = ctx || null; const b = document.getElementById('pdai'); if (b) b.onclick = () => start(); },
+    _state: () => ent, _render: render, _demo: demoData,
   };
 }());
