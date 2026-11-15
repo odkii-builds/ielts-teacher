@@ -8,6 +8,7 @@ Mod._load = function (r, ...a) {
 };
 /* Права, платные проверки и админ-действия поверх index.js. Точка входа функции: main.handler */
 const base = require('./index');
+const { fillDays } = require('./stats');
 const { q, db, verify, getUser, ok, bad, TypedValues, TypedData, E } = base._;
 
 // ---------- Права и платные возможности (источник истины — сервер) ----------
@@ -82,13 +83,48 @@ actions.review = async (b, me) => {
   return ok({ result: e.kind === 'free' ? R.trim(full) : R.fullOut(full), ent: view(fin, me) });
 };
 actions.me = async (b, me) => ok({ ent: view(await getEnt(me.id), me) });
+// Лист ожидания клуба. join=true: встать в очередь (повтор не меняет место); join=false: только статус.
+actions.club_wait = async (b, me) => {
+  const I = { $i: TypedValues.utf8(me.id) };
+  const mine = await q('DECLARE $i AS Utf8; SELECT ts FROM waitlist WHERE id = $i;', I);
+  let ts = mine[0] ? num(mine[0].ts) : 0;
+  if (!ts && b.join === true) {
+    ts = Date.now();
+    await q('DECLARE $i AS Utf8; DECLARE $e AS Utf8; DECLARE $t AS Uint64; UPSERT INTO waitlist (id, email, ts) VALUES ($i, $e, $t);', { ...I, $e: TypedValues.utf8(String(me.email || '')), $t: TypedValues.uint64(ts) });
+  }
+  const total = num((await q('SELECT COUNT(*) AS c FROM waitlist;'))[0].c);
+  if (!ts) return ok({ joined: false, total });
+  const pos = num((await q('DECLARE $t AS Uint64; SELECT COUNT(*) AS c FROM waitlist WHERE ts <= $t;', { $t: TypedValues.uint64(ts) }))[0].c);
+  return ok({ joined: true, pos, total });
+};
 const needAdmin = (me) => { if (!isAdmin(me)) throw bad('forbidden', 403); };
+actions.club_list = async (b, me) => {
+  needAdmin(me);
+  const r = await q('SELECT email, ts FROM waitlist ORDER BY ts LIMIT 1000;');
+  return ok({ list: r.map((x) => ({ email: x.email, ts: num(x.ts) })) });
+};
 actions.admin_list = async (b, me) => {
   needAdmin(me);
   const users = await q('SELECT email, id, created FROM users ORDER BY created DESC LIMIT 500;');
   const ents = await q('SELECT id, credits, prem, ban, free, note FROM ent;');
   const m = new Map(ents.map((e) => [e.id, e]));
   return ok({ users: users.map((u) => { const e = m.get(u.id); return { email: u.email, id: u.id, created: num(u.created), credits: e ? num(e.credits) : 0, premium_until: e && num(e.prem) > Date.now() ? new Date(num(e.prem)).toISOString() : null, banned: !!(e && num(e.ban)), free: e ? num(e.free) : FREE_REVIEWS, note: e ? e.note || '' : '' }; }) });
+};
+// Сводка: всего пользователей, регистрации за 30 дней, активные, Premium, лист ожидания
+actions.admin_stats = async (b, me) => {
+  needAdmin(me);
+  try {
+    const now = Date.now(), since = now - 30 * 864e5, P = (t) => ({ $t: TypedValues.uint64(t) });
+    const cnt = async (sql, t) => num((await q(sql, t == null ? undefined : P(t)))[0].c);
+    const total = await cnt('SELECT COUNT(*) AS c FROM users;');
+    // дни по Москве (UTC+3): подзапрос с датой-числом, потом группировка
+    const reg = await q('DECLARE $t AS Uint64; SELECT d, COUNT(*) AS c FROM (SELECT (created + 10800000ul) / 86400000ul AS d FROM users WHERE created >= $t) GROUP BY d;', P(since));
+    const act = (ms) => cnt('DECLARE $t AS Uint64; SELECT COUNT(*) AS c FROM data WHERE upd >= $t;', now - ms);
+    const a1 = await act(864e5), a7 = await act(7 * 864e5), a30 = await act(30 * 864e5);
+    const prem = await cnt('DECLARE $t AS Uint64; SELECT COUNT(*) AS c FROM ent WHERE prem > $t;', now);
+    const wl = await cnt('SELECT COUNT(*) AS c FROM waitlist;');
+    return ok({ total, days: fillDays(reg.map((r) => ({ d: num(r.d), c: num(r.c) })), now, 30), active: { d1: a1, d7: a7, d30: a30 }, premium: prem, waitlist: wl, at: now });
+  } catch (e) { if (e.code) throw e; throw bad('stats: ' + String(e && e.message || e).slice(0, 300), 400); } // только админу: показываем причину
 };
 // Выдать/изменить: credits (+/-), premium_days (+), ban (true/false), note, set_free
 actions.admin_grant = async (b, me) => {

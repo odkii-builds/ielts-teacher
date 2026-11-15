@@ -268,7 +268,10 @@
   const exAll = (c) => [c.ex].concat(c.ex2 || []);
   const exIdx = (c) => (c.ex2 && c.ex2.length ? (c.rv || 0) % (1 + c.ex2.length) : 0);
   const exOf = (c) => exAll(c)[exIdx(c)];
+  const exTr = (c) => { const i = exIdx(c); return i === 0 ? c.exr : (c.ex2r && c.ex2r[i - 1]); };
   const isWord = (c) => !!(c && c.t && c.ex);
+  /** Слово, которого касались хоть как-то: показано, выучено, повторялось, закреплялось. */
+  const touched = (c) => isWord(c) && !!(c.seen || c.mastered || c.reps > 0 || c.lv > 0 || c.ls || c.fs || c.due || c.rv > 0);
   const MARK = /\[\[([^\[\]]+)\]\]/;
   const plain = (ex) => String(ex).replace(/\[\[([^\[\]]+)\]\]/g, '$1');
   /** Режим показа: flip → mcq → write по мере роста уровня; выученные повторяются обычной карточкой. */
@@ -380,15 +383,52 @@
   }
   /** Подсказка: первая буква каждого слова формы и длина. */
   const hintOf = (c) => clean(form(c)).split(' ').map((w) => w[0] + '_'.repeat(Math.max(0, w.length - 1))).join(' ');
-  /** Очередь мини-заданий: 3 раунда (вставь слово → выбери по переводу/слову → впиши), слабые карточки первыми. */
-  function drillQueue(cards, today, max, rnd) {
+  /** Разбить предложение примера на 4–8 блоков (фраза-цель остаётся одним блоком). null, если предложение слишком короткое/длинное. */
+  function orderChunks(c, rnd) {
     rnd = rnd || Math.random;
-    const ok = cards.filter((c) => isWord(c) && c.seen);
-    const todays = ok.filter((c) => c.ls === today).sort((a, b) => (a.lv || 0) - (b.lv || 0));
-    const rest = ok.filter((c) => c.ls !== today).sort((a, b) => (a.lv || 0) - (b.lv || 0));
-    const pick = todays.concat(rest).slice(0, max);
+    const txt = plain(exOf(c)).trim(); const toks = txt.split(/\s+/).filter(Boolean);
+    if (toks.length < 6 || toks.length > 18) return null;
+    const norm = (w) => String(w).toLowerCase().replace(/[^a-z'-]/g, '');
+    const tf = form(c).split(/\s+/).map(norm).filter(Boolean); let at = -1;
+    for (let i = 0; i + tf.length <= toks.length && at < 0 && tf.length; i++) if (tf.every((w, k) => norm(toks[i + k]) === w)) at = i;
+    const size = toks.length > 12 ? 3 : 2; const out = []; let cur = [];
+    const flush = () => { if (cur.length) out.push(cur.join(' ')); cur = []; };
+    for (let i = 0; i < toks.length; i++) {
+      if (at >= 0 && i === at) { flush(); out.push(toks.slice(at, at + tf.length).join(' ')); i += tf.length - 1; continue; }
+      cur.push(toks[i]); if (cur.length >= size || /[,;:]$/.test(toks[i])) flush();
+    }
+    flush();
+    if (out.length < 4 || out.length > 8) return null;
+    let mix = shuffled(out, rnd); for (let k = 0; k < 6 && mix.join(' ') === out.join(' '); k++) mix = shuffled(out, rnd);
+    return { answer: out, blocks: mix, text: txt };
+  }
+  /** Набор «сопоставь»: слова и переводы в разном порядке. Только карточки с уникальными переводами. */
+  function pairSet(cards, rnd) {
+    rnd = rnd || Math.random; const seen = new Set(); const items = [];
+    for (const c of cards) { const k = String(c.ru).toLowerCase(); if (!isWord(c) || !c.ru || seen.has(k)) continue; seen.add(k); items.push(c); }
+    if (items.length < 3) return null;
+    return { left: shuffled(items, rnd).map((c) => ({ id: c.id, text: c.t })), right: shuffled(items, rnd).map((c) => ({ id: c.id, text: c.ru })) };
+  }
+  /** Очередь мини-заданий: 3 раунда (вставь слово → выбери по переводу/слову → впиши), слабые карточки первыми. */
+  function drillQueue(cards, today, max, rnd, mode) {
+    rnd = rnd || Math.random; mode = mode || 'mix';
+    // В пуле все слова, которых хоть как-то касались (в т.ч. выученные). Первыми идут давно не повторявшиеся,
+    // слова, уже прогнанные сегодня, уходят в конец: раунды не крутят одни и те же слова.
+    const rr = new Map(); cards.forEach((c) => rr.set(c.id, rnd()));
+    const ok = cards.filter(touched).sort((a, b) => ((a.ls === today ? 1 : 0) - (b.ls === today ? 1 : 0)) || String(a.ls || '').localeCompare(String(b.ls || '')) || (a.lv || 0) - (b.lv || 0) || rr.get(a.id) - rr.get(b.id));
+    const pick = ok.slice(0, max);
+    if (mode === 'gap') return shuffled(pick, rnd).map((c) => ({ id: c.id, type: 'gap' }));
+    if (mode === 'order') return shuffled(ok.filter((c) => orderChunks(c, rnd)).slice(0, 8), rnd).map((c) => ({ id: c.id, type: 'order' }));
+    if (mode === 'pair') {
+      const sh0 = shuffled(pick.filter((c) => c.ru), rnd), out = [];
+      for (let i = 0; i + 4 <= sh0.length; i += 4) out.push({ id: sh0[i].id, ids: sh0.slice(i, i + 4).map((c) => c.id), type: 'pair' });
+      return out;
+    }
     const q = []; shuffled(pick, rnd).forEach((c) => q.push({ id: c.id, type: 'gap' }));
+    const sh = shuffled(pick, rnd);
+    for (let i = 0; i + 4 <= sh.length; i += 4) q.push({ id: sh[i].id, ids: sh.slice(i, i + 4).map((c) => c.id), type: 'pair' });
     shuffled(pick, rnd).forEach((c, i) => q.push({ id: c.id, type: i % 2 ? 'ru2en' : 'en2ru' }));
+    shuffled(pick, rnd).filter((c) => orderChunks(c, rnd)).slice(0, 5).forEach((c) => q.push({ id: c.id, type: 'order' }));
     shuffled(pick, rnd).forEach((c) => q.push({ id: c.id, type: 'type' }));
     return q;
   }
@@ -662,6 +702,6 @@
     return 3.5;
   }
 
-  const api = { ctxParts, findCtx, exAll, exIdx, exOf, SK, PHASES, pd, fmt, addDays, daysBetween, weekNo, phaseFor, errorSeverity, weights, dayTasks, newCard, dueCards, review, overall, rawToBand, isWord, plain, lrMode, lrRate, master, unmaster, reviewMastered, contexts, buildSession, pickFresh, GROUPS, GROUP_LABEL, MAIN_GROUPS, group, inGroup, choices, typeCheck, hintOf, drillQueue, form, pickNext, mcq, checkSentence, GAPS, analyseText, checkAnswer, parseFeedback, errDrillable, normFix, errInit, errDue, errCheck, errRate, EI, CEF, cefOf, cefRank, PL_GRAM, placementItems, placementScore, placementSkills, studyTick, STUDY_IDLE, sentenceTypes };
+  const api = { touched, orderChunks, pairSet, ctxParts, findCtx, exAll, exIdx, exOf, exTr, SK, PHASES, pd, fmt, addDays, daysBetween, weekNo, phaseFor, errorSeverity, weights, dayTasks, newCard, dueCards, review, overall, rawToBand, isWord, plain, lrMode, lrRate, master, unmaster, reviewMastered, contexts, buildSession, pickFresh, GROUPS, GROUP_LABEL, MAIN_GROUPS, group, inGroup, choices, typeCheck, hintOf, drillQueue, form, pickNext, mcq, checkSentence, GAPS, analyseText, checkAnswer, parseFeedback, errDrillable, normFix, errInit, errDue, errCheck, errRate, EI, CEF, cefOf, cefRank, PL_GRAM, placementItems, placementScore, placementSkills, studyTick, STUDY_IDLE, sentenceTypes };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Engine = api;
 })(typeof window !== 'undefined' ? window : globalThis);

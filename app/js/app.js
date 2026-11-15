@@ -26,6 +26,7 @@
     errors: '<path d="M5 21V4m0 0h11l-2 4 2 4H5"/>',
     more: '<circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>',
     left: '<path d="M15 5l-7 7 7 7"/>',
     right: '<path d="M9 5l7 7-7 7"/>',
     chev: '<path d="M9 5l7 7-7 7"/>',
@@ -98,6 +99,8 @@
   }
   const segVal = (id) => $('#' + id).dataset.v;
   const head = (title, sub, acts) => '<div class="head"><div><h1>' + esc(title) + '</h1>' + (sub ? '<p class="sub">' + sub + '</p>' : '') + '</div><div class="acts">' + (acts || '') + '</div></div>';
+  const dtopH = (i, n) => '<div class="dtop"><span class="dcnt">' + (i + 1) + ' из ' + n + '</span><button class="ib" id="dr_x" aria-label="Выйти">' + ico('x') + '</button></div>';
+  const dh = (t) => '<h2 class="dh">' + esc(t) + '</h2>';
   const plusBtn = (id, label) => '<button class="ib" id="' + id + '" aria-label="' + esc(label) + '">' + ico('plus') + '</button>';
   function paint(html, animate) {
     document.body.classList.remove('drilling');
@@ -319,7 +322,7 @@
 
   // ---------- Карточки ----------
   let DECK = [], READ = [], WRITING = null;
-  const trLine = (c) => '<div class="exr">' + (c.exr && E.exIdx(c) === 0 ? hl(c.exr) : '<mark>' + esc(c.t) + '</mark> — ' + esc(c.ru)) + '</div>';
+  const trLine = (c) => '<div class="exr">' + (E.exTr(c) ? hl(E.exTr(c)) : '<mark>' + esc(c.t) + '</mark> — ' + esc(c.ru)) + '</div>';
   const tapW = (t) => t.replace(/([A-Za-z][A-Za-z'’-]*)|([^A-Za-z]+)/g, (m, w, o) => w ? '<span class="w" data-w="' + esc(w.toLowerCase()) + '">' + esc(w) + '</span>' : esc(o));
   const hl = (ex) => String(ex == null ? '' : ex).split(/(\[\[[^\[\]]+\]\])/).map((x) => /^\[\[/.test(x) ? '<mark>' + tapW(x.slice(2, -2)) + '</mark>' : tapW(x)).join('');
   ['gesturestart', 'gesturechange', 'gestureend'].forEach((n) => document.addEventListener(n, (ev) => ev.preventDefault())); // iOS: без щипкового зума
@@ -372,7 +375,7 @@
 
   const userCef = (p) => (p.cefMode && p.cefMode !== 'auto') ? p.cefMode : E.cefOf(p.skills);
   // Колода лежит в app/data/deck.json, а не в базе пользователя: в облако уходит только прогресс по начатым карточкам.
-  const STATIC = ['t', 'ru', 'ex', 'pos', 'dom', 'cef', 'src', 'acl', 'rec', 'exr', 'ex2', 'f', 'b'];
+  const STATIC = ['t', 'ru', 'ex', 'pos', 'dom', 'cef', 'src', 'acl', 'rec', 'exr', 'ex2', 'ex2r', 'f', 'b'];
   let DECKIDS = new Set();
   function pack() {
     const out = { active: DB.active, profiles: {} };
@@ -396,9 +399,10 @@
     const uniq = new Map(); p.cards.forEach((c) => { const o = uniq.get(c.id); if (!o || (c.seen && !o.seen)) uniq.set(c.id, c); });
     p.cards = Array.from(uniq.values()).filter((c) => c.f || c.t || byId[c.id]);
     if (p.cards.length !== before) changed = true;
-    p.cards.forEach((c) => { const d = byId[c.id]; if (d) { c.t = d.t; c.ru = d.ru; c.ex = d.ex; c.pos = d.pos; c.dom = d.dom; c.cef = d.cef; c.src = d.src; c.acl = d.acl; c.rec = d.rec; c.exr = d.exr; c.ex2 = d.ex2; } });
+    p.cards.forEach((c) => { if (!c.seen && E.touched(c)) { c.seen = true; changed = true; } }); // слова, которых касались, но без отметки «показано»
+    p.cards.forEach((c) => { const d = byId[c.id]; if (d) { c.t = d.t; c.ru = d.ru; c.ex = d.ex; c.pos = d.pos; c.dom = d.dom; c.cef = d.cef; c.src = d.src; c.acl = d.acl; c.rec = d.rec; c.exr = d.exr; c.ex2 = d.ex2; c.ex2r = d.ex2r; } });
     const ids = new Set(p.cards.map((c) => c.id));
-    DECK.forEach((d) => { if (!ids.has(d.id)) p.cards.push(Object.assign(E.newCard('', '', d.id), { t: d.t, ru: d.ru, ex: d.ex, pos: d.pos, dom: d.dom, cef: d.cef, src: d.src, acl: d.acl, rec: d.rec, exr: d.exr, ex2: d.ex2, lv: 0 })); });
+    DECK.forEach((d) => { if (!ids.has(d.id)) p.cards.push(Object.assign(E.newCard('', '', d.id), { t: d.t, ru: d.ru, ex: d.ex, pos: d.pos, dom: d.dom, cef: d.cef, src: d.src, acl: d.acl, rec: d.rec, exr: d.exr, ex2: d.ex2, ex2r: d.ex2r, lv: 0 })); });
     const seen = p.cards.filter((c) => c.seen); const lvl = userCef(p); const rk = (c) => E.cefRank(lvl, c.cef);
     const rest = p.cards.filter((c) => !c.seen).sort((a, b) => ((b.rec ? 1 : 0) - (a.rec ? 1 : 0)) || (rk(a) - rk(b)) || (hash(a.id) - hash(b.id))); p.cards = seen.concat(rest);
     return changed;
@@ -427,7 +431,8 @@
     const p = P(); ensureSess(p); refill(p);
     const mastered = p.cards.filter((c) => c.mastered).length, work = p.cards.filter((c) => c.seen && !c.mastered).length;
     paint(head('Карточки', '<span id="csub"></span>', plusBtn('cplus', 'Добавить')) + seg('ctab', [['learn', 'Учить'], ['drill', 'Закрепить'], ['deck', 'Колода']], cst.tab) + (p.cards.filter((c) => c.seen).length >= 4 ? '<div class="list cta" id="vwlink" style="margin-top:12px"><a class="rowi" href="#vw"><div class="grow"><b>Задание IELTS со своими словами</b><div class="mut" style="margin-top:2px">Эссе, график или письмо — с выученными словами</div></div></a></div>' : '') + '<div id="cbody" style="margin-top:16px"></div>');
-    bindSeg('ctab', (v) => { cst.tab = v; if (v === 'drill') cst.dr = null; drawCards(); });
+    bindSeg('ctab', (v) => { cst.tab = v; if (v === 'drill') { cst.dr = null; cst.dmode = null; try { localStorage.setItem('ielts_new_drill', '1'); } catch (e) { /* ignore */ } $$('#ctab .nw').forEach((e) => e.remove()); } drawCards(); });
+    try { if (cst.tab === 'drill') localStorage.setItem('ielts_new_drill', '1'); else if (!localStorage.getItem('ielts_new_drill')) { const b = $('#ctab button[data-v="drill"]'); if (b) b.insertAdjacentHTML('beforeend', '<span class="nw">Новое</span>'); } } catch (e) { /* ignore */ }
     $('#cplus').onclick = () => openSheet('<h2>Новая карточка</h2><div class="stack"><input id="cf" placeholder="Слово или фраза (English)" autocomplete="off"><input id="cb" placeholder="Перевод" autocomplete="off"><input id="cx" placeholder="Предложение с этим словом" autocomplete="off"><button class="btn p" id="cadd">Добавить</button></div>' +
       '<h3>Импорт</h3><textarea id="csv" placeholder="слово;перевод;пример — по одной на строку (или front;back)"></textarea><div style="margin-top:10px"><button class="btn" id="cimp">Импортировать</button></div>', () => {
       $('#cadd').onclick = () => { const f = $('#cf').value.trim(), b = $('#cb').value.trim(); if (!f || !b) { toast('Заполни слово и перевод'); return; } addWordCard(p, f, b, $('#cx').value.trim()); sess = null; save(); closeSheet(); toast('Добавлено'); route(); };
@@ -462,7 +467,7 @@
     if (!id) {
       body.innerHTML = grpBar(p) + '<div class="card enter" style="text-align:center;padding:30px 16px"><div class="big">✓</div><div class="mut" style="margin:6px 0 16px">На сейчас всё. Новых сегодня: ' + p.newToday.n + '</div><button class="btn p" id="cdrill">Закрепить мини-заданиями</button><div style="height:10px"></div><button class="btn" id="cmore">Ещё 10 новых слов</button></div>';
       $$('#gf button').forEach((b) => { b.onclick = () => { p.cgrp = b.dataset.g; sess = null; cst.cur = null; save(); ensureSess(p); refill(p); drawCards(); }; });
-      $('#cdrill').onclick = () => { cst.tab = 'drill'; cst.dr = null; viewCards(); };
+      $('#cdrill').onclick = () => { cst.tab = 'drill'; cst.dr = null; cst.dmode = null; viewCards(); };
       $('#cmore').onclick = () => { p.newToday.extra = (p.newToday.extra || 0) + 10; save(); sess = null; ensureSess(p); refill(p); drawCards(); };
       return;
     }
@@ -510,12 +515,18 @@
   }
   const grpBar = (p) => '<div class="chips" id="gf" style="margin:0 -18px 12px">' + [['main', 'Основное'], ...E.GROUPS, ['all', 'Все']].map(([k, n]) => '<button data-g="' + k + '" class="' + (k === grpOf(p) ? 'on' : '') + '">' + esc(n) + '</button>').join('') + '</div>';
   // ---------- Закрепление: мини-задания ----------
+  const MODES = [['mix', '🎲', 'Вперемешку', 'Все типы заданий подряд'], ['order', '🧩', 'Собрать предложение', 'Расставь блоки в правильном порядке'], ['pair', '🔗', 'Сопоставить перевод', 'Слова и переводы парами'], ['gap', '✏️', 'Вставить в предложение', 'Пропущенное слово в примере']];
+  function drawModes() {
+    document.body.classList.remove('drilling');
+    $('#cbody').innerHTML = '<div class="enter"><h2 style="margin:4px 0 12px;font-size:20px">Как закрепим слова?</h2><div class="stack">' + MODES.map(([k, ic, n, d]) => '<button class="card mode" data-m="' + k + '"><span class="mic">' + ic + '</span><span><b>' + n + '</b><span class="mut">' + d + '</span></span></button>').join('') + '</div></div>';
+    $$('.mode').forEach((b) => { b.onclick = () => { cst.dmode = b.dataset.m; cst.dr = null; drawDrill(); }; });
+  }
   function startDrill(p) {
-    const q = E.drillQueue(p.cards, today(), 12);
+    const q = E.drillQueue(p.cards, today(), 12, null, cst.dmode);
     cst.dr = { q, i: 0, bad: {}, ids: Array.from(new Set(q.map((x) => x.id))), done: false };
   }
   function drawDrill() {
-    const p = P(); const body = $('#cbody'); if (!cst.dr) startDrill(p); const d = cst.dr;
+    const p = P(); const body = $('#cbody'); if (!cst.dr && !cst.dmode) return drawModes(); if (!cst.dr) startDrill(p); const d = cst.dr;
     document.body.classList.remove('drilling');
     if (!d.q.length) { body.innerHTML = '<div class="card" style="text-align:center;padding:26px 16px"><div class="big">📚</div><div class="mut" style="margin:8px 0 16px">Пока нечего закреплять: сначала пройди несколько карточек на вкладке «Учить».</div><button class="btn p" id="gol">К карточкам</button></div>'; $('#gol').onclick = () => { cst.tab = 'learn'; viewCards(); }; return; }
     const it = d.q[d.i];
@@ -524,12 +535,57 @@
       const weak = d.ids.filter((id) => d.bad[id]).map((id) => p.cards.find((x) => x.id === id)).filter(Boolean);
       body.innerHTML = '<div class="card enter" style="text-align:center;padding:22px 16px"><div class="big">' + (weak.length ? '👍' : '🎉') + '</div><div style="font-weight:600;margin:6px 0">Верно с первого раза: ' + (d.ids.length - weak.length) + ' из ' + d.ids.length + '</div>' +
         (weak.length ? '<div class="mut" style="margin:6px 0 4px">Эти слова ещё стоит повторить:</div><div class="stack" style="text-align:left">' + weak.map((c) => '<div class="card" style="padding:10px 12px"><b>' + esc(c.t) + '</b> — ' + esc(c.ru) + '</div>').join('') + '</div>' : '<div class="mut">Уровень слов повышен.</div>') +
-        '<div style="margin-top:16px"><button class="btn p" id="again">Ещё раунд</button></div><div style="margin-top:8px"><button class="btn" id="gol">К карточкам</button></div></div>';
-      $('#again').onclick = () => { cst.dr = null; drawDrill(); }; $('#gol').onclick = () => { cst.tab = 'learn'; sess = null; viewCards(); };
+        '<div style="margin-top:16px"><button class="btn p" id="again">Ещё раунд</button></div><div style="margin-top:8px"><button class="btn" id="gmode">Другой режим</button></div><div style="margin-top:8px"><button class="btn" id="gol">К карточкам</button></div></div>';
+      $('#again').onclick = () => { cst.dr = null; drawDrill(); }; $('#gmode').onclick = () => { cst.dr = null; cst.dmode = null; drawDrill(); }; $('#gol').onclick = () => { cst.tab = 'learn'; sess = null; viewCards(); };
       return;
     }
     document.body.classList.add('drilling');
     const c = p.cards.find((x) => x.id === it.id);
+    const ent = it.shown ? '' : ' enter'; it.shown = true;
+    const dtop = dtopH(d.i, d.q.length);
+    const bindX = () => { $('#dr_x').onclick = () => { cst.tab = 'learn'; cst.dr = null; viewCards(); }; };
+    if (it.type === 'pair') {
+      if (!it.ps) { it.ps = E.pairSet(it.ids.map((id) => p.cards.find((x) => x.id === id)).filter(Boolean)); it.mt = {}; it.sel = null; }
+      if (!it.ps) { d.i += 1; drawDrill(); return; }
+      const ps = it.ps;
+      const btn = (x, side) => '<button class="opt" data-s="' + side + '" data-id="' + esc(x.id) + '">' + esc(x.text).replace(/ (\S{1,3})$/, '\u00a0$1') + '</button>';
+      body.innerHTML = '<div class="drill' + ent + '">' + dtop + dh('Сопоставь слова и переводы') + '<div class="pair">' + ps.left.map((l, i) => btn(l, 'l') + btn(ps.right[i], 'r')).join('') + '</div><div id="pnext" style="margin-top:12px;min-height:52px"></div></div>';
+      bindX();
+      // всё обновляется на месте, без перерисовки: ничего не прыгает
+      const refresh = () => {
+        $$('.pair .opt').forEach((b) => { const id = b.dataset.id, m = !!it.mt[id]; b.classList.toggle('ok', m); b.classList.toggle('sel', !m && b.dataset.s === 'l' && it.sel === id); b.disabled = m; });
+        $('#pnext').innerHTML = Object.keys(it.mt).length === ps.left.length ? '<button class="btn p" id="dr_next">Дальше</button>' : '';
+        const nx = $('#dr_next'); if (nx) nx.onclick = () => { d.i += 1; drawDrill(); };
+      };
+      $$('.pair .opt').forEach((b) => { b.onclick = () => {
+        const id = b.dataset.id;
+        if (b.dataset.s === 'l') { it.sel = it.sel === id ? null : id; refresh(); return; }
+        if (!it.sel) { toast('Сначала выбери слово слева'); return; }
+        if (it.sel === id) { it.mt[id] = 1; it.sel = null; refresh(); return; }
+        d.bad[it.sel] = true; b.classList.add('bad'); setTimeout(() => b.classList.remove('bad'), 450);
+      }; });
+      refresh();
+      return;
+    }
+    if (it.type === 'order') {
+      if (!it.o) { it.o = E.orderChunks(c); it.pl = []; }
+      if (!it.o) { d.i += 1; drawDrill(); return; }
+      const o = it.o, n = o.blocks.length, answered = it.res != null;
+      const line = it.pl.map((i) => '<button class="opt' + (answered ? (it.res === 'ok' ? ' ok' : ' bad') : '') + '" data-r="' + i + '"' + (answered ? ' disabled' : '') + '>' + esc(o.blocks[i]) + '</button>').join('');
+      const pool = o.blocks.map((b, i) => '<button class="opt" data-a="' + i + '"' + (it.pl.includes(i) || answered ? ' style="visibility:hidden" disabled' : '') + '>' + esc(b) + '</button>').join('');
+      const hint = String(c.exr || '').replace(/\[\[|\]\]/g, '') || c.ru;
+      body.innerHTML = '<div class="drill' + ent + '">' + dtop + dh('Собери предложение') + '<div class="flash" style="min-height:0;padding:16px 18px"><div style="font-size:16px;color:var(--mut)">' + esc(hint) + '</div></div>' +
+        '<div class="blkline">' + (line || '<span class="mut">Нажимай на блоки по порядку</span>') + '</div><div class="blks">' + pool + '</div>' +
+        (answered ? '<div class="flash back" style="min-height:0;padding:14px 16px;font-size:17px"><div>' + hl(E.exOf(c)) + '</div></div><div style="margin-top:10px"><button class="btn p" id="dr_next">Дальше</button></div>'
+          : '<div style="margin-top:12px">' + (it.pl.length === n ? '<button class="btn p" id="dr_ok">Проверить</button>' : '') + (it.pl.length ? '<div style="text-align:center;margin-top:8px"><button class="link" id="dr_rs">Сбросить</button></div>' : '') + '</div>') + '</div>';
+      bindX();
+      $$('.blks .opt').forEach((b) => { b.onclick = () => { it.pl.push(+b.dataset.a); drawDrill(); }; });
+      $$('.blkline .opt').forEach((b) => { b.onclick = () => { it.pl = it.pl.filter((x) => x !== +b.dataset.r); drawDrill(); }; });
+      const rs = $('#dr_rs'); if (rs) rs.onclick = () => { it.pl = []; drawDrill(); };
+      const ok = $('#dr_ok'); if (ok) ok.onclick = () => { it.res = it.pl.map((i) => o.blocks[i]).join(' ') === o.answer.join(' ') ? 'ok' : 'bad'; if (it.res === 'bad') { d.bad[c.id] = true; if (!it.retry) d.q.push({ id: c.id, type: 'order', retry: true }); } drawDrill(); };
+      const nx = $('#dr_next'); if (nx) nx.onclick = () => { c.rv = (c.rv || 0) + 1; d.i += 1; drawDrill(); };
+      return;
+    }
     if (!it.m) { if (it.type === 'gap') it.m = E.mcq(c, p.cards); else if (it.type === 'ru2en') it.m = E.choices(c, p.cards, 't'); else if (it.type === 'en2ru') it.m = E.choices(c, p.cards, 'ru'); }
     it.h = it.h || 0;
     const optsH = (m) => '<div class="opts">' + m.opts.map((o, i) => '<button class="opt' + (it.pick != null ? (i === m.answer ? ' ok' : i === it.pick ? ' bad' : '') : '') + '" data-o="' + i + '"' + (it.pick != null ? ' disabled' : '') + '>' + esc(o) + '</button>').join('') + '</div>';
@@ -538,10 +594,10 @@
     const tr = (it.h >= 1 || answered) && (it.type === 'gap' || it.type === 'type') ? '<small>перевод: ' + esc(c.ru) + '</small>' : '';
     const lab = esc(E.GROUP_LABEL[E.group(c)]);
     let card = '';
-    if (it.type === 'gap') card = '<div class="flash">' + (tr || '<small>Вставь слово в пропуск</small>') + '<div class="exm">' + (answered ? hl(E.exOf(c)) + trLine(c) : esc(it.m.text)) + '</div></div>' + optsH(it.m);
-    else if (it.type === 'ru2en') card = '<div class="flash"><small>Как это по-английски? · ' + lab + '</small><div class="term" style="font-size:24px">' + esc(c.ru) + '</div>' + (answered ? '<div class="exm" style="font-size:16px">' + hl(E.exOf(c)) + trLine(c) + '</div>' : '') + '</div>' + optsH(it.m);
-    else if (it.type === 'en2ru') card = '<div class="flash"><small>Выбери перевод · ' + lab + '</small><div class="term">' + esc(c.t) + '</div><div class="exm" style="font-size:16px">' + hl(E.exOf(c)) + (answered ? trLine(c) : '') + '</div></div>' + optsH(it.m);
-    else card = '<div class="flash">' + (tr || '<small>Впиши пропущенное слово</small>') + '<div class="exm">' + (answered ? hl(E.exOf(c)) + trLine(c) : esc(String(E.exOf(c)).replace(/\[\[[^\[\]]+\]\]/, '_____'))) + '</div>' + (!answered && it.h >= 2 ? '<div class="mut" style="letter-spacing:2px;margin-top:6px">' + esc(E.hintOf(c)) + '</div>' : '') + (answered && it.res !== 'ok' ? '<div class="mut" style="margin-top:4px">' + (it.res === 'near' ? 'Почти — опечатка' : 'Не совсем') + '</div>' : '') + '</div>' +
+    if (it.type === 'gap') card = dh('Вставь слово в пропуск') + '<div class="flash">' + tr + '<div class="exm">' + (answered ? hl(E.exOf(c)) + trLine(c) : esc(it.m.text)) + '</div></div>' + optsH(it.m);
+    else if (it.type === 'ru2en') card = dh('Как это по-английски?') + '<div class="flash"><small>' + lab + '</small><div class="term" style="font-size:24px">' + esc(c.ru) + '</div>' + (answered ? '<div class="exm" style="font-size:16px">' + hl(E.exOf(c)) + trLine(c) + '</div>' : '') + '</div>' + optsH(it.m);
+    else if (it.type === 'en2ru') card = dh('Выбери перевод') + '<div class="flash"><small>' + lab + '</small><div class="term">' + esc(c.t) + '</div><div class="exm" style="font-size:16px">' + hl(E.exOf(c)) + (answered ? trLine(c) : '') + '</div></div>' + optsH(it.m);
+    else card = dh('Впиши пропущенное слово') + '<div class="flash">' + tr + '<div class="exm">' + (answered ? hl(E.exOf(c)) + trLine(c) : esc(String(E.exOf(c)).replace(/\[\[[^\[\]]+\]\]/, '_____'))) + '</div>' + (!answered && it.h >= 2 ? '<div class="mut" style="letter-spacing:2px;margin-top:6px">' + esc(E.hintOf(c)) + '</div>' : '') + (answered && it.res !== 'ok' ? '<div class="mut" style="margin-top:4px">' + (it.res === 'near' ? 'Почти — опечатка' : 'Не совсем') + '</div>' : '') + '</div>' +
       (it.res == null ? '<input id="dr_in" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="слово" style="margin-top:10px">' : '');
     let act = '';
     if (answered) act = '<button class="btn p" id="dr_next">Дальше</button>';
@@ -549,7 +605,7 @@
       if (it.type === 'type') act += '<button class="btn p" id="dr_ok">Проверить</button>';
       if (it.h < maxH) act += '<div style="text-align:center;margin-top:8px"><button class="link" id="dr_hint">' + (it.type === 'type' && it.h === 1 ? 'Ещё подсказка: первая буква' : 'Взять подсказку') + '</button></div>';
     }
-    body.innerHTML = '<div class="drill enter"><div class="dtop"><span class="mut">' + (d.i + 1) + ' из ' + d.q.length + '</span><button class="link" id="dr_x">Выйти</button></div>' + card + '<div style="margin-top:10px">' + act + '</div></div>';
+    body.innerHTML = '<div class="drill enter">' + dtopH(d.i, d.q.length) + card + '<div style="margin-top:10px">' + act + '</div></div>';
     const fin = (ok) => { if (!ok) { d.bad[c.id] = true; if (!it.retry) d.q.push({ id: c.id, type: it.type, retry: true }); } };
     $$('.opt').forEach((b) => { b.onclick = () => { it.pick = +b.dataset.o; fin(it.pick === it.m.answer); drawDrill(); }; });
     const ok = $('#dr_ok'); if (ok) { const go = () => { const v = $('#dr_in').value.trim(); if (!v) { toast('Впиши слово'); return; } it.res = E.typeCheck(c, v); fin(it.res !== 'bad'); drawDrill(); }; ok.onclick = go; $('#dr_in').onkeydown = (e) => { if (e.key === 'Enter') go(); }; }
@@ -968,17 +1024,18 @@
   // ---------- Настройки ----------
   function viewSet() {
     const p = P();
-    let h = head('Настройки', esc(user ? user.email : '')) + '<div class="list"><div class="rowi"><span class="grow">Синхронизация</span><span class="mut" id="sst">' + ({ ok: 'всё сохранено', pending: 'сохраняю…', error: 'нет связи' }[syncState]) + '</span></div><button class="rowi" id="regen"><span class="grow">Пересоздать план на сегодня</span></button><button class="rowi" id="exp"><span class="grow">Скачать копию данных</span></button><button class="rowi" id="out"><span class="grow" style="color:#dc2626">Выйти</span></button></div>';
+    const dot = { ok: '#16a34a', pending: '#d97706', error: '#dc2626' }[syncState] || '#16a34a';
+    let h = head('Настройки', esc(user ? user.email : '')) + '<div class="sl">Аккаунт</div><div class="list"><div class="rowi"><span class="grow">Синхронизация</span><span class="mut" id="sst"><i class="sd" style="background:' + dot + '"></i>' + ({ ok: 'всё сохранено', pending: 'сохраняю…', error: 'нет связи' }[syncState]) + '</span></div><button class="rowi" id="regen"><span class="grow">Пересоздать план на сегодня</span></button><button class="rowi" id="exp"><span class="grow">Скачать копию данных</span></button><button class="rowi" id="out"><span class="grow" style="color:#dc2626">Выйти</span></button></div>';
     const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    if (!standalone) h += '<div class="list" style="margin-top:12px"><button class="rowi" id="inst"><span class="grow">Установить как приложение<div class="mut" style="margin-top:2px">' + (ios ? 'Safari → Поделиться → На экран «Домой»' : 'Иконка на главном экране, работает офлайн') + '</div></span></button></div>';
-    h += '<div class="list" style="margin-top:12px"><div class="rowi"><span class="grow">Уровень карточек<div class="mut" style="margin-top:2px">Сейчас: ' + userCef(p) + ' — слова на ступень выше</div></span><select id="cefm">' + ['auto', 'B1', 'B2', 'C1', 'C2'].map((v) => '<option value="' + v + '"' + ((p.cefMode || 'auto') === v ? ' selected' : '') + '>' + (v === 'auto' ? 'Авто' : v) + '</option>').join('') + '</select></div></div>';
-    h += '<div class="list" style="margin-top:12px"><button class="rowi" id="retest"><span class="grow">Пройти входной тест заново<div class="mut" style="margin-top:2px">' + (p.placement ? 'Сейчас: ' + esc(p.placement.cefr) + ' · ' + esc(p.placement.date) : 'Определит уровень и подберёт задания') + '</div></span>' + ico('chev', 'chev') + '</button></div>';
-    h += '<div class="list" style="margin-top:12px"><button class="rowi" data-gl="1"><span class="grow">Что значат слова и буквы<div class="mut" style="margin-top:2px">Band, задания 1 и 2, пробный экзамен, сочетания слов…</div></span>' + ico('chev', 'chev') + '</button></div>';
-    h += '<h3>Профиль</h3>' + profileForm(p, 'Сохранить');
+    if (!standalone) h += '<div class="list" style="margin-top:10px"><button class="rowi" id="inst"><span class="grow">Установить как приложение<div class="mut" style="margin-top:2px">' + (ios ? 'Safari → Поделиться → На экран «Домой»' : 'Иконка на главном экране, работает офлайн') + '</div></span></button></div>';
+    h += '<div class="sl">Учёба</div><div class="list"><div class="rowc"><b>Уровень карточек</b><div class="mut" style="margin:2px 0 12px">Сейчас: ' + userCef(p) + ' — слова на ступень выше</div>' + seg('cefm', [['auto', 'Авто'], ['B1', 'B1'], ['B2', 'B2'], ['C1', 'C1'], ['C2', 'C2']], p.cefMode || 'auto') + '</div>';
+    h += '<button class="rowi" id="retest"><span class="grow">Пройти входной тест заново<div class="mut" style="margin-top:2px">' + (p.placement ? 'Сейчас: ' + esc(p.placement.cefr) + ' · ' + esc(p.placement.date) : 'Определит уровень и подберёт задания') + '</div></span>' + ico('chev', 'chev') + '</button>';
+    h += '<button class="rowi" data-gl="1"><span class="grow">Что значат слова и буквы<div class="mut" style="margin-top:2px">Band, задания 1 и 2, пробный экзамен, сочетания слов…</div></span>' + ico('chev', 'chev') + '</button></div>';
+    h += '<div class="sl">Профиль</div>' + profileForm(p, 'Сохранить');
     paint(h);
     $('#retest').onclick = () => viewPlacement((r) => { p.placement = r; p.skills = E.placementSkills(r.band); p.days = {}; syncDeck(p); sess = null; save(); toast('Уровень: ' + r.cefr); location.hash = '#set'; route(); });
-    $('#cefm').onchange = () => { p.cefMode = $('#cefm').value; syncDeck(p); sess = null; save(); toast('Уровень карточек: ' + userCef(p)); viewSet(); };
+    bindSeg('cefm', (v) => { p.cefMode = v; syncDeck(p); sess = null; save(); toast('Уровень карточек: ' + userCef(p)); viewSet(); });
     const ib = $('#inst'); if (ib) ib.onclick = async () => { if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; } else toast(ios ? 'Safari → Поделиться → На экран «Домой»' : 'Меню браузера → Установить приложение'); };
     bindSeg('f_module');
     $('#pf').onsubmit = (e) => {
@@ -1000,6 +1057,26 @@
     $('#pf').onsubmit = (e) => { e.preventDefault(); const f = readProfileForm(); if (placeDone) f.placement = placeDone; newProfile(f); placeDone = null; sess = null; location.hash = '#today'; route(); };
   }
 
+  // Шаг 2 регистрации: код из письма
+  function codeStep(em, pw) {
+    $('#af').innerHTML = '<p style="font-size:17px;margin:0 0 6px">Мы отправили код на <b>' + esc(em) + '</b></p><p class="mut" style="margin:0 0 14px">Введите 6 цифр из письма. Не пришло? Проверьте «Спам».</p><input id="acode" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="000000" style="text-align:center;font-size:24px;letter-spacing:8px" required><div class="err" id="aerr"></div><button class="btn p" id="asub" type="submit">Подтвердить</button><div style="text-align:center;margin-top:8px"><button class="link" id="ares" type="button" disabled></button></div><div style="text-align:center;margin-top:4px"><button class="link" id="aback" type="button">Изменить почту</button></div>';
+    const inp = $('#acode'); inp.focus();
+    let t = 60, iv = null;
+    const tick = () => { const r = $('#ares'); if (!r) { clearInterval(iv); return; } if (t > 0) { r.disabled = true; r.textContent = 'Отправить код ещё раз через ' + t + ' с'; t--; } else { clearInterval(iv); r.disabled = false; r.textContent = 'Отправить код ещё раз'; } };
+    iv = setInterval(tick, 1000); tick();
+    $('#ares').onclick = async () => { t = 60; iv = setInterval(tick, 1000); tick(); try { await Cloud.signupCode(em); $('#aerr').style.color = ''; $('#aerr').textContent = 'Код отправлен ещё раз'; } catch (e) { $('#aerr').textContent = String(e.message || e); } };
+    $('#aback').onclick = () => { clearInterval(iv); viewAuth(); };
+    inp.oninput = () => { inp.value = inp.value.replace(/\D/g, '').slice(0, 6); };
+    $('#af').onsubmit = async (e) => {
+      e.preventDefault(); const b = $('#asub'); b.disabled = true; $('#aerr').textContent = '';
+      try {
+        const r = await Cloud.signUp(em, pw, inp.value);
+        if (r.error) throw r.error;
+        clearInterval(iv); await start(r.data.session.user);
+      } catch (err) { $('#aerr').style.color = ''; $('#aerr').textContent = /fetch|network|Нет связи/i.test(String(err.message)) ? 'Нет связи с сервером' : String(err.message || err); b.disabled = false; }
+    };
+  }
+
   // ---------- вход ----------
   function viewAuth() {
     $('#tabs').hidden = true;
@@ -1013,6 +1090,7 @@
       try {
         const em = $('#ae').value.trim(), pw = $('#ap').value;
         if (signup && !$('#acons').checked) throw new Error('Для регистрации нужно согласие на обработку данных');
+        if (signup) { const sc = await Cloud.signupCode(em); if (sc.required) { b.disabled = false; return codeStep(em, pw); } }
         const r = signup ? await Cloud.signUp(em, pw) : await Cloud.signIn(em, pw);
         if (r.error) throw r.error;
         if (!r.data.session) { $('#af').innerHTML = '<p style="font-size:17px">Письмо отправлено на <b>' + esc(em) + '</b>.</p><p class="mut">Откройте его и перейдите по ссылке, чтобы подтвердить аккаунт. После перехода вы сразу окажетесь в приложении — входить заново не нужно. Не пришло? Проверьте «Спам».</p>'; return; }
