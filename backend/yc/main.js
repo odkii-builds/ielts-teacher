@@ -68,6 +68,8 @@ const R = require('./review');
 // Расширенный разбор: проверка текста -> атомарное списание -> Groq -> при любой ошибке возврат списанного.
 // Бесплатная проверка получает только обрезанный результат (остальное не покидает сервер).
 actions.review = async (b, me) => {
+  // До релиза платных функций разбор доступен только админам (ADMIN_EMAILS); REVIEW_OPEN=1 открывает всем.
+  if (!isAdmin(me) && E.REVIEW_OPEN !== '1') throw bad('Расширенный разбор пока недоступен', 403);
   const kind = ['t1', 'gt'].includes(b.kind) ? b.kind : 't2', text = String(b.text || ''), bad0 = R.check(kind, text);
   if (bad0) throw bad(bad0);
   const goal = Math.min(9, Math.max(4, Number(b.goal) || 7));
