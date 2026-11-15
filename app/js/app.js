@@ -406,7 +406,7 @@
     const rest = p.cards.filter((c) => !c.seen).sort((a, b) => ((b.rec ? 1 : 0) - (a.rec ? 1 : 0)) || (rk(a) - rk(b)) || (hash(a.id) - hash(b.id))); p.cards = seen.concat(rest);
     return changed;
   }
-  function ensureP(p) { p.errors.forEach((e) => E.errInit(e, today())); p.drafts = p.drafts || {}; p.study = p.study || {}; p.writes = p.writes || []; p.reads = p.reads || []; if (!p.newToday) p.newToday = { date: '', n: 0, extra: 0 }; }
+  function ensureP(p) { p.errors.forEach((e) => E.errInit(e, today())); p.drafts = p.drafts || {}; p.study = p.study || {}; p.writes = p.writes || []; p.reads = p.reads || []; p.listens = p.listens || []; if (!p.newToday) p.newToday = { date: '', n: 0, extra: 0 }; }
   const grpOf = (p) => p.cgrp || 'main';
   const newLeft = (p) => Math.max(0, p.newPerDay + (p.newToday.extra || 0) - p.newToday.n);
   function ensureSess(p) {
@@ -921,6 +921,19 @@
   // ----- Reading -----
   const RS = { id: null, ans: {}, done: false };
   const RTAG = { mh: 'R-MH', mi: 'R-MI', tfng: 'R-TFNG', mcq: 'R-MCQ', sc: 'R-COMP' };
+  function qInput(g, it, ans, done) {
+    let inp = '';
+    if (g.type === 'tfng') inp = '<div class="seg" style="margin-top:8px">' + ['T', 'F', 'NG'].map((v) => '<button type="button" data-q="' + it.n + '" data-v="' + v + '" class="' + (ans[it.n] === v ? 'on' : '') + '"' + (done ? ' disabled' : '') + '>' + ({ T: 'True', F: 'False', NG: 'Not given' }[v]) + '</button>').join('') + '</div>';
+    else if (g.type === 'mh' || g.type === 'mi') inp = '<select data-q="' + it.n + '" style="margin-top:8px"' + (done ? ' disabled' : '') + '><option value="">—</option>' + g.options.map((o) => '<option value="' + esc(o[0]) + '"' + (ans[it.n] === o[0] ? ' selected' : '') + '>' + esc(o[0]) + '</option>').join('') + '</select>';
+    else if (g.type === 'mcq') inp = '<div class="opts" style="margin-top:8px">' + it.opts.map((o) => '<button type="button" class="opt' + (ans[it.n] === o[0] ? ' sel' : '') + '" data-q="' + it.n + '" data-v="' + o[0] + '"' + (done ? ' disabled' : '') + '>' + esc(o) + '</button>').join('') + '</div>';
+    else inp = '<input data-q="' + it.n + '" style="margin-top:8px" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" value="' + esc(ans[it.n] || '') + '"' + (done ? ' disabled' : '') + '>';
+    return inp;
+  }
+  function bindQ(ans) {
+    $$('button[data-q]').forEach((b) => { b.onclick = () => { ans[b.dataset.q] = b.dataset.v; $$('button[data-q="' + b.dataset.q + '"]').forEach((x) => x.classList.toggle('on', x === b)); $$('button.opt[data-q="' + b.dataset.q + '"]').forEach((x) => x.classList.toggle('sel', x === b)); }; });
+    $$('select[data-q]').forEach((s) => { s.onchange = () => { ans[s.dataset.q] = s.value; }; });
+    $$('input[data-q]').forEach((s) => { s.oninput = () => { ans[s.dataset.q] = s.value; }; });
+  }
   function viewReading() {
     const p = P();
     let h = head('Чтение', READ.tests.length + ' учебных текстов по формату Academic') + '<div class="list">' + READ.tests.map((t) => {
@@ -941,11 +954,7 @@
       h += '<h3>' + esc(g.title) + '</h3><p class="mut" style="margin:-4px 0 10px">' + esc(g.instr) + '</p>';
       if (g.type === 'mh') h += '<div class="card mut" style="margin-bottom:10px">' + g.options.map((o) => '<div><b>' + esc(o[0]) + '</b>&nbsp; ' + esc(o[1]) + '</div>').join('') + '</div>';
       h += '<div class="list">' + g.items.map((it) => {
-        let inp = '';
-        if (g.type === 'tfng') inp = '<div class="seg" style="margin-top:8px">' + ['T', 'F', 'NG'].map((v) => '<button type="button" data-q="' + it.n + '" data-v="' + v + '" class="' + (ans[it.n] === v ? 'on' : '') + '"' + (done ? ' disabled' : '') + '>' + ({ T: 'True', F: 'False', NG: 'Not given' }[v]) + '</button>').join('') + '</div>';
-        else if (g.type === 'mh' || g.type === 'mi') inp = '<select data-q="' + it.n + '" style="margin-top:8px"' + (done ? ' disabled' : '') + '><option value="">—</option>' + g.options.map((o) => '<option value="' + esc(o[0]) + '"' + (ans[it.n] === o[0] ? ' selected' : '') + '>' + esc(o[0]) + '</option>').join('') + '</select>';
-        else if (g.type === 'mcq') inp = '<div class="opts" style="margin-top:8px">' + it.opts.map((o) => '<button type="button" class="opt' + (ans[it.n] === o[0] ? ' sel' : '') + '" data-q="' + it.n + '" data-v="' + o[0] + '"' + (done ? ' disabled' : '') + '>' + esc(o) + '</button>').join('') + '</div>';
-        else inp = '<input data-q="' + it.n + '" style="margin-top:8px" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" value="' + esc(ans[it.n] || '') + '"' + (done ? ' disabled' : '') + '>';
+        const inp = qInput(g, it, ans, done);
         const fb = done ? '<div class="mut" style="margin-top:8px;color:var(--' + (ok(it) ? 'ok' : 'warn') + ')">' + (ok(it) ? '✓ Верно' : '✗ Верный ответ: <b>' + esc(Array.isArray(it.a) ? it.a[0] : it.a) + '</b>') + ' — ' + esc(it.why) + '</div>' : '';
         return '<div class="rowi" style="display:block"><div><b>' + it.n + '.</b> ' + esc(it.q) + '</div>' + inp + fb + '</div>';
       }).join('') + '</div>';
@@ -957,9 +966,7 @@
     } else h += '<div style="margin-top:18px"><button class="btn p" id="rsub">Сдать</button></div>';
     paint(h, !RS.painted); RS.painted = true;
     bindTimer(t.minutes, 'r' + id);
-    $$('button[data-q]').forEach((b) => { b.onclick = () => { ans[b.dataset.q] = b.dataset.v; $$('button[data-q="' + b.dataset.q + '"]').forEach((x) => x.classList.toggle('on', x === b)); $$('button.opt[data-q="' + b.dataset.q + '"]').forEach((x) => x.classList.toggle('sel', x === b)); }; });
-    $$('select[data-q]').forEach((s) => { s.onchange = () => { ans[s.dataset.q] = s.value; }; });
-    $$('input[data-q]').forEach((s) => { s.oninput = () => { ans[s.dataset.q] = s.value; }; });
+    bindQ(ans);
     const sub = $('#rsub'); if (sub) sub.onclick = () => {
       const un = items.filter((it) => !String(ans[it.n] || '').trim()).length;
       const fin = () => { RS.done = true; const raw = items.filter(ok).length; const scaled = Math.round(raw / items.length * 40); p.reads.push({ id, date: today(), raw, total: items.length, band: E.rawToBand(p.module === 'general' ? 'reading_general' : 'reading_academic', scaled) }); save(); RS.painted = false; viewRead(id); window.scrollTo(0, 0); };
@@ -972,6 +979,156 @@
     const rt = $('#rretry'); if (rt) rt.onclick = () => { RS.ans = {}; RS.done = false; RS.painted = false; viewRead(id); window.scrollTo(0, 0); };
   }
 
+  // ---------- Аудирование ----------
+  let LISTEN = { tests: [], note: '' };
+  const LS = { key: '', ans: {}, done: false, exam: true, rate: 1, played: {}, playing: 0, painted: false };
+  const tts = { run: 0 };
+  const speechOk = () => typeof speechSynthesis !== 'undefined' && typeof SpeechSynthesisUtterance !== 'undefined';
+  function stopSpeech() { tts.run++; LS.playing = 0; if (speechOk()) { try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } } }
+  function enVoices() {
+    if (!speechOk()) return [];
+    const vs = speechSynthesis.getVoices().filter((v) => /^en/i.test(v.lang));
+    return vs.sort((a, b) => (/GB/i.test(b.lang) - /GB/i.test(a.lang)) || (b.localService - a.localService));
+  }
+  /** Читает реплики по очереди: у каждого говорящего свой голос (или своя высота тона). */
+  function speakLines(lines, rate, onLine, onEnd) {
+    stopSpeech(); const run = tts.run; const spk = {}; const vs = enVoices(); let i = 0;
+    const next = () => {
+      if (run !== tts.run) return;
+      if (i >= lines.length) { if (onEnd) onEnd(); return; }
+      const sp = lines[i][0]; const text = lines[i][1]; if (onLine) onLine(i); i++;
+      if (!(sp in spk)) spk[sp] = Object.keys(spk).length;
+      const slot = spk[sp]; const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-GB'; u.rate = rate;
+      if (vs.length) u.voice = vs[slot % vs.length];
+      u.pitch = vs.length > 1 ? 1 : [1, 1.3, 0.8, 1.15][slot % 4];
+      u.onend = () => setTimeout(next, 350);
+      u.onerror = () => { if (run === tts.run) setTimeout(next, 60); };
+      speechSynthesis.speak(u);
+    };
+    setTimeout(next, 80);
+  }
+  function bigList(items) {
+    return '<div class="stack">' + items.map((x) => '<a class="card mode" href="' + x[0] + '"><span class="mic">' + x[1] + '</span><span class="grow"><b>' + esc(x[2]) + '</b><span class="mut">' + esc(x[3]) + '</span></span>' + (x[4] ? '<span class="chip on">' + esc(x[4]) + '</span>' : '') + '</a>').join('') + '</div>';
+  }
+  const LPART = [['☎️', 'Бытовой разговор', 'Заполни форму: имена, числа, адреса'], ['🗺️', 'Монолог и план', 'Выбери ответ и подпиши план здания'], ['🎓', 'Обсуждение', 'Студенты и преподаватель: мнения и задачи'], ['🧑‍🏫', 'Лекция', 'Академическая лекция, заметки с пропусками']];
+  function viewListening() {
+    const p = P(); const best = (k) => { const rs = (p.listens || []).filter((r) => r.id === k); return rs.length ? rs.reduce((a, r) => (r.raw > a.raw ? r : a)) : null; };
+    let h = head('Аудирование', 'Как на экзамене: 4 части, 40 вопросов, запись звучит один раз');
+    h += '<h3 style="margin-top:0">Полный тест</h3>' + bigList(LISTEN.tests.map((t) => { const b = best(t.id + '/all'); return ['#listen/' + t.id, '🎧', t.title, t.topic + ' · 40 вопросов', b ? b.raw + '/' + b.total : '']; }));
+    const t0 = LISTEN.tests[0];
+    if (t0) h += '<h3>Одна часть</h3>' + bigList(t0.parts.map((pt, i) => { const b = best(t0.id + '/' + pt.n); return ['#listen/' + t0.id + '/' + pt.n, LPART[i][0], 'Part ' + pt.n + ' · ' + LPART[i][1], LPART[i][2], b ? b.raw + '/' + b.total : '']; }));
+    h += '<h3>Тренировка слуха</h3>' + bigList([['#dictation', '✍️', 'Диктант', 'Слушай предложения из своих карточек и пиши']]);
+    h += '<h3>Как устроен экзамен</h3><div class="card stack"><div><b>30 минут</b> записи и ещё 10 минут на перенос ответов (на бумаге).</div><div><b>4 части по 10 вопросов</b>: разговор, монолог, обсуждение, лекция — от простого к сложному.</div><div>Запись звучит <b>один раз</b>, ответы пишешь по ходу.</div><div>Считаются <b>орфография</b> и лимит слов: «two» и «2» засчитываются, «teh» — нет.</div></div>';
+    h += '<p class="mut" style="margin-top:14px">' + esc(LISTEN.note) + ' Реальные тесты — в Cambridge IELTS и на ielts.org.</p>';
+    paint(h);
+  }
+  function planSvg(pl) {
+    const tx = (o, t, c) => '<text class="' + c + '" x="' + (o.x + o.w / 2) + '" y="' + (o.y + o.h / 2) + '">' + esc(t) + '</text>';
+    let s = '<svg class="plan" viewBox="0 0 ' + pl.w + ' ' + pl.h + '" role="img" aria-label="План здания">';
+    pl.fixed.forEach((o) => { s += '<rect class="' + (o.corridor ? 'pc' : 'pf') + '" x="' + o.x + '" y="' + o.y + '" width="' + o.w + '" height="' + o.h + '" rx="6"/>' + (o.t ? tx(o, o.t, 'pt') : ''); });
+    pl.spots.forEach((o) => { s += '<rect class="ps" x="' + o.x + '" y="' + o.y + '" width="' + o.w + '" height="' + o.h + '" rx="6"/>' + tx(o, o.l, 'pl'); });
+    if (pl.entrance) { const e = pl.entrance; s += '<text class="pt" x="' + (e.x + e.w / 2) + '" y="' + (pl.h - 5) + '">▲ ' + esc(e.t) + '</text>'; }
+    return s + '</svg>';
+  }
+  function viewListen(id, pn) {
+    const p = P(); const t = LISTEN.tests.find((x) => x.id === id);
+    const parts = t ? (pn ? t.parts.filter((x) => String(x.n) === pn) : t.parts) : [];
+    if (!parts.length) { location.hash = '#listening'; return; }
+    const key = id + '/' + (pn || 'all');
+    if (LS.key !== key) { stopSpeech(); Object.assign(LS, { key, ans: {}, done: false, played: {}, painted: false }); }
+    const ans = LS.ans; const done = LS.done;
+    const items = []; parts.forEach((pt) => pt.groups.forEach((g) => g.items.forEach((it) => items.push(Object.assign({ type: g.type, plan: !!g.plan }, it)))));
+    const ok = (it) => E.checkAnswer(it, ans[it.n]);
+    let h = head(pn ? parts[0].title : t.title, esc(pn ? parts[0].kind : t.topic), back('#listening'));
+    h += '<div class="card stack"><div class="seg" id="lmode"><button type="button" data-v="1" class="' + (LS.exam ? 'on' : '') + '">Как на экзамене</button><button type="button" data-v="0" class="' + (LS.exam ? '' : 'on') + '">Можно повторять</button></div><div class="seg" id="lrate">' + [[0.85, 'Медленнее'], [1, 'Обычно'], [1.15, 'Быстрее']].map((r) => '<button type="button" data-v="' + r[0] + '" class="' + (LS.rate === r[0] ? 'on' : '') + '">' + r[1] + '</button>').join('') + '</div></div>';
+    if (!speechOk()) h += '<div class="card" style="margin-top:12px">На этом устройстве нет озвучки. Открой приложение в Safari или Chrome — или читай скрипт после сдачи ответов.</div>';
+    parts.forEach((pt) => {
+      h += '<h3>' + esc(pt.title) + '</h3><div class="card stack"><p class="mut" style="margin:0">' + esc(pt.intro) + '</p><button class="btn p" data-lp="' + pt.n + '"></button><div class="mut" data-ls="' + pt.n + '"></div></div>';
+      pt.groups.forEach((g) => {
+        h += '<h3 style="margin-top:18px">' + esc(g.title) + '</h3><p class="mut" style="margin:-4px 0 10px">' + esc(g.instr) + '</p>';
+        if (g.plan) h += '<div class="card">' + planSvg(g.plan) + '</div><div style="height:10px"></div>';
+        else if (g.type === 'mi') h += '<div class="card mut" style="margin-bottom:10px">' + g.options.map((o) => '<div><b>' + esc(o[0]) + '</b>&nbsp; ' + esc(o[1]) + '</div>').join('') + '</div>';
+        h += '<div class="list">' + g.items.map((it) => {
+          const fb = done ? '<div class="mut" style="margin-top:8px;color:var(--' + (ok(it) ? 'ok' : 'warn') + ')">' + (ok(it) ? '✓ Верно' : '✗ Верный ответ: <b>' + esc(Array.isArray(it.a) ? it.a[0] : it.a) + '</b>') + ' — ' + esc(it.why) + '</div>' : '';
+          return '<div class="rowi" style="display:block"><div><b>' + it.n + '.</b> ' + esc(it.q) + '</div>' + qInput(g, it, ans, done) + fb + '</div>';
+        }).join('') + '</div>';
+      });
+      if (done) h += '<details class="card" style="margin-top:12px"><summary><b>Скрипт</b> <span class="mut">— нажми на слово, чтобы увидеть перевод</span></summary><div class="stack" style="margin-top:10px">' + pt.script.map((l) => '<p style="margin:0">' + tapW(l[1]) + '</p>').join('') + '</div></details>';
+    });
+    if (done) {
+      const raw = items.filter(ok).length; const full = !pn;
+      h += '<div class="card" style="margin-top:18px;text-align:center"><div class="big">' + raw + ' / ' + items.length + '</div><div class="mut">' + (full ? '≈ band ' + E.rawToBand('listening', raw) + ' (приблизительно, по шкале Academic/General)' : 'Одна часть — band не считаем. Пройди все четыре части, чтобы оценить уровень.') + '</div></div><div class="stack" style="margin-top:12px"><button class="btn p" id="lerr">Добавить ошибки в журнал</button><button class="btn" id="lretry">Пройти заново</button></div>';
+    } else h += '<div style="margin-top:18px"><button class="btn p" id="lsub">Сдать</button></div>';
+    paint(h, !LS.painted); LS.painted = true;
+    bindQ(ans);
+    const refresh = () => {
+      $$('[data-lp]').forEach((b) => {
+        const n = +b.dataset.lp; const on = LS.playing === n; const used = LS.exam && LS.played[n] && !done;
+        b.textContent = on ? '⏹ Остановить' : used ? '✓ Запись прозвучала' : (LS.played[n] ? '▶ Послушать ещё раз' : '▶ Слушать ' + (parts.find((x) => x.n === n).title.split(' · ')[0]));
+        b.disabled = !speechOk() || used;
+      });
+      $$('[data-ls]').forEach((s) => { if (LS.playing !== +s.dataset.ls) s.textContent = LS.exam ? 'Звучит один раз — ответы пиши по ходу.' : 'Можно слушать сколько угодно раз.'; });
+    };
+    refresh();
+    $$('[data-lp]').forEach((b) => {
+      b.onclick = () => {
+        const n = +b.dataset.lp; const pt = parts.find((x) => x.n === n);
+        if (LS.playing === n) { stopSpeech(); LS.played[n] = true; refresh(); return; }
+        LS.playing = n; refresh();
+        const st = $('[data-ls="' + n + '"]');
+        speakLines(pt.script, LS.rate, (i) => { if (st) st.textContent = 'Реплика ' + (i + 1) + ' из ' + pt.script.length; }, () => { LS.playing = 0; LS.played[n] = true; refresh(); });
+        LS.playing = n; // speakLines сбрасывает флаг через stopSpeech
+      };
+    });
+    bindSeg('lmode', (v) => { LS.exam = v === '1'; refresh(); });
+    bindSeg('lrate', (v) => { LS.rate = parseFloat(v); });
+    const sub = $('#lsub'); if (sub) sub.onclick = () => {
+      const un = items.filter((it) => !String(ans[it.n] || '').trim()).length;
+      const fin = () => {
+        stopSpeech(); LS.done = true; const raw = items.filter(ok).length;
+        p.listens.push({ id: key, date: today(), raw, total: items.length, band: pn ? null : E.rawToBand('listening', raw) });
+        save(); LS.painted = false; viewListen(id, pn); window.scrollTo(0, 0);
+      };
+      if (un) confirmSheet('Без ответа: ' + un + '. Сдать всё равно?', 'Сдать', fin); else fin();
+    };
+    const le = $('#lerr'); if (le) le.onclick = () => {
+      let n = 0; items.filter((it) => !ok(it)).forEach((it) => { p.errors.push({ id: uid(), date: today(), tag: it.plan ? 'L-MAP' : LTAG[it.type], snippet: t.title + ' · Q' + it.n + ': ' + it.q.slice(0, 60), fix: 'ответ: ' + (Array.isArray(it.a) ? it.a[0] : it.a), nodrill: true }); n++; });
+      delete p.days[today()]; save(); le.disabled = true; toast('Записано ошибок: ' + n);
+    };
+    const lr = $('#lretry'); if (lr) lr.onclick = () => { LS.key = ''; viewListen(id, pn); window.scrollTo(0, 0); };
+  }
+  const LTAG = { sc: 'L-SPELL', mcq: 'L-DISTR', mi: 'L-DISTR' };
+
+  // ----- Диктант из своих карточек -----
+  const DT = { q: [], i: 0, ok: 0, shown: false };
+  function dictStart() {
+    const p = P(); const pool = p.cards.filter((c) => c.seen && E.exOf(c) && String(E.exOf(c)).split(/\s+/).length <= 18);
+    const src = pool.length >= 5 ? pool : p.cards.filter((c) => E.exOf(c) && String(E.exOf(c)).split(/\s+/).length <= 18);
+    const a = src.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; }
+    DT.q = a.slice(0, 8).map((c) => ({ id: c.id, text: E.plain(E.exOf(c)), ru: c.ru })); DT.i = 0; DT.ok = 0; DT.shown = false;
+  }
+  const wordsOf = (s) => String(s).toLowerCase().replace(/[^a-z0-9'’ -]/g, ' ').replace(/[’]/g, "'").split(/\s+/).filter(Boolean);
+  function viewDictation() {
+    if (!DT.q.length) dictStart();
+    if (!DT.q.length) { paint(head('Диктант', 'Сначала добавь слова в карточки', back('#listening'))); return; }
+    if (DT.i >= DT.q.length) {
+      paint(head('Диктант', 'Готово', back('#listening')) + '<div class="card" style="text-align:center"><div class="big">' + DT.ok + ' / ' + DT.q.length + '</div><div class="mut">предложений записано без ошибок</div></div><div class="stack" style="margin-top:12px"><button class="btn p" id="dnew">Ещё раз</button></div>');
+      $('#dnew').onclick = () => { dictStart(); viewDictation(); }; return;
+    }
+    const q = DT.q[DT.i];
+    paint(head('Диктант', (DT.i + 1) + ' из ' + DT.q.length, back('#listening')) + '<div class="card stack"><button class="btn p" id="dplay">▶ Слушать</button><input id="dans" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Напиши, что услышал"><div id="dfb"></div></div><div class="stack" style="margin-top:12px"><button class="btn p" id="dchk">Проверить</button></div>', false);
+    const say = () => speakLines([['A', q.text]], 0.9, null, null);
+    $('#dplay').onclick = say; if (!DT.shown) setTimeout(say, 200);
+    $('#dchk').onclick = () => {
+      if (DT.shown) { DT.i++; DT.shown = false; stopSpeech(); viewDictation(); return; }
+      const got = wordsOf($('#dans').value); const want = wordsOf(q.text); const good = got.join(' ') === want.join(' ');
+      if (good) DT.ok++; DT.shown = true;
+      $('#dfb').innerHTML = '<div style="color:var(--' + (good ? 'ok' : 'warn') + ')">' + (good ? '✓ Верно' : '✗ Правильно:') + '</div><div style="margin-top:6px">' + esc(q.text) + '</div><div class="mut" style="margin-top:6px">' + esc(q.ru || '') + '</div>';
+      $('#dchk').textContent = DT.i + 1 >= DT.q.length ? 'Результат' : 'Дальше';
+    };
+  }
+
   // ---------- Прогресс ----------
   function viewProgress() {
     const p = P(); const t0 = today();
@@ -982,6 +1139,7 @@
     const ks = Object.keys(wk).map(Number).sort((a, b) => b - a).slice(0, 8);
     if (ks.length) h += '<h3>Выполнение по неделям</h3><div class="card stack">' + ks.map((k) => { const pc = Math.round(100 * wk[k].done / Math.max(1, wk[k].plan)); return '<div><div class="sum" style="margin-bottom:6px"><span>Неделя ' + k + '</span><span>' + wk[k].done + ' / ' + wk[k].plan + ' мин</span></div><div class="bar"><i style="width:' + pc + '%"></i></div></div>'; }).join('') + '</div>';
     if (p.reads.length) h += '<h3>Чтение</h3><div class="list">' + p.reads.slice().reverse().slice(0, 6).map((r) => { const t = READ.tests.find((x) => x.id === r.id); return '<div class="rowi"><div class="grow"><b>' + esc(t ? t.title : r.id) + '</b><div class="mut" style="margin-top:2px">' + esc(fmtD(r.date)) + '</div></div><span>' + r.raw + '/' + r.total + ' · ≈' + r.band + '</span></div>'; }).join('') + '</div>';
+    if ((p.listens || []).length) h += '<h3>Аудирование</h3><div class="list">' + p.listens.slice().reverse().slice(0, 6).map((r) => { const t = LISTEN.tests.find((x) => x.id === r.id.split('/')[0]); return '<div class="rowi"><div class="grow"><b>' + esc(t ? t.title : r.id) + (r.id.split('/')[1] !== 'all' ? ' · Part ' + r.id.split('/')[1] : '') + '</b><div class="mut" style="margin-top:2px">' + esc(fmtD(r.date)) + '</div></div><span>' + r.raw + '/' + r.total + (r.band ? ' · ≈' + r.band : '') + '</span></div>'; }).join('') + '</div>';
     paint(h);
     $('#mplus').onclick = () => openSheet('<h2>Новый пробный экзамен</h2><div class="grid4">' + E.SK.map((s) => '<div><input id="m_' + s + '" type="number" inputmode="decimal" step="0.5" min="1" max="9"><div class="mut" style="text-align:center;margin-top:4px">' + esc(SKN[s]) + '</div></div>').join('') + '</div>' +
       '<label style="display:flex;gap:10px;align-items:center;margin:16px 0"><input type="checkbox" id="m_up" checked style="width:20px;height:20px"> Обновить уровни в профиле</label><button class="btn p" id="msave">Сохранить</button>' +
@@ -1101,22 +1259,22 @@
 
   // ---------- маршрутизация ----------
   const TABS = [['today', 'Сегодня'], ['plan', 'План'], ['cards', 'Карточки'], ['errors', 'Ошибки']];
-  const MORE = [['progress', 'Прогресс'], ['writing', 'Письменная часть'], ['reading', 'Чтение'], ['res', 'Ресурсы'], ['set', 'Настройки']];
-  const MORE_ALIAS = { write: 'writing', read: 'reading' };
+  const MORE = [['progress', 'Прогресс', '📈', 'Пробные экзамены и выполнение плана'], ['writing', 'Письменная часть', '✍️', 'Эссе, графики и письма'], ['listening', 'Аудирование', '🎧', 'Тесты как на экзамене и диктант'], ['reading', 'Чтение', '📖', 'Тексты и вопросы формата IELTS'], ['res', 'Ресурсы', '📚', 'Материалы для подготовки'], ['set', 'Настройки', '⚙️', 'Профиль, цель и аккаунт']];
+  const MORE_ALIAS = { write: 'writing', read: 'reading', listen: 'listening', dictation: 'listening' };
   function renderTabs(tab0) {
     let tab = tab0;
     const t = $('#tabs'); t.hidden = false;
     tab = MORE_ALIAS[tab] || (tab === 'fix' ? 'errors' : tab === 'vw' ? 'cards' : tab === 't2' ? 'writing' : tab); const inMore = MORE.some((m) => m[0] === tab);
     t.innerHTML = TABS.map(([k, n]) => '<a href="#' + k + '" class="' + (k === tab ? 'on' : '') + '">' + ico(k) + n + '</a>').join('') + '<button id="tmore" class="' + (inMore ? 'on' : '') + '">' + ico('more') + (inMore ? MORE.find((m) => m[0] === tab)[1] : 'Ещё') + '</button>';
-    $('#tmore').onclick = () => openSheet('<div class="list">' + MORE.map(([k, n]) => '<a class="rowi" href="#' + k + '"><span class="grow">' + n + '</span>' + ico('chev', 'chev') + '</a>').join('') + '</div>', (el) => { el.querySelectorAll('a').forEach((a) => { a.onclick = () => closeSheet(); }); });
+    $('#tmore').onclick = () => openSheet('<div class="stack" style="padding-top:4px">' + MORE.map(([k, n, ic, d]) => '<a class="card mode" href="#' + k + '"><span class="mic">' + ic + '</span><span class="grow"><b>' + n + '</b><span class="mut">' + d + '</span></span></a>').join('') + '</div>', (el) => { el.querySelectorAll('a').forEach((a) => { a.onclick = () => closeSheet(); }); });
   }
   function route(animate) {
     if (!user) return viewAuth();
-    closeSheet(true);
+    closeSheet(true); stopSpeech();
     const parts = (location.hash || '#today').slice(1).split('/'); const tab = parts[0];
     if (!DB.active || !P()) { $('#tabs').hidden = true; return viewOnboarding(); }
     renderTabs(tab);
-    (Object.assign({ today: viewToday, plan: viewPlan, cards: viewCards, errors: viewErrors, fix: viewFix, vw: viewVw, t2: viewT2, writing: viewWriting, write: viewWrite, reading: viewReading, read: viewRead, progress: viewProgress, res: viewRes, set: viewSet }, window.Next && Next.views)[tab] || viewToday)(parts[1]);
+    (Object.assign({ today: viewToday, plan: viewPlan, cards: viewCards, errors: viewErrors, fix: viewFix, vw: viewVw, t2: viewT2, writing: viewWriting, write: viewWrite, reading: viewReading, read: viewRead, listening: viewListening, listen: viewListen, dictation: viewDictation, progress: viewProgress, res: viewRes, set: viewSet }, window.Next && Next.views)[tab] || viewToday)(parts[1], parts[2]);
     if (animate === false) $('#view').classList.remove('enter');
     window.scrollTo(0, 0);
   }
@@ -1147,8 +1305,8 @@
   async function init() {
     try {
       const J = (u) => fetch(u).then((x) => x.json());
-      const [c, r, d, rd, wr] = await Promise.all([J('data/content.json'), J('data/resources.json'), J('data/deck.json'), J('data/reading.json'), J('data/writing.json')]);
-      CONTENT = c; RES = r; DECK = d; DECKIDS = new Set(d.map((x) => x.id)); READ = rd; WRITING = wr;
+      const [c, r, d, rd, wr, ls] = await Promise.all([J('data/content.json'), J('data/resources.json'), J('data/deck.json'), J('data/reading.json'), J('data/writing.json'), J('data/listening.json').catch(() => LISTEN)]);
+      CONTENT = c; RES = r; DECK = d; DECKIDS = new Set(d.map((x) => x.id)); READ = rd; WRITING = wr; LISTEN = ls;
     } catch (e) { $('#view').textContent = 'Не удалось загрузить данные: ' + e.message; return; }
     window.addEventListener('hashchange', () => route());
     if (!Cloud.available()) { $('#view').textContent = 'Не загрузилась библиотека входа. Обнови страницу.'; return; }
