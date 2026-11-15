@@ -3,7 +3,7 @@
 <!-- Копия backend/yc/admin.html (источник правды там). Доступ: вход админа, права проверяет сервер. -->
 <h1>Админка</h1>
 <form id="lf"><input id="em" type="email" placeholder="email" autocomplete="username"> <input id="pw" type="password" placeholder="пароль" autocomplete="current-password"> <button>Войти</button> <span id="err" class="b"></span></form>
-<div id="app" hidden><div id="st"></div><p><input id="f" placeholder="поиск по email"> <button id="rl">Обновить</button> <span id="cnt" class="s"></span></p><table><thead><tr><th>Email</th><th>Проверки</th><th>Premium до</th><th>Статус</th><th>Действия</th></tr></thead><tbody id="tb"></tbody></table></div>
+<div id="app" hidden><div id="st"></div><p><input id="f" placeholder="поиск по email"> <button id="rl">Обновить</button> <span id="cnt" class="s"></span></p><p><button id="gp">Проверить связь с ИИ</button> <span id="gpo" class="s"></span></p><table><thead><tr><th>Email</th><th>Проверки</th><th>Premium до</th><th>Статус</th><th>Действия</th></tr></thead><tbody id="tb"></tbody></table></div>
 <script>
 const API='https://functions.yandexcloud.net/d4ea11hmfpfku2eldtqo';let T='',U=[];
 const $=s=>document.querySelector(s);
@@ -16,6 +16,7 @@ async function load(){U=(await call('admin_list')).users;draw();stats()}
 function draw(){const f=$('#f').value.toLowerCase();const L=U.filter(u=>u.email.includes(f));$('#cnt').textContent=L.length+' из '+U.length;
 $('#tb').innerHTML=L.map(u=>'<tr><td class="e">'+esc(u.email)+'<div class="s">'+esc(u.note)+'</div></td><td data-l="Проверки">'+u.credits+' (беспл. '+u.free+')</td><td data-l="Premium до">'+(u.premium_until?u.premium_until.slice(0,10):'—')+'</td><td data-l="Статус">'+(u.banned?'<span class="b">запрещён</span>':'ок')+'</td><td class="a"><button data-e="'+esc(u.email)+'" data-k="c">+ проверки</button> <button data-e="'+esc(u.email)+'" data-k="p">+ Premium</button> <button data-e="'+esc(u.email)+'" data-k="b">'+(u.banned?'разрешить':'запретить')+'</button> <button data-e="'+esc(u.email)+'" data-k="n">заметка</button></td></tr>').join('')}
 $('#f').oninput=draw;$('#rl').onclick=load;
+$('#gp').onclick=async()=>{const o=$('#gpo');o.textContent='проверяю…';try{const g=(await call('groq_ping')).groq;o.textContent=!g.reachable?'Недоступен с сервера: '+g.error+' ('+g.ms+' мс). Нужен прокси.':g.status===200?'Доступен, '+g.ms+' мс, модель '+g.model+(g.model_available?' есть':' НЕ найдена'):g.status===401?'Сервер отвечает ('+g.ms+' мс), но ключ '+(g.key_set?'не принят':'не задан'):'Ответ '+g.status+' за '+g.ms+' мс'+(g.status===403?': похоже на блокировку по региону, нужен прокси':'')}catch(x){o.textContent='Ошибка: '+x.message}};
 $('#tb').onclick=async e=>{const b=e.target.closest('button');if(!b)return;const email=b.dataset.e,k=b.dataset.k,u=U.find(x=>x.email===email);let p={email};
 if(k==='c'){const n=parseInt(prompt('Сколько проверок добавить (отрицательное — убрать)?','3'),10);if(!n)return;p.credits=n}
 else if(k==='p'){const n=parseInt(prompt('На сколько дней Premium?','30'),10);if(!n)return;p.premium_days=n}

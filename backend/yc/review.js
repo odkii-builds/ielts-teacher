@@ -1,6 +1,7 @@
 'use strict';
 /* Расширенный разбор эссе через Groq. Чистые функции (промпт, разбор ответа, обрезка бесплатной части) + вызов API.
  * Env: GROQ_KEY (обязательно), GROQ_MODEL (по умолчанию llama-3.3-70b-versatile), GROQ_BASE (если нужен прокси). В Groq уходит только текст эссе и тема: без почты и user_id. */
+const { redact } = require('./security');
 const E = process.env;
 const MIN_WORDS = 40, MAX_WORDS = 600, MAX_CHARS = 5000;
 const str = (x, n) => String(x == null ? '' : x).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '').trim().slice(0, n);
@@ -83,9 +84,24 @@ async function callGroq(msgs) {
       method: 'POST', signal: ctl.signal, headers: { 'content-type': 'application/json', authorization: 'Bearer ' + E.GROQ_KEY },
       body: JSON.stringify({ model: E.GROQ_MODEL || 'llama-3.3-70b-versatile', messages: msgs, temperature: 0.3, max_tokens: 5000, response_format: { type: 'json_object' } }),
     });
-    if (!r.ok) { const t = await r.text().catch(() => ''); const e = new Error('groq ' + r.status + ' ' + t.slice(0, 200)); e.upstream = r.status; throw e; }
+    // Тело ответа с ошибкой в сообщение не кладём (оно попадает в логи): только статус и код ошибки.
+    if (!r.ok) { const j = await r.json().catch(() => null); const e = new Error('groq ' + r.status + ' ' + redact(j && j.error && (j.error.code || j.error.type) || '', 60)); e.upstream = r.status; throw e; }
     const j = await r.json(); return j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
   } finally { clearTimeout(timer); }
 }
 
-module.exports = { check, messages, shape, trim, fullOut, callGroq, words };
+// Проверка доступности Groq с сервера: список моделей (токены не тратятся). Возвращает только статус, время и наличие модели.
+async function ping() {
+  const model = E.GROQ_MODEL || 'llama-3.3-70b-versatile', t0 = Date.now(), ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 10000);
+  const out = { key_set: !!E.GROQ_KEY, proxy: !!E.GROQ_BASE, model };
+  try {
+    const r = await fetch((E.GROQ_BASE || 'https://api.groq.com/openai/v1') + '/models', { signal: ctl.signal, headers: E.GROQ_KEY ? { authorization: 'Bearer ' + E.GROQ_KEY } : {} });
+    let has = null;
+    if (r.ok) { const j = await r.json().catch(() => null); has = !!(j && Array.isArray(j.data) && j.data.some((m) => m && m.id === model)); }
+    return Object.assign(out, { reachable: true, status: r.status, model_available: has, ms: Date.now() - t0 });
+  } catch (e) {
+    return Object.assign(out, { reachable: false, error: e && e.name === 'AbortError' ? 'timeout' : redact((e && e.cause && e.cause.code) || (e && e.message) || 'error', 80), ms: Date.now() - t0 });
+  } finally { clearTimeout(timer); }
+}
+
+module.exports = { check, messages, shape, trim, fullOut, callGroq, ping, words };

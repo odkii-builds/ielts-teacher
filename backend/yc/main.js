@@ -7,84 +7,80 @@ Mod._load = function (r, ...a) {
   return _load.call(this, r, ...a);
 };
 /* Права, платные проверки и админ-действия поверх index.js. Точка входа функции: main.handler */
+const crypto = require('crypto');
 const base = require('./index');
 const { fillDays } = require('./stats');
-const { q, db, verify, getUser, ok, bad, TypedValues, TypedData, E } = base._;
+const S = require('./security');
+const N = require('./ent');
+const W = require('./sweep');
+const R = require('./review');
+const { limit } = require('./ratelimit');
+const { q, inTx, verify, getUser, userMeta, ok, bad, own, TypedValues, E, ORIGINS } = base._;
+const { getEnt, putEnt, num } = N;
 
 // ---------- Права и платные возможности (источник истины — сервер) ----------
 const ADMINS = (E.ADMIN_EMAILS || '').toLowerCase().split(',').map((x) => x.trim()).filter(Boolean);
 const isAdmin = (me) => !!me && ADMINS.includes(String(me.email).toLowerCase());
-const FREE_REVIEWS = 1, PREMIUM_DAILY = 10;
-const num = (x) => (x && x.toNumber ? x.toNumber() : Number(x || 0));
-// Транзакция с полной изоляцией: чтение и запись видят один снимок; при конфликте с параллельным запросом повторяем.
-const isConflict = (e) => /abort|lock|conflict|overload|TLI|serializ/i.test(String((e && (e.constructor && e.constructor.name)) || '') + ' ' + String((e && e.message) || ''));
-async function inTx(fn) {
-  for (let i = 0; ; i++) {
-    try {
-      const d = await db();
-      return await d.tableClient.withSession(async (s) => {
-        const t = await s.beginTransaction({ serializableReadWrite: {} }), txId = t.id;
-        const run = async (text, params) => { const res = await s.executeQuery(text, params || {}, { txId }); return res.resultSets && res.resultSets[0] ? TypedData.createNativeObjects(res.resultSets[0]) : []; };
-        try { const out = await fn(run); await s.commitTransaction({ txId }); return out; } catch (e) { try { await s.rollbackTransaction({ txId }); } catch (e2) { /* ignore */ } throw e; }
-      });
-    } catch (e) { if (i < 4 && !Number.isInteger(e.code) && isConflict(e)) continue; throw e; }
-  }
+const today = () => N.dayOf(Date.now());
+// freeAllowed=false: бесплатная проверка не показывается и не выдаётся (почта не подтверждена)
+const view = (e, me, freeAllowed) => ({ credits: e.credits, premium_until: e.prem > Date.now() ? new Date(e.prem).toISOString() : null, banned: !!e.ban, free_left: freeAllowed === false ? 0 : e.free, daily_left: e.prem > Date.now() ? Math.max(0, N.PREMIUM_DAILY - (e.day === today() ? e.dcount : 0)) : 0, admin: isAdmin(me) });
+// Бесплатная проверка выдаётся только при подтверждённой почте (users.vf) либо аккаунтам, созданным до FREE_LEGACY_BEFORE (мс).
+// При сбое запроса считаем почту неподтверждённой: оплаченные проверки при этом работают.
+async function freeAllowedFor(me) {
+  try { return N.freeOk(await userMeta(me.email), Number(E.FREE_LEGACY_BEFORE) || 0); } catch (e) { S.logErr('userMeta failed', e); return false; }
 }
-async function getEnt(id, run = q) {
-  const r = await run('DECLARE $i AS Utf8; SELECT credits, prem, ban, free, day, dcount, note FROM ent WHERE id = $i;', { $i: TypedValues.utf8(id) });
-  const e = r[0];
-  return e ? { credits: num(e.credits), prem: num(e.prem), ban: num(e.ban), free: num(e.free), day: num(e.day), dcount: num(e.dcount), note: e.note || '' }
-    : { credits: 0, prem: 0, ban: 0, free: FREE_REVIEWS, day: 0, dcount: 0, note: '', fresh: true };
-}
-async function putEnt(id, e, run = q) {
-  await run('DECLARE $i AS Utf8; DECLARE $c AS Int64; DECLARE $p AS Uint64; DECLARE $b AS Uint8; DECLARE $f AS Int64; DECLARE $d AS Uint64; DECLARE $n AS Uint64; DECLARE $t AS Utf8; UPSERT INTO ent (id, credits, prem, ban, free, day, dcount, note) VALUES ($i, $c, $p, $b, $f, $d, $n, $t);',
-    { $i: TypedValues.utf8(id), $c: TypedValues.int64(e.credits), $p: TypedValues.uint64(e.prem), $b: TypedValues.uint8(e.ban), $f: TypedValues.int64(e.free), $d: TypedValues.uint64(e.day), $n: TypedValues.uint64(e.dcount), $t: TypedValues.utf8(String(e.note || '').slice(0, 300)) });
-}
-const today = () => Math.floor(Date.now() / 864e5);
-const view = (e, me) => ({ credits: e.credits, premium_until: e.prem > Date.now() ? new Date(e.prem).toISOString() : null, banned: !!e.ban, free_left: e.free, daily_left: e.prem > Date.now() ? Math.max(0, PREMIUM_DAILY - (e.day === today() ? e.dcount : 0)) : 0, admin: isAdmin(me) });
-// Списание одной ИИ-проверки. Порядок: бан -> Premium (лимит в сутки) -> оплаченные/выданные -> бесплатная первая.
-// Вызывается сервером перед обращением к ИИ; клиенту доверять нельзя.
-async function spend(id) {
-  return inTx(async (run) => {
-  const e = await getEnt(id, run);
-  if (e.ban) throw bad('Доступ к ИИ отключён', 403);
-  const t = today();
-  if (e.prem > Date.now()) {
-    if (e.day !== t) { e.day = t; e.dcount = 0; }
-    if (e.dcount >= PREMIUM_DAILY) throw bad('Дневной лимит Premium исчерпан', 429);
-    e.dcount++; e.kind = 'prem';
-  } else if (e.credits > 0) { e.credits--; e.kind = 'credit'; }
-  else if (e.free > 0) { e.free--; e.kind = 'free'; }
-  else throw bad('Нет доступных проверок', 402);
-  await putEnt(id, e, run);
-  return e;
-  });
+// Списание одной ИИ-проверки вне разбора (атомарно). Сам разбор списывает в своей транзакции вместе с записью в реестр.
+async function spend(id, freeAllowed) {
+  return inTx(async (run) => { const e = await getEnt(id, run); e.kind = N.charge(e, Date.now(), freeAllowed !== false); await putEnt(id, e, run); return e; });
 }
 // Вернуть списанную проверку того же вида, что была списана (kind из spend)
-async function refund(id, kind) { return inTx(async (run) => { const e = await getEnt(id, run); if (kind === 'prem') { if (e.dcount > 0 && e.day === today()) e.dcount--; } else if (kind === 'free') e.free++; else e.credits++; await putEnt(id, e, run); return e; }); }
+async function refund(id, kind) { return inTx(async (run) => { const e = N.giveBack(await getEnt(id, run), kind, Date.now()); await putEnt(id, e, run); return e; }); }
 module.exports.spend = spend; module.exports.refund = refund; module.exports.inTx = inTx;
 
-const R = require('./review');
-// Расширенный разбор: проверка текста -> атомарное списание -> Groq -> при любой ошибке возврат списанного.
-// Бесплатная проверка получает только обрезанный результат (остальное не покидает сервер).
+const actions = {};
+const U = (v) => TypedValues.utf8(v), U64 = (v) => TypedValues.uint64(v);
+// Расширенный разбор. Порядок: проверка текста -> лимит частоты -> возврат зависших -> одна транзакция (нет другого разбора, дневной
+// предохранитель, списание, запись pending в реестр) -> Groq -> done; при любой ошибке возврат списанного и refunded.
+// Эссе живёт только в памяти запроса: в таблицы и логи не пишется. Бесплатная проверка получает обрезанный результат (остальное не покидает сервер).
 actions.review = async (b, me) => {
   // До релиза платных функций разбор доступен только админам (ADMIN_EMAILS); REVIEW_OPEN=1 открывает всем.
-  if (!isAdmin(me) && E.REVIEW_OPEN !== '1') throw bad('Расширенный разбор пока недоступен', 403);
+  if (!reviewOpenFor(me)) throw bad('Расширенный разбор пока недоступен', 403);
   const kind = ['t1', 'gt'].includes(b.kind) ? b.kind : 't2', text = String(b.text || ''), bad0 = R.check(kind, text);
   if (bad0) throw bad(bad0);
   const goal = Math.min(9, Math.max(4, Number(b.goal) || 7));
-  const e = await spend(me.id);
+  await limit('review', [me.id]);
+  try { await W.sweepUser(me.id); } catch (e) { S.logErr('sweepUser failed', e); }
+  const freeAllowed = await freeAllowedFor(me), rid = crypto.randomUUID(), max = N.budgetMax(E.REVIEW_DAILY_MAX);
+  const spent = await inTx(async (run) => {
+    const now = Date.now(), day = N.dayOf(now);
+    const pend = await run('DECLARE $u AS Utf8; DECLARE $s AS Utf8; SELECT id FROM reviews WHERE uid = $u AND status = $s LIMIT 1;', { $u: U(me.id), $s: U('pending') });
+    if (pend.length) throw bad('Разбор уже идёт. Дождитесь результата', 429);
+    const e = await getEnt(me.id, run), k = N.charge(e, now, freeAllowed);
+    const br = await run('DECLARE $d AS Uint64; SELECT n FROM budget WHERE day = $d;', { $d: U64(day) }), n = br[0] ? num(br[0].n) : 0;
+    if (N.overBudget(n, max)) throw bad('Сервис перегружен, попробуйте позже', 503); // транзакция откатывается: списания нет
+    await run('DECLARE $d AS Uint64; DECLARE $n AS Uint64; UPSERT INTO budget (day, n) VALUES ($d, $n);', { $d: U64(day), $n: U64(n + 1) });
+    await putEnt(me.id, e, run);
+    await run('DECLARE $u AS Utf8; DECLARE $i AS Utf8; DECLARE $k AS Utf8; DECLARE $s AS Utf8; DECLARE $t AS Uint64; UPSERT INTO reviews (uid, id, kind, status, ts) VALUES ($u, $i, $k, $s, $t);',
+      { $u: U(me.id), $i: U(rid), $k: U(k), $s: U('pending'), $t: U64(now) });
+    return k;
+  });
   let full;
   try { full = R.shape(await R.callGroq(R.messages(kind, b.question, text, goal)), text); }
   catch (err) {
-    console.error('review failed', err && (err.upstream || ''), err && err.message);
-    try { await refund(me.id, e.kind); } catch (e2) { console.error('refund failed', e2 && e2.message); }
-    throw bad('Не удалось получить разбор. Проверка возвращена, попробуйте ещё раз через минуту', 502);
+    S.logErr('review failed', err);
+    let back = false;
+    try { back = await W.refundRow(me.id, rid); } catch (e2) { S.logErr('refund failed', e2); }
+    throw bad(back ? 'Не удалось получить разбор. Проверка возвращена, попробуйте ещё раз через минуту' : 'Не удалось получить разбор. Проверка вернётся автоматически в течение нескольких минут', 502);
   }
-  const fin = await getEnt(me.id);
-  return ok({ result: e.kind === 'free' ? R.trim(full) : R.fullOut(full), ent: view(fin, me) });
+  // Если отметить не удалось, запись останется pending и проверка вернётся как зависшая: ошибка в пользу пользователя.
+  try { if (!(await W.finishRow(me.id, rid))) console.error('review row was not pending at finish'); } catch (e) { S.logErr('finish failed', e); }
+  return ok({ result: spent === 'free' ? R.trim(full) : R.fullOut(full), ent: view(await getEnt(me.id), me, freeAllowed) });
 };
-actions.me = async (b, me) => ok({ ent: view(await getEnt(me.id), me) });
+// Лишний запрос о подтверждении почты делаем, только когда разбор этому пользователю доступен и бесплатная проверка ещё не потрачена.
+const reviewOpenFor = (me) => isAdmin(me) || E.REVIEW_OPEN === '1';
+actions.me = async (b, me) => { const e = await getEnt(me.id); return ok({ ent: view(e, me, e.free > 0 && reviewOpenFor(me) ? await freeAllowedFor(me) : true) }); };
+// Доступен ли Groq с сервера (нужно проверить из РФ до включения разбора). Только админ; ключ и тело ответа не возвращаются.
+actions.groq_ping = async (b, me) => { needAdmin(me); await limit('groq_ping', [me.id]); return ok({ groq: await R.ping() }); };
 // Лист ожидания клуба. join=true: встать в очередь (повтор не меняет место); join=false: только статус.
 actions.club_wait = async (b, me) => {
   const I = { $i: TypedValues.utf8(me.id) };
@@ -99,7 +95,7 @@ actions.club_wait = async (b, me) => {
   const pos = num((await q('DECLARE $t AS Uint64; SELECT COUNT(*) AS c FROM waitlist WHERE ts <= $t;', { $t: TypedValues.uint64(ts) }))[0].c);
   return ok({ joined: true, pos, total });
 };
-const needAdmin = (me) => { if (!isAdmin(me)) throw bad('forbidden', 403); };
+function needAdmin(me) { if (!isAdmin(me)) throw bad('forbidden', 403); }
 actions.club_list = async (b, me) => {
   needAdmin(me);
   const r = await q('SELECT email, ts FROM waitlist ORDER BY ts LIMIT 1000;');
@@ -110,7 +106,7 @@ actions.admin_list = async (b, me) => {
   const users = await q('SELECT email, id, created FROM users ORDER BY created DESC LIMIT 500;');
   const ents = await q('SELECT id, credits, prem, ban, free, note FROM ent;');
   const m = new Map(ents.map((e) => [e.id, e]));
-  return ok({ users: users.map((u) => { const e = m.get(u.id); return { email: u.email, id: u.id, created: num(u.created), credits: e ? num(e.credits) : 0, premium_until: e && num(e.prem) > Date.now() ? new Date(num(e.prem)).toISOString() : null, banned: !!(e && num(e.ban)), free: e ? num(e.free) : FREE_REVIEWS, note: e ? e.note || '' : '' }; }) });
+  return ok({ users: users.map((u) => { const e = m.get(u.id); return { email: u.email, id: u.id, created: num(u.created), credits: e ? num(e.credits) : 0, premium_until: e && num(e.prem) > Date.now() ? new Date(num(e.prem)).toISOString() : null, banned: !!(e && num(e.ban)), free: e ? num(e.free) : N.FREE_REVIEWS, note: e ? e.note || '' : '' }; }) });
 };
 // Сводка: всего пользователей, регистрации за 30 дней, активные, Premium, лист ожидания
 actions.admin_stats = async (b, me) => {
@@ -126,7 +122,7 @@ actions.admin_stats = async (b, me) => {
     const prem = await cnt('DECLARE $t AS Uint64; SELECT COUNT(*) AS c FROM ent WHERE prem > $t;', now);
     const wl = await cnt('SELECT COUNT(*) AS c FROM waitlist;');
     return ok({ total, days: fillDays(reg.map((r) => ({ d: num(r.d), c: num(r.c) })), now, 30), active: { d1: a1, d7: a7, d30: a30 }, premium: prem, waitlist: wl, at: now });
-  } catch (e) { if (e.code) throw e; throw bad('stats: ' + String(e && e.message || e).slice(0, 300), 400); } // только админу: показываем причину
+  } catch (e) { if (e.code) throw e; throw bad('stats: ' + S.redact(e && e.message || e, 300), 400); } // только админу: показываем причину
 };
 // Выдать/изменить: credits (+/-), premium_days (+), ban (true/false), note, set_free
 actions.admin_grant = async (b, me) => {
@@ -146,20 +142,26 @@ actions.admin_grant = async (b, me) => {
   });
 };
 
+// Таймер (триггер раз в 5 минут) возвращает зависшие разборы. Такое событие можно подделать снаружи (?integration=raw),
+// поэтому оно делает только идемпотентную уборку и ничего не возвращает.
+const isTimer = (ev) => !ev.httpMethod && Array.isArray(ev.messages) && ev.messages.some((m) => m && m.details && m.details.trigger_id);
 module.exports.handler = async (event) => {
-  let b = null;
-  try { b = JSON.parse(event.isBase64Encoded ? Buffer.from(event.body || '', 'base64').toString() : event.body || '{}'); } catch (e) { /* пусть решит базовый обработчик */ }
+  if (!event || typeof event !== 'object') event = {};
+  if (isTimer(event)) { try { await W.sweepStale(); } catch (e) { S.logErr('sweep failed', e); } return { statusCode: 200, body: 'ok' }; }
   const origin = (event.headers && (event.headers.Origin || event.headers.origin)) || '';
-  const O = (E.ORIGIN || 'https://ielts.odkii-builds.ru').split(',');
-  const h = { 'content-type': 'application/json', 'access-control-allow-origin': O.includes(origin) ? origin : O[0], 'access-control-allow-headers': 'content-type', vary: 'origin' };
-  if (b && b.a === 'diag' && E.DEBUG) { try { await q('SELECT 1;'); return { statusCode: 200, headers: h, body: '{"ok":true}' }; } catch (e) { return { statusCode: 200, headers: h, body: JSON.stringify({ ok: false, err: String(e && e.message || e).slice(0, 300) }) }; } }
-  if (!b || !actions[b.a]) return base.handler(event);
+  const h = S.headers(origin, ORIGINS);
+  let b = null, raw = '';
+  try { raw = S.rawBody(event); } catch (e) { return { statusCode: 413, headers: h, body: '{"ok":false,"error":"too large"}' }; }
+  try { b = JSON.parse(raw); } catch (e) { /* пусть решит базовый обработчик */ }
+  if (b && b.a === 'diag' && E.DEBUG) { try { await q('SELECT 1;'); return { statusCode: 200, headers: h, body: '{"ok":true}' }; } catch (e) { return { statusCode: 200, headers: h, body: JSON.stringify({ ok: false, err: S.redact(e && e.message || e, 300) }) }; } }
+  if (!b || !own(actions, b.a)) return base.handler(event);
   try {
+    if (S.tooBig(raw, b.a)) throw bad('too large', 413);
     const me = verify(b.token); if (!me) throw bad('unauthorized', 401);
-    return { statusCode: 200, headers: h, body: JSON.stringify(await actions[b.a](b, me)) };
+    return { statusCode: 200, headers: h, body: JSON.stringify(await actions[b.a](b, me, { ip: S.clientIp(event) })) };
   } catch (e) {
-    const c = Number.isInteger(e.code) ? e.code : 500;
-    if (c === 500) console.error(e && e.stack || e);
+    const c = e && Number.isInteger(e.code) && e.code >= 400 && e.code < 600 ? e.code : 500;
+    if (c === 500) S.logErr('error', e);
     return { statusCode: c, headers: h, body: JSON.stringify({ ok: false, error: c === 500 ? 'server error' : e.message }) };
   }
 };

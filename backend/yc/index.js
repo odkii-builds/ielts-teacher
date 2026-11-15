@@ -7,8 +7,10 @@ const crypto = require('crypto');
 const zlib = require('zlib');
 const { Driver, MetadataAuthService, TypedValues, TypedData } = require('ydb-sdk');
 
+const S = require('./security');
+
 const E = process.env;
-const ORIGINS = (E.ORIGIN || 'https://ielts.odkii-builds.ru').split(',');
+const ORIGINS = S.origins(E.ORIGIN); // только точные адреса, без «*»
 const TTL = 30 * 864e5;
 let driver = null;
 async function db() {
@@ -21,6 +23,24 @@ async function q(text, params) {
   const d = await db();
   const res = await d.tableClient.withSession((s) => s.executeQuery(text, params || {}));
   return res.resultSets && res.resultSets[0] ? TypedData.createNativeObjects(res.resultSets[0]) : [];
+}
+// Транзакция с полной изоляцией: чтение и запись видят один снимок; при конфликте с параллельным запросом повторяем (до 6 попыток с паузой).
+const isConflict = (e) => /abort|lock|conflict|overload|TLI|serializ/i.test(String((e && (e.constructor && e.constructor.name)) || '') + ' ' + String((e && e.message) || ''));
+async function inTx(fn) {
+  for (let i = 0; ; i++) {
+    try {
+      const d = await db();
+      return await d.tableClient.withSession(async (s) => {
+        const t = await s.beginTransaction({ serializableReadWrite: {} }), txId = t.id;
+        const run = async (text, params) => { const res = await s.executeQuery(text, params || {}, { txId }); return res.resultSets && res.resultSets[0] ? TypedData.createNativeObjects(res.resultSets[0]) : []; };
+        try { const out = await fn(run); await s.commitTransaction({ txId }); return out; } catch (e) { try { await s.rollbackTransaction({ txId }); } catch (e2) { /* ignore */ } throw e; }
+      });
+    } catch (e) {
+      if (Number.isInteger(e.code) || !isConflict(e)) throw e;
+      if (i >= 5) throw bad('Сервис занят, повторите запрос', 503); // столько одновременных запросов к одной записи обычный клиент не делает
+      await new Promise((r) => setTimeout(r, 10 * (i + 1) + Math.floor(Math.random() * 25)));
+    }
+  }
 }
 
 const b64u = (b) => Buffer.from(b).toString('base64url');
@@ -54,6 +74,14 @@ async function getUser(email) {
 async function putUser(u) {
   await q('DECLARE $e AS Utf8; DECLARE $i AS Utf8; DECLARE $p AS Utf8; DECLARE $c AS Uint64; UPSERT INTO users (email, id, pass, created) VALUES ($e, $i, $p, $c);',
     { $e: TypedValues.utf8(u.email), $i: TypedValues.utf8(u.id), $p: TypedValues.utf8(u.pass), $c: TypedValues.uint64(Date.now()) });
+}
+// Подтверждена ли почта (vf) и когда создан аккаунт: от этого зависит бесплатный разбор. Отдельный запрос, чтобы вход не зависел от новой колонки.
+async function userMeta(email) {
+  const r = await q('DECLARE $e AS Utf8; SELECT vf, created FROM users WHERE email = $e;', { $e: TypedValues.utf8(email) });
+  return r[0] || null;
+}
+async function markVerified(email) {
+  try { await q('DECLARE $e AS Utf8; DECLARE $v AS Uint8; UPDATE users SET vf = $v WHERE email = $e;', { $e: TypedValues.utf8(email), $v: TypedValues.uint8(1) }); } catch (e) { S.logErr('markVerified failed', e); }
 }
 async function putData(id, obj) {
   const z = zlib.gzipSync(Buffer.from(JSON.stringify(obj)));
@@ -106,20 +134,24 @@ const actions = {
     const legacy = await legacyLogin(raw, pw);
     const u = legacy || { id: crypto.randomUUID(), email, pass: hash(pw) };
     if (!legacy) await putUser(u);
+    if (mail.required()) await markVerified(u.email); // код из письма проверен выше
     return ok({ token: sign(u), user: { id: u.id, email: u.email } });
   },
   // Шаг 1 регистрации: отправить код. Если подтверждение выключено, ничего не отправляем.
-  async signup_code(b) {
-    const mail = require('./mail');
+  async signup_code(b, me, ctx) {
+    const mail = require('./mail'), { limit } = require('./ratelimit');
     if (!mail.required()) return ok({ required: false });
     const pe = policy.check(b.email); if (!pe.ok) throw bad(pe.msg);
+    await limit('signup_code_email', [pe.canon], { soft: true });
+    if (ctx && ctx.ip) await limit('signup_code_ip', [ctx.ip], { soft: true });
     if (await taken(pe)) throw bad('Этот email уже зарегистрирован. Нажмите «Войти»', 409);
     await mail.sendCode(pe.canon, pe.raw);
     return ok({ required: true, sent: true });
   },
-  async login(b) {
-    const email = String(b.email || '').trim().toLowerCase(), pw = String(b.password || '');
+  async login(b, me, ctx) {
+    const email = String(b.email || '').trim().toLowerCase().slice(0, 320), pw = String(b.password || '').slice(0, 200);
     if (throttled(email)) throw bad('Слишком много попыток. Подождите 10 минут', 429);
+    await require('./ratelimit').limit('login', [(ctx && ctx.ip) || '', email], { soft: true });
     const pe = policy.check(email);
     let u = await getUser(email);
     if (!u && pe.ok && pe.canon !== email) u = await getUser(pe.canon);
@@ -136,22 +168,25 @@ const actions = {
   },
 };
 
+const own = (o, k) => typeof k === 'string' && Object.prototype.hasOwnProperty.call(o, k);
 module.exports.handler = async (event) => {
+  if (!event || typeof event !== 'object') event = {};
   const origin = (event.headers && (event.headers.Origin || event.headers.origin)) || '';
-  const h = { 'content-type': 'application/json', 'access-control-allow-origin': ORIGINS.includes(origin) ? origin : ORIGINS[0], 'access-control-allow-headers': 'content-type', vary: 'origin' };
+  const h = S.headers(origin, ORIGINS);
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: h, body: '' };
   try {
-    const raw = event.isBase64Encoded ? Buffer.from(event.body || '', 'base64').toString() : event.body || '{}';
-    const b = JSON.parse(raw), fn = actions[b.a];
-    if (!fn) throw bad('unknown action', 404);
+    const raw = S.rawBody(event);
+    let b; try { b = JSON.parse(raw); } catch (e) { throw bad('bad request'); } // текст ошибки разбора в логи не пишем: в нём может быть тело запроса
+    if (!b || !own(actions, b.a)) throw bad('unknown action', 404);
+    if (S.tooBig(raw, b.a)) throw bad('too large', 413);
     let me = null;
     if (b.a === 'pull' || b.a === 'push') { me = verify(b.token); if (!me) throw bad('unauthorized', 401); }
-    return { statusCode: 200, headers: h, body: JSON.stringify(await fn(b, me)) };
+    return { statusCode: 200, headers: h, body: JSON.stringify(await actions[b.a](b, me, { ip: S.clientIp(event) })) };
   } catch (e) {
-    const c = e.code && Number.isInteger(e.code) ? e.code : 500;
-    if (c === 500) console.error(e && e.stack || e);
+    const c = e && Number.isInteger(e.code) && e.code >= 400 && e.code < 600 ? e.code : 500;
+    if (c === 500) S.logErr('error', e);
     return { statusCode: c, headers: h, body: JSON.stringify({ ok: false, error: c === 500 ? 'server error' : e.message }) };
   }
 };
 
-module.exports._ = { q, db, verify, getUser, ok, bad, TypedValues, TypedData, E };
+module.exports._ = { q, db, inTx, verify, getUser, userMeta, ok, bad, own, TypedValues, TypedData, E, ORIGINS };
