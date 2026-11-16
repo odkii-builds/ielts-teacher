@@ -1,942 +1,2649 @@
 {
-  "note": "Учебные мини-версии: части короче настоящих (2–3 минуты вместо 7–8), но типы заданий, нумерация, паузы на чтение вопросов и проверку и перевод в band — как на экзамене.",
-  "tests": [
+ "note": "Учебные мини-версии: части короче настоящих (2–3 минуты вместо 7–8), но типы заданий, нумерация, паузы на чтение вопросов и проверку и перевод в band — как на экзамене.",
+ "tests": [
+  {
+   "id": "L1",
+   "title": "Listening Test 1",
+   "topic": "Спортцентр · музей · проект · зелёные крыши",
+   "parts": [
     {
-      "id": "L1",
-      "title": "Listening Test 1",
-      "topic": "Спортцентр · музей · проект · зелёные крыши",
-      "parts": [
-        {
-          "n": 1,
-          "title": "Part 1 · Разговор по телефону",
-          "kind": "Form completion",
-          "intro": "You will hear a woman joining a sports centre by phone. Complete the form. Write ONE WORD AND/OR A NUMBER for each answer.",
-          "script": [
-            [
-              "N",
-              "Part 1. You will hear a telephone conversation between a woman and a receptionist at a sports centre. First you have some time to look at questions 1 to 10."
-            ],
-            [
-              "_",
-              30
-            ],
-            [
-              "N",
-              "You will see that there is an example already done. On this occasion only, the conversation relating to this will be played first."
-            ],
-            [
-              "A",
-              "Good morning, Riverside Sports Centre. How can I help?"
-            ],
-            [
-              "B",
-              "Hi, I'd like to join the centre. I think I need to fill in a membership form."
-            ],
-            [
-              "N",
-              "Now listen carefully and answer questions 1 to 10."
-            ],
-            [
-              "A",
-              "Of course, I can do that with you over the phone. First, what's your surname?"
-            ],
-            [
-              "B",
-              "It's Marlowe. That's M, A, R, L, O, W, E."
-            ],
-            [
-              "A",
-              "Thank you, Ms Marlowe. And your address?"
-            ],
-            [
-              "B",
-              "Flat six, forty-eight Kingsley Road."
-            ],
-            [
-              "A",
-              "And a contact number?"
-            ],
-            [
-              "B",
-              "My mobile is oh seven seven oh oh, nine oh one, three five eight."
-            ],
-            [
-              "A",
-              "Lovely. Now, we have two kinds of membership. Full membership is forty-two pounds a month and you can come at any time. Off-peak membership is only twenty-eight pounds a month, but you can only use the centre before four in the afternoon."
-            ],
-            [
-              "B",
-              "I work until five, so full membership would be better... actually, no. I work from home on Mondays, Wednesdays and Fridays, so I could come in the mornings. I'll take the off-peak one."
-            ],
-            [
-              "A",
-              "Good choice. And what do you mainly want to use the centre for? The gym, the classes, or the pool?"
-            ],
-            [
-              "B",
-              "Mostly swimming. I might try the classes later."
-            ],
-            [
-              "A",
-              "Then you should come to an induction session. They're held on Thursdays at six o'clock in the evening."
-            ],
-            [
-              "B",
-              "Six is a bit late for me. Do you have anything earlier?"
-            ],
-            [
-              "A",
-              "Let me check... there's one at half past five, the same day."
-            ],
-            [
-              "B",
-              "Thursday at half past five is perfect."
-            ],
-            [
-              "A",
-              "Great. Please bring some photo ID, like a passport, and a towel. There's also a deposit of five pounds for the locker key, which you get back when you leave."
-            ],
-            [
-              "B",
-              "That's fine. Thanks very much."
-            ],
-            [
-              "A",
-              "You're welcome, Ms Marlowe. See you on Thursday."
-            ],
-            [
-              "N",
-              "That is the end of Part 1. You now have thirty seconds to check your answers."
-            ],
-            [
-              "_",
-              30
-            ]
-          ],
-          "groups": [
-            {
-              "type": "sc",
-              "title": "Questions 1–10",
-              "instr": "Complete the form below. Write ONE WORD AND/OR A NUMBER for each answer.",
-              "items": [
-                {
-                  "n": 1,
-                  "q": "Surname: ________",
-                  "a": [
-                    "Marlowe"
-                  ],
-                  "why": "Имя произнесено по буквам: M-A-R-L-O-W-E."
-                },
-                {
-                  "n": 2,
-                  "q": "Address: Flat 6, 48 ________ Road",
-                  "a": [
-                    "Kingsley"
-                  ],
-                  "why": "«Kingsley Road»."
-                },
-                {
-                  "n": 3,
-                  "q": "Mobile number: ________",
-                  "a": [
-                    "07700901358",
-                    "07700 901358",
-                    "07700 901 358"
-                  ],
-                  "why": "Номер называют группами: 07700, 901, 358."
-                },
-                {
-                  "n": 4,
-                  "q": "Type of membership: ________ membership",
-                  "a": [
-                    "off-peak",
-                    "off peak",
-                    "offpeak"
-                  ],
-                  "why": "Сначала она колеблется («full»), но в конце говорит: «I'll take the off-peak one»."
-                },
-                {
-                  "n": 5,
-                  "q": "Monthly cost: £ ________",
-                  "a": [
-                    "28",
-                    "twenty-eight",
-                    "twenty eight"
-                  ],
-                  "why": "Off-peak стоит 28 фунтов; 42 — это full, отвлекающая цифра."
-                },
-                {
-                  "n": 6,
-                  "q": "Main interest: ________",
-                  "a": [
-                    "swimming"
-                  ],
-                  "why": "«Mostly swimming»."
-                },
-                {
-                  "n": 7,
-                  "q": "Induction session on: ________",
-                  "a": [
-                    "Thursday",
-                    "Thursdays"
-                  ],
-                  "why": "«Held on Thursdays»."
-                },
-                {
-                  "n": 8,
-                  "q": "Time of session: ________ p.m.",
-                  "a": [
-                    "5.30",
-                    "5:30",
-                    "530",
-                    "5.30pm",
-                    "530pm",
-                    "half past five"
-                  ],
-                  "why": "6.00 ей не подходит, поэтому выбирают «half past five» — 5.30."
-                },
-                {
-                  "n": 9,
-                  "q": "Bring: photo ________ and a towel",
-                  "a": [
-                    "ID",
-                    "identification"
-                  ],
-                  "why": "«Please bring some photo ID»."
-                },
-                {
-                  "n": 10,
-                  "q": "Locker deposit: £ ________",
-                  "a": [
-                    "5",
-                    "five"
-                  ],
-                  "why": "«A deposit of five pounds»."
-                }
-              ],
-              "example": {
-                "q": "Name of centre: ________",
-                "a": "Riverside"
-              }
-            }
-          ],
-          "cast": {
-            "N": [
-              "British",
-              "f"
-            ],
-            "A": [
-              "British",
-              "m"
-            ],
-            "B": [
-              "Australian",
-              "f"
-            ]
-          }
-        },
-        {
-          "n": 2,
-          "title": "Part 2 · Монолог (план здания)",
-          "kind": "Multiple choice + Plan labelling",
-          "intro": "You will hear a manager welcoming new volunteers to the Harbour Heritage Centre.",
-          "script": [
-            [
-              "N",
-              "Part 2. You will hear a manager welcoming new volunteers to the Harbour Heritage Centre. First you have some time to look at questions 11 to 20."
-            ],
-            [
-              "_",
-              30
-            ],
-            [
-              "N",
-              "Now listen carefully and answer questions 11 to 20."
-            ],
-            [
-              "A",
-              "Welcome, everyone, and thank you for volunteering at the Harbour Heritage Centre. Let me start with a few practical points."
-            ],
-            [
-              "A",
-              "The centre opens to the public at ten o'clock. It used to open at half past nine, but we found that very few visitors arrived before ten. Volunteers, however, should arrive by nine thirty so that we can have a short briefing."
-            ],
-            [
-              "A",
-              "Parking is limited. Please don't use the visitors' car park at the front. Staff and volunteers park behind the building, and you reach it through the side gate on Mill Lane."
-            ],
-            [
-              "A",
-              "Everyone wears a name badge. Staff wear blue, and volunteers wear green, so visitors know who to ask for help. You'll collect your badge from reception each morning."
-            ],
-            [
-              "A",
-              "Our most popular exhibition is the model of the old shipyard. It's been here since the centre opened, and children love pressing the buttons to hear the sounds of the workers. The photography gallery is also good, but it's much quieter."
-            ],
-            [
-              "A",
-              "Now, let me tell you where everything is. Please look at the plan. When you come in through the main entrance, you'll see reception straight ahead. The cloakroom is just to your left as you enter, next to the door, so visitors can leave coats and bags there."
-            ],
-            [
-              "A",
-              "From reception, a long corridor runs straight ahead of you. On the left-hand side, the first door you come to is the cafe. The second door on the left, after the cafe, is the workshop room, where the weekend art classes are held. The room at the very top, at the far end of the corridor, is the lecture hall. You can't miss it."
-            ],
-            [
-              "A",
-              "Now the right-hand side. The toilets are at the bottom, near reception. Just beyond the toilets, the first door on the right, you'll find the first aid room. The next one, in the middle, is the library, and the room at the far end on the right, next to the lecture hall, is the quiet room. We keep it for visitors who need a rest."
-            ],
-            [
-              "A",
-              "Right, if you have any questions, please ask now. Otherwise, let's go and collect your badges."
-            ],
-            [
-              "N",
-              "That is the end of Part 2. You now have thirty seconds to check your answers."
-            ],
-            [
-              "_",
-              30
-            ]
-          ],
-          "groups": [
-            {
-              "type": "mcq",
-              "title": "Questions 11–14",
-              "instr": "Choose the correct letter, A, B or C.",
-              "items": [
-                {
-                  "n": 11,
-                  "q": "At what time does the centre open to the public?",
-                  "opts": [
-                    "A 9.30",
-                    "B 10.00",
-                    "C 10.30"
-                  ],
-                  "a": "B",
-                  "why": "Раньше открывались в 9.30, но теперь — в десять; 9.30 — время сбора волонтёров."
-                },
-                {
-                  "n": 12,
-                  "q": "Where should volunteers park?",
-                  "opts": [
-                    "A in the visitors' car park",
-                    "B on Mill Lane",
-                    "C behind the building"
-                  ],
-                  "a": "C",
-                  "why": "«Staff and volunteers park behind the building». Mill Lane — только там, где боковые ворота."
-                },
-                {
-                  "n": 13,
-                  "q": "What colour badge do volunteers wear?",
-                  "opts": [
-                    "A blue",
-                    "B green",
-                    "C red"
-                  ],
-                  "a": "B",
-                  "why": "Сотрудники — синие, волонтёры — зелёные."
-                },
-                {
-                  "n": 14,
-                  "q": "Which exhibition is the most popular?",
-                  "opts": [
-                    "A the shipyard model",
-                    "B the photography gallery",
-                    "C the art workshop"
-                  ],
-                  "a": "A",
-                  "why": "«Our most popular exhibition is the model of the old shipyard»."
-                }
-              ]
-            },
-            {
-              "type": "mi",
-              "title": "Questions 15–20",
-              "instr": "Label the plan below. Write the correct letter, A–H, next to Questions 15–20.",
-              "plan": {
-                "w": 360,
-                "h": 250,
-                "fixed": [
-                  {
-                    "x": 150,
-                    "y": 195,
-                    "w": 60,
-                    "h": 40,
-                    "t": "Reception"
-                  },
-                  {
-                    "x": 225,
-                    "y": 195,
-                    "w": 115,
-                    "h": 40,
-                    "t": "Toilets"
-                  },
-                  {
-                    "x": 160,
-                    "y": 60,
-                    "w": 40,
-                    "h": 130,
-                    "t": "",
-                    "corridor": true
-                  }
-                ],
-                "spots": [
-                  {
-                    "l": "G",
-                    "x": 160,
-                    "y": 8,
-                    "w": 40,
-                    "h": 48
-                  },
-                  {
-                    "l": "A",
-                    "x": 20,
-                    "y": 8,
-                    "w": 130,
-                    "h": 54
-                  },
-                  {
-                    "l": "B",
-                    "x": 20,
-                    "y": 68,
-                    "w": 130,
-                    "h": 54
-                  },
-                  {
-                    "l": "C",
-                    "x": 20,
-                    "y": 128,
-                    "w": 130,
-                    "h": 54
-                  },
-                  {
-                    "l": "H",
-                    "x": 20,
-                    "y": 195,
-                    "w": 120,
-                    "h": 40
-                  },
-                  {
-                    "l": "D",
-                    "x": 210,
-                    "y": 8,
-                    "w": 130,
-                    "h": 54
-                  },
-                  {
-                    "l": "E",
-                    "x": 210,
-                    "y": 68,
-                    "w": 130,
-                    "h": 54
-                  },
-                  {
-                    "l": "F",
-                    "x": 210,
-                    "y": 128,
-                    "w": 130,
-                    "h": 54
-                  }
-                ],
-                "entrance": {
-                  "x": 150,
-                  "y": 238,
-                  "w": 60,
-                  "t": "Main entrance"
-                }
-              },
-              "options": [
-                [
-                  "A",
-                  "A"
-                ],
-                [
-                  "B",
-                  "B"
-                ],
-                [
-                  "C",
-                  "C"
-                ],
-                [
-                  "D",
-                  "D"
-                ],
-                [
-                  "E",
-                  "E"
-                ],
-                [
-                  "F",
-                  "F"
-                ],
-                [
-                  "G",
-                  "G"
-                ],
-                [
-                  "H",
-                  "H"
-                ]
-              ],
-              "items": [
-                {
-                  "n": 15,
-                  "q": "Cafe",
-                  "a": "C",
-                  "why": "Слева от ресепшена первая дверь — кафе."
-                },
-                {
-                  "n": 16,
-                  "q": "Workshop room",
-                  "a": "B",
-                  "why": "Вторая дверь слева, сразу после кафе."
-                },
-                {
-                  "n": 17,
-                  "q": "Lecture hall",
-                  "a": "G",
-                  "why": "«At the very top, at the far end of the corridor»."
-                },
-                {
-                  "n": 18,
-                  "q": "First aid room",
-                  "a": "F",
-                  "why": "Справа, сразу за туалетами — первая дверь."
-                },
-                {
-                  "n": 19,
-                  "q": "Quiet room",
-                  "a": "D",
-                  "why": "Дальняя комната справа, рядом с лекционным залом."
-                },
-                {
-                  "n": 20,
-                  "q": "Cloakroom",
-                  "a": "H",
-                  "why": "Слева от входа, у самой двери."
-                }
-              ]
-            }
-          ],
-          "cast": {
-            "N": [
-              "British",
-              "f"
-            ],
-            "A": [
-              "British",
-              "f"
-            ]
-          }
-        },
-        {
-          "n": 3,
-          "title": "Part 3 · Обсуждение (студенты и преподаватель)",
-          "kind": "Multiple choice + Matching",
-          "intro": "You will hear two students, Lena and Omar, discussing their project on food waste with their tutor, Dr Evans.",
-          "script": [
-            [
-              "N",
-              "Part 3. You will hear two students, Lena and Omar, discussing their project on food waste with their tutor, Dr Evans. First you have some time to look at questions 21 to 30."
-            ],
-            [
-              "_",
-              30
-            ],
-            [
-              "N",
-              "Now listen carefully and answer questions 21 to 30."
-            ],
-            [
-              "T",
-              "Come in, both of you. So, how is the food waste project going?"
-            ],
-            [
-              "L",
-              "Quite well, Dr Evans. We've decided to focus on the university canteen rather than the whole campus."
-            ],
-            [
-              "T",
-              "That sounds sensible. Why the change?"
-            ],
-            [
-              "O",
-              "At first we wanted to look at all the cafes, but we realised we wouldn't have enough time to collect the data. The canteen is the biggest, so it should give us enough information."
-            ],
-            [
-              "T",
-              "Good. And how will you collect it?"
-            ],
-            [
-              "L",
-              "We'll weigh the leftovers at the end of each lunchtime for two weeks. We thought about asking students to fill in a survey, but people tend to say they waste less than they really do."
-            ],
-            [
-              "T",
-              "Quite right. Self-reported data is often unreliable. What about the results so far?"
-            ],
-            [
-              "O",
-              "We only have the first three days, but the surprising thing is that most of the waste isn't food left on plates. It's the salad bar. People take too much and throw it away."
-            ],
-            [
-              "T",
-              "Interesting. Have you thought about what you'd recommend?"
-            ],
-            [
-              "L",
-              "We're considering smaller plates at the salad bar. But Omar thinks that charging by weight would work better."
-            ],
-            [
-              "O",
-              "I do. Smaller plates just mean people go back more often."
-            ],
-            [
-              "T",
-              "Well, you don't need to decide yet. Now, let's talk about who does what. Lena, you're good with statistics."
-            ],
-            [
-              "L",
-              "Yes, I'll analyse the data, and I'll also do the slides for the presentation, since I've used that software before."
-            ],
-            [
-              "O",
-              "I'll design the weighing record sheets, and I'll write the final report. We'll both be at the canteen for the weighing, of course."
-            ],
-            [
-              "T",
-              "And the interviews with the canteen manager?"
-            ],
-            [
-              "O",
-              "Lena has already arranged that."
-            ],
-            [
-              "L",
-              "Yes, I emailed him last week. He's happy to talk to us next Tuesday."
-            ],
-            [
-              "T",
-              "Excellent. One last thing: please check your references carefully. Last year's group lost marks for that. The deadline is the fourteenth of December, and I'd like to see a draft a week before."
-            ],
-            [
-              "O",
-              "Understood. Thank you, Dr Evans."
-            ],
-            [
-              "N",
-              "That is the end of Part 3. You now have thirty seconds to check your answers."
-            ],
-            [
-              "_",
-              30
-            ]
-          ],
-          "groups": [
-            {
-              "type": "mcq",
-              "title": "Questions 21–25",
-              "instr": "Choose the correct letter, A, B or C.",
-              "items": [
-                {
-                  "n": 21,
-                  "q": "Why did the students decide to focus on the canteen?",
-                  "opts": [
-                    "A It produces the most waste.",
-                    "B They did not have time to study every cafe.",
-                    "C The manager asked them to."
-                  ],
-                  "a": "B",
-                  "why": "«We wouldn't have enough time to collect the data»; «the biggest» — лишь довод, не причина (A не названа прямо)."
-                },
-                {
-                  "n": 22,
-                  "q": "Why didn't they use a survey?",
-                  "opts": [
-                    "A It would take too long.",
-                    "B Students would not answer.",
-                    "C People are not honest about waste."
-                  ],
-                  "a": "C",
-                  "why": "«People tend to say they waste less than they really do»."
-                },
-                {
-                  "n": 23,
-                  "q": "What have they found so far?",
-                  "opts": [
-                    "A Most waste comes from the salad bar.",
-                    "B Most waste is left on plates.",
-                    "C The canteen wastes less than expected."
-                  ],
-                  "a": "A",
-                  "why": "«Most of the waste isn't food left on plates. It's the salad bar»."
-                },
-                {
-                  "n": 24,
-                  "q": "What does Omar think the canteen should do?",
-                  "opts": [
-                    "A use smaller plates",
-                    "B charge for salad by weight",
-                    "C remove the salad bar"
-                  ],
-                  "a": "B",
-                  "why": "Lena предлагает меньшие тарелки, а Omar — оплату по весу."
-                },
-                {
-                  "n": 25,
-                  "q": "Dr Evans wants a draft of the report",
-                  "opts": [
-                    "A on 7 December",
-                    "B on 14 December",
-                    "C after the presentation"
-                  ],
-                  "a": "A",
-                  "why": "Срок 14 декабря, а черновик — за неделю до него, то есть 7 декабря."
-                }
-              ]
-            },
-            {
-              "type": "mi",
-              "title": "Questions 26–30",
-              "instr": "Who is responsible for each task? Choose the correct letter, A, B or C. A — Lena, B — Omar, C — both students.",
-              "options": [
-                [
-                  "A",
-                  "Lena"
-                ],
-                [
-                  "B",
-                  "Omar"
-                ],
-                [
-                  "C",
-                  "Both students"
-                ]
-              ],
-              "items": [
-                {
-                  "n": 26,
-                  "q": "analysing the data",
-                  "a": "A",
-                  "why": "«I'll analyse the data» — Lena."
-                },
-                {
-                  "n": 27,
-                  "q": "designing the record sheets",
-                  "a": "B",
-                  "why": "«I'll design the weighing record sheets» — Omar."
-                },
-                {
-                  "n": 28,
-                  "q": "weighing the leftovers",
-                  "a": "C",
-                  "why": "«We'll both be at the canteen for the weighing»."
-                },
-                {
-                  "n": 29,
-                  "q": "writing the final report",
-                  "a": "B",
-                  "why": "Omar: «and I'll write the final report»."
-                },
-                {
-                  "n": 30,
-                  "q": "arranging the interview with the manager",
-                  "a": "A",
-                  "why": "«Lena has already arranged that»."
-                }
-              ]
-            }
-          ],
-          "cast": {
-            "N": [
-              "British",
-              "f"
-            ],
-            "T": [
-              "British",
-              "m"
-            ],
-            "L": [
-              "Canadian",
-              "f"
-            ],
-            "O": [
-              "Australian",
-              "m"
-            ]
-          }
-        },
-        {
-          "n": 4,
-          "title": "Part 4 · Лекция",
-          "kind": "Note completion",
-          "intro": "You will hear a lecturer talking about green roofs. Complete the notes. Write ONE WORD AND/OR A NUMBER for each answer.",
-          "script": [
-            [
-              "N",
-              "Part 4. You will hear a lecturer talking about green roofs. First you have some time to look at questions 31 to 40."
-            ],
-            [
-              "_",
-              30
-            ],
-            [
-              "N",
-              "Now listen carefully and answer questions 31 to 40."
-            ],
-            [
-              "A",
-              "Today I'd like to talk about green roofs, which are roofs covered with plants. They are not a new idea. People in Scandinavia were covering their houses with grass hundreds of years ago, to keep them warm in winter."
-            ],
-            [
-              "A",
-              "In modern cities, green roofs are valued for different reasons. First, temperature. On a hot summer day, a green roof can be up to five degrees cooler than a normal roof, and that helps to cool the whole street."
-            ],
-            [
-              "A",
-              "Second, water. A green roof can absorb up to seventy per cent of the rain that falls on it. This means less water pours into the drains during storms, so there is less flooding."
-            ],
-            [
-              "A",
-              "How is a green roof built? At the bottom, there's a waterproof membrane, which protects the building. On top of this goes a layer of soil, and finally the plants. For most roofs, the best choice is a plant called sedum, because it survives dry weather and needs almost no care."
-            ],
-            [
-              "A",
-              "One problem is weight. A green roof can weigh around one hundred kilograms per square metre, so the building must be strong enough. In older buildings, engineers have to check this first."
-            ],
-            [
-              "A",
-              "Another problem is cost. Installing a green roof costs about twice as much as a normal roof. However, it also lasts much longer. A normal roof may need replacing after twenty years, while a green roof can last for forty."
-            ],
-            [
-              "A",
-              "Finally, wildlife. Even small green roofs attract insects. In one study in London, researchers found several rare types of beetle on roofs that were less than ten years old."
-            ],
-            [
-              "A",
-              "As for cities that lead the way, Stuttgart in Germany has one of the highest numbers of green roofs in Europe. Some local councils there even pay part of the cost for homeowners."
-            ],
-            [
-              "N",
-              "That is the end of Part 4. You now have thirty seconds to check your answers."
-            ],
-            [
-              "_",
-              30
-            ]
-          ],
-          "groups": [
-            {
-              "type": "sc",
-              "title": "Questions 31–40",
-              "instr": "Complete the notes below. Write ONE WORD AND/OR A NUMBER for each answer.",
-              "items": [
-                {
-                  "n": 31,
-                  "q": "Early green roofs were used in ________ to keep houses warm.",
-                  "a": [
-                    "Scandinavia"
-                  ],
-                  "why": "«People in Scandinavia were covering their houses with grass»."
-                },
-                {
-                  "n": 32,
-                  "q": "In summer, a green roof can be up to ________ degrees cooler.",
-                  "a": [
-                    "5",
-                    "five"
-                  ],
-                  "why": "«Up to five degrees cooler»."
-                },
-                {
-                  "n": 33,
-                  "q": "It can absorb up to ________ % of rainfall.",
-                  "a": [
-                    "70",
-                    "seventy"
-                  ],
-                  "why": "«Seventy per cent»."
-                },
-                {
-                  "n": 34,
-                  "q": "The bottom layer is a ________ membrane.",
-                  "a": [
-                    "waterproof"
-                  ],
-                  "why": "«A waterproof membrane»."
-                },
-                {
-                  "n": 35,
-                  "q": "The plant most often used is ________.",
-                  "a": [
-                    "sedum"
-                  ],
-                  "why": "«A plant called sedum»."
-                },
-                {
-                  "n": 36,
-                  "q": "A green roof weighs about ________ kg per square metre.",
-                  "a": [
-                    "100",
-                    "one hundred",
-                    "a hundred"
-                  ],
-                  "why": "«Around one hundred kilograms»."
-                },
-                {
-                  "n": 37,
-                  "q": "It costs about ________ as much as a normal roof.",
-                  "a": [
-                    "twice",
-                    "2 times",
-                    "two times",
-                    "double"
-                  ],
-                  "why": "«About twice as much»."
-                },
-                {
-                  "n": 38,
-                  "q": "A green roof can last for ________ years.",
-                  "a": [
-                    "40",
-                    "forty"
-                  ],
-                  "why": "Обычная крыша — 20 лет, зелёная — 40."
-                },
-                {
-                  "n": 39,
-                  "q": "Researchers in London found rare ________ on green roofs.",
-                  "a": [
-                    "beetles",
-                    "beetle"
-                  ],
-                  "why": "«Several rare types of beetle»."
-                },
-                {
-                  "n": 40,
-                  "q": "The German city of ________ has many green roofs.",
-                  "a": [
-                    "Stuttgart"
-                  ],
-                  "why": "«Stuttgart in Germany»."
-                }
-              ]
-            }
-          ],
-          "cast": {
-            "N": [
-              "British",
-              "f"
-            ],
-            "A": [
-              "New Zealand",
-              "f"
-            ]
-          }
-        }
+     "n": 1,
+     "title": "Part 1 · Разговор по телефону",
+     "kind": "Form completion",
+     "intro": "You will hear a woman joining a sports centre by phone. Complete the form. Write ONE WORD AND/OR A NUMBER for each answer.",
+     "script": [
+      [
+       "N",
+       "Part 1. You will hear a telephone conversation between a woman and a receptionist at a sports centre. First you have some time to look at questions 1 to 10."
+      ],
+      [
+       "_",
+       30
+      ],
+      [
+       "N",
+       "You will see that there is an example already done. On this occasion only, the conversation relating to this will be played first."
+      ],
+      [
+       "A",
+       "Good morning, Riverside Sports Centre. How can I help?"
+      ],
+      [
+       "B",
+       "Hi, I'd like to join the centre. I think I need to fill in a membership form."
+      ],
+      [
+       "N",
+       "Now listen carefully and answer questions 1 to 10."
+      ],
+      [
+       "A",
+       "Of course, I can do that with you over the phone. First, what's your surname?"
+      ],
+      [
+       "B",
+       "It's Marlowe. That's M, A, R, L, O, W, E."
+      ],
+      [
+       "A",
+       "Thank you, Ms Marlowe. And your address?"
+      ],
+      [
+       "B",
+       "Flat six, forty-eight Kingsley Road."
+      ],
+      [
+       "A",
+       "And a contact number?"
+      ],
+      [
+       "B",
+       "My mobile is oh seven seven oh oh, nine oh one, three five eight."
+      ],
+      [
+       "A",
+       "Lovely. Now, we have two kinds of membership. Full membership is forty-two pounds a month and you can come at any time. Off-peak membership is only twenty-eight pounds a month, but you can only use the centre before four in the afternoon."
+      ],
+      [
+       "B",
+       "I work until five, so full membership would be better... actually, no. I work from home on Mondays, Wednesdays and Fridays, so I could come in the mornings. I'll take the off-peak one."
+      ],
+      [
+       "A",
+       "Good choice. And what do you mainly want to use the centre for? The gym, the classes, or the pool?"
+      ],
+      [
+       "B",
+       "Mostly swimming. I might try the classes later."
+      ],
+      [
+       "A",
+       "Then you should come to an induction session. They're held on Thursdays at six o'clock in the evening."
+      ],
+      [
+       "B",
+       "Six is a bit late for me. Do you have anything earlier?"
+      ],
+      [
+       "A",
+       "Let me check... there's one at half past five, the same day."
+      ],
+      [
+       "B",
+       "Thursday at half past five is perfect."
+      ],
+      [
+       "A",
+       "Great. Please bring some photo ID, like a passport, and a towel. There's also a deposit of five pounds for the locker key, which you get back when you leave."
+      ],
+      [
+       "B",
+       "That's fine. Thanks very much."
+      ],
+      [
+       "A",
+       "You're welcome, Ms Marlowe. See you on Thursday."
+      ],
+      [
+       "N",
+       "That is the end of Part 1. You now have thirty seconds to check your answers."
+      ],
+      [
+       "_",
+       30
       ]
+     ],
+     "groups": [
+      {
+       "type": "sc",
+       "title": "Questions 1–10",
+       "instr": "Complete the form below. Write ONE WORD AND/OR A NUMBER for each answer.",
+       "items": [
+        {
+         "n": 1,
+         "q": "Surname: ________",
+         "a": [
+          "Marlowe"
+         ],
+         "why": "Имя произнесено по буквам: M-A-R-L-O-W-E."
+        },
+        {
+         "n": 2,
+         "q": "Address: Flat 6, 48 ________ Road",
+         "a": [
+          "Kingsley"
+         ],
+         "why": "«Kingsley Road»."
+        },
+        {
+         "n": 3,
+         "q": "Mobile number: ________",
+         "a": [
+          "07700901358",
+          "07700 901358",
+          "07700 901 358"
+         ],
+         "why": "Номер называют группами: 07700, 901, 358."
+        },
+        {
+         "n": 4,
+         "q": "Type of membership: ________ membership",
+         "a": [
+          "off-peak",
+          "off peak",
+          "offpeak"
+         ],
+         "why": "Сначала она колеблется («full»), но в конце говорит: «I'll take the off-peak one»."
+        },
+        {
+         "n": 5,
+         "q": "Monthly cost: £ ________",
+         "a": [
+          "28",
+          "twenty-eight",
+          "twenty eight"
+         ],
+         "why": "Off-peak стоит 28 фунтов; 42 — это full, отвлекающая цифра."
+        },
+        {
+         "n": 6,
+         "q": "Main interest: ________",
+         "a": [
+          "swimming"
+         ],
+         "why": "«Mostly swimming»."
+        },
+        {
+         "n": 7,
+         "q": "Induction session on: ________",
+         "a": [
+          "Thursday",
+          "Thursdays"
+         ],
+         "why": "«Held on Thursdays»."
+        },
+        {
+         "n": 8,
+         "q": "Time of session: ________ p.m.",
+         "a": [
+          "5.30",
+          "5:30",
+          "530",
+          "5.30pm",
+          "530pm",
+          "half past five"
+         ],
+         "why": "6.00 ей не подходит, поэтому выбирают «half past five» — 5.30."
+        },
+        {
+         "n": 9,
+         "q": "Bring: photo ________ and a towel",
+         "a": [
+          "ID",
+          "identification"
+         ],
+         "why": "«Please bring some photo ID»."
+        },
+        {
+         "n": 10,
+         "q": "Locker deposit: £ ________",
+         "a": [
+          "5",
+          "five"
+         ],
+         "why": "«A deposit of five pounds»."
+        }
+       ],
+       "example": {
+        "q": "Name of centre: ________",
+        "a": "Riverside"
+       }
+      }
+     ],
+     "cast": {
+      "N": [
+       "British",
+       "f"
+      ],
+      "A": [
+       "British",
+       "m"
+      ],
+      "B": [
+       "Australian",
+       "f"
+      ]
+     }
+    },
+    {
+     "n": 2,
+     "title": "Part 2 · Монолог (план здания)",
+     "kind": "Multiple choice + Plan labelling",
+     "intro": "You will hear a manager welcoming new volunteers to the Harbour Heritage Centre.",
+     "script": [
+      [
+       "N",
+       "Part 2. You will hear a manager welcoming new volunteers to the Harbour Heritage Centre. First you have some time to look at questions 11 to 20."
+      ],
+      [
+       "_",
+       30
+      ],
+      [
+       "N",
+       "Now listen carefully and answer questions 11 to 20."
+      ],
+      [
+       "A",
+       "Welcome, everyone, and thank you for volunteering at the Harbour Heritage Centre. Let me start with a few practical points."
+      ],
+      [
+       "A",
+       "The centre opens to the public at ten o'clock. It used to open at half past nine, but we found that very few visitors arrived before ten. Volunteers, however, should arrive by nine thirty so that we can have a short briefing."
+      ],
+      [
+       "A",
+       "Parking is limited. Please don't use the visitors' car park at the front. Staff and volunteers park behind the building, and you reach it through the side gate on Mill Lane."
+      ],
+      [
+       "A",
+       "Everyone wears a name badge. Staff wear blue, and volunteers wear green, so visitors know who to ask for help. You'll collect your badge from reception each morning."
+      ],
+      [
+       "A",
+       "Our most popular exhibition is the model of the old shipyard. It's been here since the centre opened, and children love pressing the buttons to hear the sounds of the workers. The photography gallery is also good, but it's much quieter."
+      ],
+      [
+       "A",
+       "Now, let me tell you where everything is. Please look at the plan. When you come in through the main entrance, you'll see reception straight ahead. The cloakroom is just to your left as you enter, next to the door, so visitors can leave coats and bags there."
+      ],
+      [
+       "A",
+       "From reception, a long corridor runs straight ahead of you. On the left-hand side, the first door you come to is the cafe. The second door on the left, after the cafe, is the workshop room, where the weekend art classes are held. The room at the very top, at the far end of the corridor, is the lecture hall. You can't miss it."
+      ],
+      [
+       "A",
+       "Now the right-hand side. The toilets are at the bottom, near reception. Just beyond the toilets, the first door on the right, you'll find the first aid room. The next one, in the middle, is the library, and the room at the far end on the right, next to the lecture hall, is the quiet room. We keep it for visitors who need a rest."
+      ],
+      [
+       "A",
+       "Right, if you have any questions, please ask now. Otherwise, let's go and collect your badges."
+      ],
+      [
+       "N",
+       "That is the end of Part 2. You now have thirty seconds to check your answers."
+      ],
+      [
+       "_",
+       30
+      ]
+     ],
+     "groups": [
+      {
+       "type": "mcq",
+       "title": "Questions 11–14",
+       "instr": "Choose the correct letter, A, B or C.",
+       "items": [
+        {
+         "n": 11,
+         "q": "At what time does the centre open to the public?",
+         "opts": [
+          "A 9.30",
+          "B 10.00",
+          "C 10.30"
+         ],
+         "a": "B",
+         "why": "Раньше открывались в 9.30, но теперь — в десять; 9.30 — время сбора волонтёров."
+        },
+        {
+         "n": 12,
+         "q": "Where should volunteers park?",
+         "opts": [
+          "A in the visitors' car park",
+          "B on Mill Lane",
+          "C behind the building"
+         ],
+         "a": "C",
+         "why": "«Staff and volunteers park behind the building». Mill Lane — только там, где боковые ворота."
+        },
+        {
+         "n": 13,
+         "q": "What colour badge do volunteers wear?",
+         "opts": [
+          "A blue",
+          "B green",
+          "C red"
+         ],
+         "a": "B",
+         "why": "Сотрудники — синие, волонтёры — зелёные."
+        },
+        {
+         "n": 14,
+         "q": "Which exhibition is the most popular?",
+         "opts": [
+          "A the shipyard model",
+          "B the photography gallery",
+          "C the art workshop"
+         ],
+         "a": "A",
+         "why": "«Our most popular exhibition is the model of the old shipyard»."
+        }
+       ]
+      },
+      {
+       "type": "mi",
+       "title": "Questions 15–20",
+       "instr": "Label the plan below. Write the correct letter, A–H, next to Questions 15–20.",
+       "plan": {
+        "w": 360,
+        "h": 250,
+        "fixed": [
+         {
+          "x": 150,
+          "y": 195,
+          "w": 60,
+          "h": 40,
+          "t": "Reception"
+         },
+         {
+          "x": 225,
+          "y": 195,
+          "w": 115,
+          "h": 40,
+          "t": "Toilets"
+         },
+         {
+          "x": 160,
+          "y": 60,
+          "w": 40,
+          "h": 130,
+          "t": "",
+          "corridor": true
+         }
+        ],
+        "spots": [
+         {
+          "l": "G",
+          "x": 160,
+          "y": 8,
+          "w": 40,
+          "h": 48
+         },
+         {
+          "l": "A",
+          "x": 20,
+          "y": 8,
+          "w": 130,
+          "h": 54
+         },
+         {
+          "l": "B",
+          "x": 20,
+          "y": 68,
+          "w": 130,
+          "h": 54
+         },
+         {
+          "l": "C",
+          "x": 20,
+          "y": 128,
+          "w": 130,
+          "h": 54
+         },
+         {
+          "l": "H",
+          "x": 20,
+          "y": 195,
+          "w": 120,
+          "h": 40
+         },
+         {
+          "l": "D",
+          "x": 210,
+          "y": 8,
+          "w": 130,
+          "h": 54
+         },
+         {
+          "l": "E",
+          "x": 210,
+          "y": 68,
+          "w": 130,
+          "h": 54
+         },
+         {
+          "l": "F",
+          "x": 210,
+          "y": 128,
+          "w": 130,
+          "h": 54
+         }
+        ],
+        "entrance": {
+         "x": 150,
+         "y": 238,
+         "w": 60,
+         "t": "Main entrance"
+        }
+       },
+       "options": [
+        [
+         "A",
+         "A"
+        ],
+        [
+         "B",
+         "B"
+        ],
+        [
+         "C",
+         "C"
+        ],
+        [
+         "D",
+         "D"
+        ],
+        [
+         "E",
+         "E"
+        ],
+        [
+         "F",
+         "F"
+        ],
+        [
+         "G",
+         "G"
+        ],
+        [
+         "H",
+         "H"
+        ]
+       ],
+       "items": [
+        {
+         "n": 15,
+         "q": "Cafe",
+         "a": "C",
+         "why": "Слева от ресепшена первая дверь — кафе."
+        },
+        {
+         "n": 16,
+         "q": "Workshop room",
+         "a": "B",
+         "why": "Вторая дверь слева, сразу после кафе."
+        },
+        {
+         "n": 17,
+         "q": "Lecture hall",
+         "a": "G",
+         "why": "«At the very top, at the far end of the corridor»."
+        },
+        {
+         "n": 18,
+         "q": "First aid room",
+         "a": "F",
+         "why": "Справа, сразу за туалетами — первая дверь."
+        },
+        {
+         "n": 19,
+         "q": "Quiet room",
+         "a": "D",
+         "why": "Дальняя комната справа, рядом с лекционным залом."
+        },
+        {
+         "n": 20,
+         "q": "Cloakroom",
+         "a": "H",
+         "why": "Слева от входа, у самой двери."
+        }
+       ]
+      }
+     ],
+     "cast": {
+      "N": [
+       "British",
+       "f"
+      ],
+      "A": [
+       "British",
+       "f"
+      ]
+     }
+    },
+    {
+     "n": 3,
+     "title": "Part 3 · Обсуждение (студенты и преподаватель)",
+     "kind": "Multiple choice + Matching",
+     "intro": "You will hear two students, Lena and Omar, discussing their project on food waste with their tutor, Dr Evans.",
+     "script": [
+      [
+       "N",
+       "Part 3. You will hear two students, Lena and Omar, discussing their project on food waste with their tutor, Dr Evans. First you have some time to look at questions 21 to 30."
+      ],
+      [
+       "_",
+       30
+      ],
+      [
+       "N",
+       "Now listen carefully and answer questions 21 to 30."
+      ],
+      [
+       "T",
+       "Come in, both of you. So, how is the food waste project going?"
+      ],
+      [
+       "L",
+       "Quite well, Dr Evans. We've decided to focus on the university canteen rather than the whole campus."
+      ],
+      [
+       "T",
+       "That sounds sensible. Why the change?"
+      ],
+      [
+       "O",
+       "At first we wanted to look at all the cafes, but we realised we wouldn't have enough time to collect the data. The canteen is the biggest, so it should give us enough information."
+      ],
+      [
+       "T",
+       "Good. And how will you collect it?"
+      ],
+      [
+       "L",
+       "We'll weigh the leftovers at the end of each lunchtime for two weeks. We thought about asking students to fill in a survey, but people tend to say they waste less than they really do."
+      ],
+      [
+       "T",
+       "Quite right. Self-reported data is often unreliable. What about the results so far?"
+      ],
+      [
+       "O",
+       "We only have the first three days, but the surprising thing is that most of the waste isn't food left on plates. It's the salad bar. People take too much and throw it away."
+      ],
+      [
+       "T",
+       "Interesting. Have you thought about what you'd recommend?"
+      ],
+      [
+       "L",
+       "We're considering smaller plates at the salad bar. But Omar thinks that charging by weight would work better."
+      ],
+      [
+       "O",
+       "I do. Smaller plates just mean people go back more often."
+      ],
+      [
+       "T",
+       "Well, you don't need to decide yet. Now, let's talk about who does what. Lena, you're good with statistics."
+      ],
+      [
+       "L",
+       "Yes, I'll analyse the data, and I'll also do the slides for the presentation, since I've used that software before."
+      ],
+      [
+       "O",
+       "I'll design the weighing record sheets, and I'll write the final report. We'll both be at the canteen for the weighing, of course."
+      ],
+      [
+       "T",
+       "And the interviews with the canteen manager?"
+      ],
+      [
+       "O",
+       "Lena has already arranged that."
+      ],
+      [
+       "L",
+       "Yes, I emailed him last week. He's happy to talk to us next Tuesday."
+      ],
+      [
+       "T",
+       "Excellent. One last thing: please check your references carefully. Last year's group lost marks for that. The deadline is the fourteenth of December, and I'd like to see a draft a week before."
+      ],
+      [
+       "O",
+       "Understood. Thank you, Dr Evans."
+      ],
+      [
+       "N",
+       "That is the end of Part 3. You now have thirty seconds to check your answers."
+      ],
+      [
+       "_",
+       30
+      ]
+     ],
+     "groups": [
+      {
+       "type": "mcq",
+       "title": "Questions 21–25",
+       "instr": "Choose the correct letter, A, B or C.",
+       "items": [
+        {
+         "n": 21,
+         "q": "Why did the students decide to focus on the canteen?",
+         "opts": [
+          "A It produces the most waste.",
+          "B They did not have time to study every cafe.",
+          "C The manager asked them to."
+         ],
+         "a": "B",
+         "why": "«We wouldn't have enough time to collect the data»; «the biggest» — лишь довод, не причина (A не названа прямо)."
+        },
+        {
+         "n": 22,
+         "q": "Why didn't they use a survey?",
+         "opts": [
+          "A It would take too long.",
+          "B Students would not answer.",
+          "C People are not honest about waste."
+         ],
+         "a": "C",
+         "why": "«People tend to say they waste less than they really do»."
+        },
+        {
+         "n": 23,
+         "q": "What have they found so far?",
+         "opts": [
+          "A Most waste comes from the salad bar.",
+          "B Most waste is left on plates.",
+          "C The canteen wastes less than expected."
+         ],
+         "a": "A",
+         "why": "«Most of the waste isn't food left on plates. It's the salad bar»."
+        },
+        {
+         "n": 24,
+         "q": "What does Omar think the canteen should do?",
+         "opts": [
+          "A use smaller plates",
+          "B charge for salad by weight",
+          "C remove the salad bar"
+         ],
+         "a": "B",
+         "why": "Lena предлагает меньшие тарелки, а Omar — оплату по весу."
+        },
+        {
+         "n": 25,
+         "q": "Dr Evans wants a draft of the report",
+         "opts": [
+          "A on 7 December",
+          "B on 14 December",
+          "C after the presentation"
+         ],
+         "a": "A",
+         "why": "Срок 14 декабря, а черновик — за неделю до него, то есть 7 декабря."
+        }
+       ]
+      },
+      {
+       "type": "mi",
+       "title": "Questions 26–30",
+       "instr": "Who is responsible for each task? Choose the correct letter, A, B or C. A — Lena, B — Omar, C — both students.",
+       "options": [
+        [
+         "A",
+         "Lena"
+        ],
+        [
+         "B",
+         "Omar"
+        ],
+        [
+         "C",
+         "Both students"
+        ]
+       ],
+       "items": [
+        {
+         "n": 26,
+         "q": "analysing the data",
+         "a": "A",
+         "why": "«I'll analyse the data» — Lena."
+        },
+        {
+         "n": 27,
+         "q": "designing the record sheets",
+         "a": "B",
+         "why": "«I'll design the weighing record sheets» — Omar."
+        },
+        {
+         "n": 28,
+         "q": "weighing the leftovers",
+         "a": "C",
+         "why": "«We'll both be at the canteen for the weighing»."
+        },
+        {
+         "n": 29,
+         "q": "writing the final report",
+         "a": "B",
+         "why": "Omar: «and I'll write the final report»."
+        },
+        {
+         "n": 30,
+         "q": "arranging the interview with the manager",
+         "a": "A",
+         "why": "«Lena has already arranged that»."
+        }
+       ]
+      }
+     ],
+     "cast": {
+      "N": [
+       "British",
+       "f"
+      ],
+      "T": [
+       "British",
+       "m"
+      ],
+      "L": [
+       "Canadian",
+       "f"
+      ],
+      "O": [
+       "Australian",
+       "m"
+      ]
+     }
+    },
+    {
+     "n": 4,
+     "title": "Part 4 · Лекция",
+     "kind": "Note completion",
+     "intro": "You will hear a lecturer talking about green roofs. Complete the notes. Write ONE WORD AND/OR A NUMBER for each answer.",
+     "script": [
+      [
+       "N",
+       "Part 4. You will hear a lecturer talking about green roofs. First you have some time to look at questions 31 to 40."
+      ],
+      [
+       "_",
+       30
+      ],
+      [
+       "N",
+       "Now listen carefully and answer questions 31 to 40."
+      ],
+      [
+       "A",
+       "Today I'd like to talk about green roofs, which are roofs covered with plants. They are not a new idea. People in Scandinavia were covering their houses with grass hundreds of years ago, to keep them warm in winter."
+      ],
+      [
+       "A",
+       "In modern cities, green roofs are valued for different reasons. First, temperature. On a hot summer day, a green roof can be up to five degrees cooler than a normal roof, and that helps to cool the whole street."
+      ],
+      [
+       "A",
+       "Second, water. A green roof can absorb up to seventy per cent of the rain that falls on it. This means less water pours into the drains during storms, so there is less flooding."
+      ],
+      [
+       "A",
+       "How is a green roof built? At the bottom, there's a waterproof membrane, which protects the building. On top of this goes a layer of soil, and finally the plants. For most roofs, the best choice is a plant called sedum, because it survives dry weather and needs almost no care."
+      ],
+      [
+       "A",
+       "One problem is weight. A green roof can weigh around one hundred kilograms per square metre, so the building must be strong enough. In older buildings, engineers have to check this first."
+      ],
+      [
+       "A",
+       "Another problem is cost. Installing a green roof costs about twice as much as a normal roof. However, it also lasts much longer. A normal roof may need replacing after twenty years, while a green roof can last for forty."
+      ],
+      [
+       "A",
+       "Finally, wildlife. Even small green roofs attract insects. In one study in London, researchers found several rare types of beetle on roofs that were less than ten years old."
+      ],
+      [
+       "A",
+       "As for cities that lead the way, Stuttgart in Germany has one of the highest numbers of green roofs in Europe. Some local councils there even pay part of the cost for homeowners."
+      ],
+      [
+       "N",
+       "That is the end of Part 4. You now have thirty seconds to check your answers."
+      ],
+      [
+       "_",
+       30
+      ]
+     ],
+     "groups": [
+      {
+       "type": "sc",
+       "title": "Questions 31–40",
+       "instr": "Complete the notes below. Write ONE WORD AND/OR A NUMBER for each answer.",
+       "items": [
+        {
+         "n": 31,
+         "q": "Early green roofs were used in ________ to keep houses warm.",
+         "a": [
+          "Scandinavia"
+         ],
+         "why": "«People in Scandinavia were covering their houses with grass»."
+        },
+        {
+         "n": 32,
+         "q": "In summer, a green roof can be up to ________ degrees cooler.",
+         "a": [
+          "5",
+          "five"
+         ],
+         "why": "«Up to five degrees cooler»."
+        },
+        {
+         "n": 33,
+         "q": "It can absorb up to ________ % of rainfall.",
+         "a": [
+          "70",
+          "seventy"
+         ],
+         "why": "«Seventy per cent»."
+        },
+        {
+         "n": 34,
+         "q": "The bottom layer is a ________ membrane.",
+         "a": [
+          "waterproof"
+         ],
+         "why": "«A waterproof membrane»."
+        },
+        {
+         "n": 35,
+         "q": "The plant most often used is ________.",
+         "a": [
+          "sedum"
+         ],
+         "why": "«A plant called sedum»."
+        },
+        {
+         "n": 36,
+         "q": "A green roof weighs about ________ kg per square metre.",
+         "a": [
+          "100",
+          "one hundred",
+          "a hundred"
+         ],
+         "why": "«Around one hundred kilograms»."
+        },
+        {
+         "n": 37,
+         "q": "It costs about ________ as much as a normal roof.",
+         "a": [
+          "twice",
+          "2 times",
+          "two times",
+          "double"
+         ],
+         "why": "«About twice as much»."
+        },
+        {
+         "n": 38,
+         "q": "A green roof can last for ________ years.",
+         "a": [
+          "40",
+          "forty"
+         ],
+         "why": "Обычная крыша — 20 лет, зелёная — 40."
+        },
+        {
+         "n": 39,
+         "q": "Researchers in London found rare ________ on green roofs.",
+         "a": [
+          "beetles",
+          "beetle"
+         ],
+         "why": "«Several rare types of beetle»."
+        },
+        {
+         "n": 40,
+         "q": "The German city of ________ has many green roofs.",
+         "a": [
+          "Stuttgart"
+         ],
+         "why": "«Stuttgart in Germany»."
+        }
+       ]
+      }
+     ],
+     "cast": {
+      "N": [
+       "British",
+       "f"
+      ],
+      "A": [
+       "New Zealand",
+       "f"
+      ]
+     }
     }
-  ]
+   ]
+  },
+  {
+   "id": "L2",
+   "title": "Listening Test 2",
+   "topic": "Прокат велосипедов · ферма-парк · сон · пчёлы в городе",
+   "parts": [
+    {
+     "n": 1,
+     "title": "Part 1 · Прокат велосипедов",
+     "kind": "Form completion",
+     "intro": "You will hear a telephone conversation about hiring a bicycle. Complete the form. Write ONE WORD AND/OR A NUMBER for each answer.",
+     "script": [
+      [
+       "N",
+       "Part 1. You will hear a telephone conversation between a customer and an assistant at a bicycle hire shop. First you have some time to look at questions 1 to 10."
+      ],
+      [
+       "_",
+       30
+      ],
+      [
+       "N",
+       "You will see that there is an example already done. On this occasion only, the conversation relating to this will be played first."
+      ],
+      [
+       "A",
+       "Greenway Cycles, good afternoon."
+      ],
+      [
+       "B",
+       "Hello. I'd like to hire a bike for a few days, please."
+      ],
+      [
+       "N",
+       "Now listen carefully and answer questions 1 to 10."
+      ],
+      [
+       "A",
+       "Certainly. Can I take your surname?"
+      ],
+      [
+       "B",
+       "It's Fletcher. F, L, E, T, C, H, E, R."
+      ],
+      [
+       "A",
+       "Thanks. And a phone number?"
+      ],
+      [
+       "B",
+       "Zero seven nine one one, six two four, three eight zero."
+      ],
+      [
+       "A",
+       "What kind of bike would you like? A road bike is the most popular."
+      ],
+      [
+       "B",
+       "I was going to ask for a road bike, but I'll be riding in the hills, so I think a mountain bike would be better."
+      ],
+      [
+       "A",
+       "And how many days?"
+      ],
+      [
+       "B",
+       "Two, I think... actually, make it three. I'd like to start on Saturday."
+      ],
+      [
+       "A",
+       "Fine. A mountain bike is twelve pounds a day. Road bikes are fifteen."
+      ],
+      [
+       "B",
+       "Twelve is good. Do you provide helmets?"
+      ],
+      [
+       "A",
+       "Yes, they're included. What size do you take?"
+      ],
+      [
+       "B",
+       "Medium, I think."
+      ],
+      [
+       "A",
+       "There's also a deposit of fifty pounds, which we return when you bring the bike back."
+      ],
+      [
+       "B",
+       "No problem. Can I collect the bike somewhere near the lake?"
+      ],
+      [
+       "A",
+       "We have a stand in the Lakeside car park, so I'll bring it there at nine."
+      ],
+      [
+       "A",
+       "And we'll give you a free map of local cycle routes, too."
+      ],
+      [
+       "B",
+       "Great, thank you very much."
+      ],
+      [
+       "N",
+       "That is the end of Part 1. You now have thirty seconds to check your answers."
+      ],
+      [
+       "_",
+       30
+      ]
+     ],
+     "groups": [
+      {
+       "type": "sc",
+       "title": "Questions 1–10",
+       "instr": "Complete the booking form below. Write ONE WORD AND/OR A NUMBER for each answer.",
+       "example": {
+        "q": "Name of shop: ________",
+        "a": "Greenway"
+       },
+       "items": [
+        {
+         "n": 1,
+         "q": "Surname: ________",
+         "a": [
+          "Fletcher"
+         ],
+         "why": "Фамилия названа по буквам: F-L-E-T-C-H-E-R."
+        },
+        {
+         "n": 2,
+         "q": "Phone number: ________",
+         "a": [
+          "07911624380",
+          "07911 624380",
+          "07911 624 380"
+         ],
+         "why": "Номер называют группами: 07911, 624, 380."
+        },
+        {
+         "n": 3,
+         "q": "Type of bike: ________",
+         "a": [
+          "mountain",
+          "mountain bike"
+         ],
+         "why": "Сначала road bike, но из-за холмов он выбирает mountain."
+        },
+        {
+         "n": 4,
+         "q": "Number of days: ________",
+         "a": [
+          "3",
+          "three"
+         ],
+         "why": "Говорит «two», но тут же исправляется: «make it three»."
+        },
+        {
+         "n": 5,
+         "q": "First day: ________",
+         "a": [
+          "Saturday"
+         ],
+         "why": "«I'd like to start on Saturday»."
+        },
+        {
+         "n": 6,
+         "q": "Cost per day: £ ________",
+         "a": [
+          "12",
+          "twelve"
+         ],
+         "why": "Горный велосипед — 12 фунтов; 15 — шоссейный, отвлекающая цифра."
+        },
+        {
+         "n": 7,
+         "q": "Helmet size: ________",
+         "a": [
+          "medium"
+         ],
+         "why": "«Medium, I think»."
+        },
+        {
+         "n": 8,
+         "q": "Deposit: £ ________",
+         "a": [
+          "50",
+          "fifty"
+         ],
+         "why": "«A deposit of fifty pounds»."
+        },
+        {
+         "n": 9,
+         "q": "Collection point: ________ car park",
+         "a": [
+          "Lakeside",
+          "lakeside"
+         ],
+         "why": "«The Lakeside car park»."
+        },
+        {
+         "n": 10,
+         "q": "Free gift: ________ of cycle routes",
+         "a": [
+          "map",
+          "a map"
+         ],
+         "why": "«A free map of local cycle routes»."
+        }
+       ]
+      }
+     ],
+     "cast": {
+      "N": [
+       "British",
+       "f"
+      ],
+      "A": [
+       "British",
+       "m"
+      ],
+      "B": [
+       "New Zealand",
+       "f"
+      ]
+     }
+    },
+    {
+     "n": 2,
+     "title": "Part 2 · Монолог (ферма-парк)",
+     "kind": "Multiple choice + Matching",
+     "intro": "You will hear a guide welcoming visitors to Willow Farm Park.",
+     "script": [
+      [
+       "N",
+       "Part 2. You will hear a guide welcoming visitors to Willow Farm Park. First you have some time to look at questions 11 to 20."
+      ],
+      [
+       "_",
+       30
+      ],
+      [
+       "N",
+       "Now listen carefully and answer questions 11 to 20."
+      ],
+      [
+       "A",
+       "Good morning, everyone, and welcome to Willow Farm Park. Before you start exploring, here are a few useful things to know."
+      ],
+      [
+       "A",
+       "Tickets for children under five are free. Children from five to twelve pay half price, and adults pay full price. If you bought your tickets online, you already have ten per cent off, so well done."
+      ],
+      [
+       "A",
+       "The best time to see the animals being fed is two o'clock. It used to be at eleven, but we moved it so that more families could come. The milking takes place at four, but that is much quieter."
+      ],
+      [
+       "A",
+       "Dogs are very welcome, but they must stay on a lead at all times, because of the lambs."
+      ],
+      [
+       "A",
+       "If you get lost, don't worry. Just find a member of staff. We wear yellow jackets, so we're easy to spot."
+      ],
+      [
+       "A",
+       "Now, a quick look at this week's activities. On Monday, you can ride a pony. On Tuesday, there's a cheese-making workshop. Wednesday is our quiet day with no events. On Thursday, a local artist will teach pottery. On Friday, a ranger leads a bird-watching walk by the lake, and on Saturday there's a tractor tour, which is always very popular. Enjoy your day!"
+      ],
+      [
+       "N",
+       "That is the end of Part 2. You now have thirty seconds to check your answers."
+      ],
+      [
+       "_",
+       30
+      ]
+     ],
+     "groups": [
+      {
+       "type": "mcq",
+       "title": "Questions 11–14",
+       "instr": "Choose the correct letter, A, B or C.",
+       "items": [
+        {
+         "n": 11,
+         "q": "Which visitors do not pay for entry?",
+         "opts": [
+          "A children under three",
+          "B children under five",
+          "C children under twelve"
+         ],
+         "a": "B",
+         "why": "«Children under five are free»; пять–двенадцать платят половину."
+        },
+        {
+         "n": 12,
+         "q": "Visitors get a discount if they",
+         "opts": [
+          "A come in a group",
+          "B arrive after lunch",
+          "C buy tickets online"
+         ],
+         "a": "C",
+         "why": "«Bought your tickets online… ten per cent off»."
+        },
+        {
+         "n": 13,
+         "q": "When are the animals fed?",
+         "opts": [
+          "A at 11.00",
+          "B at 2.00",
+          "C at 4.00"
+         ],
+         "a": "B",
+         "why": "Раньше кормили в 11, теперь в два; в 4 — дойка."
+        },
+        {
+         "n": 14,
+         "q": "What must visitors do with their dogs?",
+         "opts": [
+          "A leave them at the entrance",
+          "B keep them on a lead",
+          "C keep them away from the cafe"
+         ],
+         "a": "B",
+         "why": "«They must stay on a lead at all times»."
+        }
+       ]
+      },
+      {
+       "type": "mi",
+       "title": "Questions 15–20",
+       "instr": "What is happening on each day? Choose SIX answers from the box and write the correct letter, A–F, next to Questions 15–20.",
+       "options": [
+        [
+         "A",
+         "pony rides"
+        ],
+        [
+         "B",
+         "pottery"
+        ],
+        [
+         "C",
+         "bird watching"
+        ],
+        [
+         "D",
+         "tractor tour"
+        ],
+        [
+         "E",
+         "cheese making"
+        ],
+        [
+         "F",
+         "no events"
+        ],
+        [
+         "G",
+         "face painting"
+        ],
+        [
+         "H",
+         "storytelling"
+        ]
+       ],
+       "items": [
+        {
+         "n": 15,
+         "q": "Monday",
+         "a": "A",
+         "why": "«On Monday, you can ride a pony»."
+        },
+        {
+         "n": 16,
+         "q": "Tuesday",
+         "a": "E",
+         "why": "«On Tuesday, there's a cheese-making workshop»."
+        },
+        {
+         "n": 17,
+         "q": "Wednesday",
+         "a": "F",
+         "why": "Среда — «quiet day with no events»."
+        },
+        {
+         "n": 18,
+         "q": "Thursday",
+         "a": "B",
+         "why": "«A local artist will teach pottery»."
+        },
+        {
+         "n": 19,
+         "q": "Friday",
+         "a": "C",
+         "why": "«A ranger leads a bird-watching walk»."
+        },
+        {
+         "n": 20,
+         "q": "Saturday",
+         "a": "D",
+         "why": "«On Saturday there's a tractor tour»."
+        }
+       ]
+      }
+     ],
+     "cast": {
+      "N": [
+       "British",
+       "f"
+      ],
+      "A": [
+       "Australian",
+       "m"
+      ]
+     }
+    },
+    {
+     "n": 3,
+     "title": "Part 3 · Обсуждение (исследование сна)",
+     "kind": "Sentence completion + Multiple choice",
+     "intro": "You will hear two students, Priya and Jack, discussing their sleep study with their tutor, Dr Hall.",
+     "script": [
+      [
+       "N",
+       "Part 3. You will hear two students, Priya and Jack, discussing their sleep study with their tutor, Dr Hall. First you have some time to look at questions 21 to 30."
+      ],
+      [
+       "_",
+       30
+      ],
+      [
+       "N",
+       "Now listen carefully and answer questions 21 to 30."
+      ],
+      [
+       "T",
+       "Hello, you two. Let's talk about your sleep study. What did you actually do?"
+      ],
+      [
+       "P",
+       "We compared the sleep habits of first-year students and their exam results, Dr Hall."
+      ],
+      [
+       "J",
+       "Forty students took part. They kept a sleep diary for two weeks."
+      ],
+      [
+       "T",
+       "Good. And what did you find?"
+      ],
+      [
+       "P",
+       "Most of them went to bed after midnight. The students who slept for eight hours scored about ten per cent higher in the test."
+      ],
+      [
+       "T",
+       "Interesting. Did you have any problems?"
+      ],
+      [
+       "J",
+       "The questionnaire was a bit of a problem. Some of the questions were unclear, so we had to rewrite them."
+      ],
+      [
+       "P",
+       "What surprised me was that napping didn't seem to help at all."
+      ],
+      [
+       "T",
+       "And what do you think is the main weakness of the study, Jack?"
+      ],
+      [
+       "J",
+       "Mostly that everything was reported by the students themselves. They might not remember exactly when they slept."
+      ],
+      [
+       "T",
+       "Exactly. Now, for your presentation, I'd suggest adding a graph so that people can see the results at a glance. And please practise your timing. You only have ten minutes."
+      ],
+      [
+       "P",
+       "We'll do that. We'll book a room for a rehearsal tomorrow."
+      ],
+      [
+       "T",
+       "Excellent."
+      ],
+      [
+       "N",
+       "That is the end of Part 3. You now have thirty seconds to check your answers."
+      ],
+      [
+       "_",
+       30
+      ]
+     ],
+     "groups": [
+      {
+       "type": "sc",
+       "title": "Questions 21–25",
+       "instr": "Complete the sentences below. Write ONE WORD ONLY for each answer.",
+       "items": [
+        {
+         "n": 21,
+         "q": "The study compared the sleep habits of ________ students.",
+         "a": [
+          "first-year",
+          "first year"
+         ],
+         "why": "«First-year students»."
+        },
+        {
+         "n": 22,
+         "q": "Participants kept a sleep ________ for two weeks.",
+         "a": [
+          "diary"
+         ],
+         "why": "«A sleep diary for two weeks»."
+        },
+        {
+         "n": 23,
+         "q": "Most students went to bed after ________.",
+         "a": [
+          "midnight"
+         ],
+         "why": "«After midnight»."
+        },
+        {
+         "n": 24,
+         "q": "Students who slept ________ hours scored higher.",
+         "a": [
+          "8",
+          "eight"
+         ],
+         "why": "«Slept for eight hours»."
+        },
+        {
+         "n": 25,
+         "q": "Dr Hall suggests adding a ________ to the presentation.",
+         "a": [
+          "graph"
+         ],
+         "why": "«I'd suggest adding a graph»."
+        }
+       ]
+      },
+      {
+       "type": "mcq",
+       "title": "Questions 26–30",
+       "instr": "Choose the correct letter, A, B or C.",
+       "items": [
+        {
+         "n": 26,
+         "q": "What was the problem with the questionnaire?",
+         "opts": [
+          "A It was too long.",
+          "B Some questions were unclear.",
+          "C Nobody replied."
+         ],
+         "a": "B",
+         "why": "«Some of the questions were unclear»; ответов поначалу было мало, но не «никто»."
+        },
+        {
+         "n": 27,
+         "q": "What surprised Priya about the results?",
+         "opts": [
+          "A Napping did not help.",
+          "B Students slept very little.",
+          "C Men slept more than women."
+         ],
+         "a": "A",
+         "why": "«Napping didn't seem to help at all»."
+        },
+        {
+         "n": 28,
+         "q": "What does Jack think is the main weakness?",
+         "opts": [
+          "A the small number of students",
+          "B only one university",
+          "C students reported their own sleep"
+         ],
+         "a": "C",
+         "why": "«Everything was reported by the students themselves»."
+        },
+        {
+         "n": 29,
+         "q": "What does Dr Hall advise for the presentation?",
+         "opts": [
+          "A use fewer slides",
+          "B practise the timing",
+          "C avoid statistics"
+         ],
+         "a": "B",
+         "why": "«Please practise your timing»."
+        },
+        {
+         "n": 30,
+         "q": "What will the students do tomorrow?",
+         "opts": [
+          "A email the participants",
+          "B rehearse the presentation",
+          "C visit the library"
+         ],
+         "a": "B",
+         "why": "«Book a room for a rehearsal tomorrow»."
+        }
+       ]
+      }
+     ],
+     "cast": {
+      "N": [
+       "British",
+       "f"
+      ],
+      "T": [
+       "British",
+       "m"
+      ],
+      "P": [
+       "American",
+       "f"
+      ],
+      "J": [
+       "American",
+       "m"
+      ]
+     }
+    },
+    {
+     "n": 4,
+     "title": "Part 4 · Лекция (пчёлы в городе)",
+     "kind": "Multiple choice + Note completion",
+     "intro": "You will hear a lecturer talking about city beekeeping.",
+     "script": [
+      [
+       "N",
+       "Part 4. You will hear a lecturer talking about city beekeeping. First you have some time to look at questions 31 to 40."
+      ],
+      [
+       "_",
+       30
+      ],
+      [
+       "N",
+       "Now listen carefully and answer questions 31 to 40."
+      ],
+      [
+       "A",
+       "Today I'd like to talk about beekeeping in cities. Many people think bees need open countryside, but in fact, city bees often do better than country ones."
+      ],
+      [
+       "A",
+       "One reason is variety. Gardens, parks and balconies offer flowers all year round, while a farm may have only one crop. A city hive can produce around twenty kilograms of honey in a good summer."
+      ],
+      [
+       "A",
+       "Hives are usually placed on rooftops. The most important rule is to keep the hive in a sunny spot, out of the wind."
+      ],
+      [
+       "A",
+       "A healthy hive contains about forty thousand bees in summer, but only one queen. Her only job is to lay eggs, up to one thousand every day."
+      ],
+      [
+       "A",
+       "Of course, there are some problems. The biggest is disease, which can spread quickly between hives, so beekeepers must inspect them every week. Another problem is the weather. If the winter is too wet, the bees cannot leave the hive to find food."
+      ],
+      [
+       "A",
+       "Finally, anyone who wants to start must register with the city council, and it is wise to take a course first. Most beginners buy their equipment second-hand, which costs about two hundred pounds."
+      ],
+      [
+       "N",
+       "That is the end of Part 4. You now have thirty seconds to check your answers."
+      ],
+      [
+       "_",
+       30
+      ]
+     ],
+     "groups": [
+      {
+       "type": "mcq",
+       "title": "Questions 31–34",
+       "instr": "Choose the correct letter, A, B or C.",
+       "items": [
+        {
+         "n": 31,
+         "q": "According to the speaker, city bees often do better because",
+         "opts": [
+          "A they live longer",
+          "B there are more kinds of flowers",
+          "C the weather is warmer"
+         ],
+         "a": "B",
+         "why": "«Variety… flowers all year round»."
+        },
+        {
+         "n": 32,
+         "q": "Hives are usually placed",
+         "opts": [
+          "A in gardens",
+          "B on rooftops",
+          "C in parks"
+         ],
+         "a": "B",
+         "why": "«Usually placed on rooftops»."
+        },
+        {
+         "n": 33,
+         "q": "The most important rule for the hive is that it should be",
+         "opts": [
+          "A sunny and out of the wind",
+          "B close to water",
+          "C far from flowers"
+         ],
+         "a": "A",
+         "why": "«A sunny spot, out of the wind»."
+        },
+        {
+         "n": 34,
+         "q": "What is the biggest problem for beekeepers?",
+         "opts": [
+          "A the weather",
+          "B the cost",
+          "C disease"
+         ],
+         "a": "C",
+         "why": "«The biggest is disease»; погода — «another problem»."
+        }
+       ]
+      },
+      {
+       "type": "sc",
+       "title": "Questions 35–40",
+       "instr": "Complete the notes below. Write ONE WORD AND/OR A NUMBER for each answer.",
+       "items": [
+        {
+         "n": 35,
+         "q": "A good summer hive can produce about ________ kg of honey.",
+         "a": [
+          "20",
+          "twenty"
+         ],
+         "why": "«Around twenty kilograms»."
+        },
+        {
+         "n": 36,
+         "q": "A summer hive contains about ________ bees.",
+         "a": [
+          "40000",
+          "40,000",
+          "forty thousand",
+          "40 000"
+         ],
+         "why": "«About forty thousand bees»."
+        },
+        {
+         "n": 37,
+         "q": "The queen lays up to ________ eggs every day.",
+         "a": [
+          "1000",
+          "1,000",
+          "one thousand",
+          "a thousand"
+         ],
+         "why": "«Up to one thousand every day»."
+        },
+        {
+         "n": 38,
+         "q": "Beekeepers must inspect hives every ________.",
+         "a": [
+          "week"
+         ],
+         "why": "«Inspect them every week»."
+        },
+        {
+         "n": 39,
+         "q": "Beginners must register with the city ________.",
+         "a": [
+          "council"
+         ],
+         "why": "«Register with the city council»."
+        },
+        {
+         "n": 40,
+         "q": "Second-hand equipment costs about £ ________.",
+         "a": [
+          "200",
+          "two hundred"
+         ],
+         "why": "«About two hundred pounds»."
+        }
+       ]
+      }
+     ],
+     "cast": {
+      "N": [
+       "British",
+       "f"
+      ],
+      "A": [
+       "American",
+       "f"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "L3",
+   "title": "Listening Test 3",
+   "topic": "Общежитие · сад · роман · коралловые рифы",
+   "parts": [
+    {
+     "n": 1,
+     "title": "Part 1 · Студенческое общежитие",
+     "kind": "Form completion",
+     "intro": "You will hear a student enquiring about a room at a university residence. Complete the form. Write ONE WORD AND/OR A NUMBER for each answer.",
+     "script": [
+      [
+       "N",
+       "Part 1. You will hear a student enquiring about accommodation at a university residence. First you have some time to look at questions 1 to 10."
+      ],
+      [
+       "_",
+       30
+      ],
+      [
+       "N",
+       "You will see that there is an example already done. On this occasion only, the conversation relating to this will be played first."
+      ],
+      [
+       "A",
+       "Parkview Residence, how can I help?"
+      ],
+      [
+       "B",
+       "Hello, I'm a new student and I'm looking for a room."
+      ],
+      [
+       "N",
+       "Now listen carefully and answer questions 1 to 10."
+      ],
+      [
+       "A",
+       "Of course. Could I have your surname, please?"
+      ],
+      [
+       "B",
+       "Okafor. That's O, K, A, F, O, R."
+      ],
+      [
+       "A",
+       "And what are you going to study?"
+      ],
+      [
+       "B",
+       "Architecture."
+      ],
+      [
+       "A",
+       "Good. We have single rooms and shared rooms. The single rooms have a private bathroom."
+      ],
+      [
+       "B",
+       "A shared room would be cheaper, but I think I'd prefer an en-suite single."
+      ],
+      [
+       "A",
+       "That's a hundred and thirty-five pounds a week. The shared rooms are a hundred and twenty."
+      ],
+      [
+       "B",
+       "That's fine. Is the contract for the whole year, fifty-two weeks?"
+      ],
+      [
+       "A",
+       "No, it's for the academic year only, forty weeks."
+      ],
+      [
+       "B",
+       "Good. When can I move in? I arrive on the thirteenth of September."
+      ],
+      [
+       "A",
+       "The rooms open on the fourteenth, so you'll need to wait one day."
+      ],
+      [
+       "B",
+       "That's OK. Which floor would my room be on?"
+      ],
+      [
+       "A",
+       "I can offer you one on the third floor. The residence also has a free gym for students."
+      ],
+      [
+       "B",
+       "Lovely. And the bus?"
+      ],
+      [
+       "A",
+       "Take a bus to Albert Street. It's just two minutes' walk from there. Collect your key from reception."
+      ],
+      [
+       "B",
+       "Great, thank you very much."
+      ],
+      [
+       "N",
+       "That is the end of Part 1. You now have thirty seconds to check your answers."
+      ],
+      [
+       "_",
+       30
+      ]
+     ],
+     "groups": [
+      {
+       "type": "sc",
+       "title": "Questions 1–10",
+       "instr": "Complete the enquiry form below. Write ONE WORD AND/OR A NUMBER for each answer.",
+       "example": {
+        "q": "Name of residence: ________",
+        "a": "Parkview"
+       },
+       "items": [
+        {
+         "n": 1,
+         "q": "Surname: ________",
+         "a": [
+          "Okafor"
+         ],
+         "why": "Фамилия по буквам: O-K-A-F-O-R."
+        },
+        {
+         "n": 2,
+         "q": "Course: ________",
+         "a": [
+          "Architecture"
+         ],
+         "why": "«Architecture»."
+        },
+        {
+         "n": 3,
+         "q": "Type of room: ________ single",
+         "a": [
+          "en-suite",
+          "ensuite",
+          "en suite"
+         ],
+         "why": "Выбирает не общую комнату, а одноместную с ванной."
+        },
+        {
+         "n": 4,
+         "q": "Rent per week: £ ________",
+         "a": [
+          "135",
+          "one hundred and thirty-five",
+          "a hundred and thirty-five"
+         ],
+         "why": "135 — одноместная; 120 — общая, отвлекающая цифра."
+        },
+        {
+         "n": 5,
+         "q": "Length of contract: ________ weeks",
+         "a": [
+          "40",
+          "forty"
+         ],
+         "why": "Не 52 недели, а только учебный год — 40."
+        },
+        {
+         "n": 6,
+         "q": "Move-in date: ________ September",
+         "a": [
+          "14",
+          "14th",
+          "fourteenth",
+          "fourteen"
+         ],
+         "why": "Он приезжает 13-го, но комнаты открываются 14-го."
+        },
+        {
+         "n": 7,
+         "q": "Room on the ________ floor",
+         "a": [
+          "third",
+          "3rd"
+         ],
+         "why": "«On the third floor»."
+        },
+        {
+         "n": 8,
+         "q": "Free facility: ________",
+         "a": [
+          "gym"
+         ],
+         "why": "«A free gym for students»."
+        },
+        {
+         "n": 9,
+         "q": "Nearest bus stop: ________ Street",
+         "a": [
+          "Albert"
+         ],
+         "why": "«Albert Street»."
+        },
+        {
+         "n": 10,
+         "q": "Collect key from: ________",
+         "a": [
+          "reception"
+         ],
+         "why": "«Collect your key from reception»."
+        }
+       ]
+      }
+     ],
+     "cast": {
+      "N": [
+       "British",
+       "f"
+      ],
+      "A": [
+       "American",
+       "f"
+      ],
+      "B": [
+       "American",
+       "m"
+      ]
+     }
+    },
+    {
+     "n": 2,
+     "title": "Part 2 · Монолог (план парка)",
+     "kind": "Plan labelling + Multiple choice",
+     "intro": "You will hear a guide describing the Maple Lodge Gardens.",
+     "script": [
+      [
+       "N",
+       "Part 2. You will hear a guide describing the Maple Lodge Gardens. First you have some time to look at questions 11 to 20."
+      ],
+      [
+       "_",
+       30
+      ],
+      [
+       "N",
+       "Now listen carefully and answer questions 11 to 20."
+      ],
+      [
+       "A",
+       "Welcome to Maple Lodge Gardens. The gardens open at nine o'clock, and the last entry is at five. Guided tours run on weekends only, and they are free."
+      ],
+      [
+       "A",
+       "Let me describe the layout. We are now at the gift shop, near the main entrance. Bicycle parking is just on your left by the gate. The path goes straight ahead."
+      ],
+      [
+       "A",
+       "On the left of the path, the first building you will see is the glasshouse. Next to it is the herb garden, and at the far end is the pond."
+      ],
+      [
+       "A",
+       "On the right, past the toilets, the first building is the cafe. Then comes the playground, and at the far end, the maze, which children love."
+      ],
+      [
+       "A",
+       "At the very end of the path, you will find the bandstand, where concerts take place in the summer."
+      ],
+      [
+       "A",
+       "Photographs are welcome everywhere, but please do not use a flash in the glasshouse. Finally, we are always looking for volunteers to help with the planting, so ask at the gift shop."
+      ],
+      [
+       "N",
+       "That is the end of Part 2. You now have thirty seconds to check your answers."
+      ],
+      [
+       "_",
+       30
+      ]
+     ],
+     "groups": [
+      {
+       "type": "mi",
+       "title": "Questions 11–16",
+       "instr": "Label the plan below. Write the correct letter, A–H, next to Questions 11–16.",
+       "plan": {
+        "w": 360,
+        "h": 250,
+        "fixed": [
+         {
+          "x": 150,
+          "y": 195,
+          "w": 60,
+          "h": 40,
+          "t": "Gift shop"
+         },
+         {
+          "x": 225,
+          "y": 195,
+          "w": 115,
+          "h": 40,
+          "t": "Toilets"
+         },
+         {
+          "x": 160,
+          "y": 60,
+          "w": 40,
+          "h": 130,
+          "t": "",
+          "corridor": true
+         }
+        ],
+        "spots": [
+         {
+          "l": "G",
+          "x": 160,
+          "y": 8,
+          "w": 40,
+          "h": 48
+         },
+         {
+          "l": "A",
+          "x": 20,
+          "y": 8,
+          "w": 130,
+          "h": 54
+         },
+         {
+          "l": "B",
+          "x": 20,
+          "y": 68,
+          "w": 130,
+          "h": 54
+         },
+         {
+          "l": "C",
+          "x": 20,
+          "y": 128,
+          "w": 130,
+          "h": 54
+         },
+         {
+          "l": "H",
+          "x": 20,
+          "y": 195,
+          "w": 120,
+          "h": 40
+         },
+         {
+          "l": "D",
+          "x": 210,
+          "y": 8,
+          "w": 130,
+          "h": 54
+         },
+         {
+          "l": "E",
+          "x": 210,
+          "y": 68,
+          "w": 130,
+          "h": 54
+         },
+         {
+          "l": "F",
+          "x": 210,
+          "y": 128,
+          "w": 130,
+          "h": 54
+         }
+        ],
+        "entrance": {
+         "x": 150,
+         "y": 238,
+         "w": 60,
+         "t": "Main entrance"
+        }
+       },
+       "options": [
+        [
+         "A",
+         "A"
+        ],
+        [
+         "B",
+         "B"
+        ],
+        [
+         "C",
+         "C"
+        ],
+        [
+         "D",
+         "D"
+        ],
+        [
+         "E",
+         "E"
+        ],
+        [
+         "F",
+         "F"
+        ],
+        [
+         "G",
+         "G"
+        ],
+        [
+         "H",
+         "H"
+        ]
+       ],
+       "items": [
+        {
+         "n": 11,
+         "q": "Glasshouse",
+         "a": "C",
+         "why": "Слева, первое здание от входа."
+        },
+        {
+         "n": 12,
+         "q": "Herb garden",
+         "a": "B",
+         "why": "Рядом со стеклянной оранжереей — вторая слева."
+        },
+        {
+         "n": 13,
+         "q": "Cafe",
+         "a": "F",
+         "why": "Справа, сразу за туалетами."
+        },
+        {
+         "n": 14,
+         "q": "Maze",
+         "a": "D",
+         "why": "Справа, в дальнем конце."
+        },
+        {
+         "n": 15,
+         "q": "Bandstand",
+         "a": "G",
+         "why": "«At the very end of the path»."
+        },
+        {
+         "n": 16,
+         "q": "Bicycle parking",
+         "a": "H",
+         "why": "Слева, у входа."
+        }
+       ]
+      },
+      {
+       "type": "mcq",
+       "title": "Questions 17–20",
+       "instr": "Choose the correct letter, A, B or C.",
+       "items": [
+        {
+         "n": 17,
+         "q": "The gardens open at",
+         "opts": [
+          "A 8.00",
+          "B 9.00",
+          "C 10.00"
+         ],
+         "a": "B",
+         "why": "«Open at nine o'clock»; 5 часов — последний вход."
+        },
+        {
+         "n": 18,
+         "q": "Guided tours run",
+         "opts": [
+          "A every day",
+          "B at weekends only",
+          "C on Wednesdays"
+         ],
+         "a": "B",
+         "why": "«On weekends only»."
+        },
+        {
+         "n": 19,
+         "q": "Visitors may not",
+         "opts": [
+          "A take photographs",
+          "B use a flash in the glasshouse",
+          "C bring food"
+         ],
+         "a": "B",
+         "why": "Фото везде можно, но без вспышки в оранжерее."
+        },
+        {
+         "n": 20,
+         "q": "Volunteers are needed for",
+         "opts": [
+          "A planting",
+          "B guiding",
+          "C the cafe"
+         ],
+         "a": "A",
+         "why": "«Help with the planting»."
+        }
+       ]
+      }
+     ],
+     "cast": {
+      "N": [
+       "British",
+       "f"
+      ],
+      "A": [
+       "New Zealand",
+       "f"
+      ]
+     }
+    },
+    {
+     "n": 3,
+     "title": "Part 3 · Обсуждение (роман)",
+     "kind": "Matching + Multiple choice",
+     "intro": "You will hear two students, Sam and Elena, discussing a novel with their tutor, Dr Brown.",
+     "script": [
+      [
+       "N",
+       "Part 3. You will hear two students, Sam and Elena, discussing a novel with their tutor, Dr Brown. First you have some time to look at questions 21 to 30."
+      ],
+      [
+       "_",
+       30
+      ],
+      [
+       "N",
+       "Now listen carefully and answer questions 21 to 30."
+      ],
+      [
+       "T",
+       "Right, you two. You've both read the novel. What did you think?"
+      ],
+      [
+       "E",
+       "The opening chapters were very slow, I thought. It took me a while to get into it."
+      ],
+      [
+       "S",
+       "I agree. But the middle section is the most exciting part. I couldn't stop reading."
+      ],
+      [
+       "E",
+       "For me, the ending was confusing. I didn't understand why the main character left."
+      ],
+      [
+       "S",
+       "I thought the main character was very realistic, though. And the setting felt believable."
+      ],
+      [
+       "T",
+       "Good. Now, why did you choose this novel for your essay?"
+      ],
+      [
+       "S",
+       "Mostly because it is short, and we only have two weeks."
+      ],
+      [
+       "T",
+       "The deadline is the twelfth of May, and the essay should be about two thousand words."
+      ],
+      [
+       "E",
+       "How many sources do we need?"
+      ],
+      [
+       "T",
+       "At least five. Use the library database, not just websites."
+      ],
+      [
+       "S",
+       "And how should we feel about the characters, as readers? Should we judge them?"
+      ],
+      [
+       "T",
+       "No. Try to be curious about them, not critical. That makes for a stronger essay."
+      ],
+      [
+       "N",
+       "That is the end of Part 3. You now have thirty seconds to check your answers."
+      ],
+      [
+       "_",
+       30
+      ]
+     ],
+     "groups": [
+      {
+       "type": "mi",
+       "title": "Questions 21–25",
+       "instr": "What do the students think about each part of the novel? Choose FIVE answers from the box and write the correct letter, A–G, next to Questions 21–25.",
+       "options": [
+        [
+         "A",
+         "too slow"
+        ],
+        [
+         "B",
+         "most exciting"
+        ],
+        [
+         "C",
+         "confusing"
+        ],
+        [
+         "D",
+         "realistic"
+        ],
+        [
+         "E",
+         "believable"
+        ],
+        [
+         "F",
+         "too long"
+        ],
+        [
+         "G",
+         "funny"
+        ]
+       ],
+       "items": [
+        {
+         "n": 21,
+         "q": "the opening chapters",
+         "a": "A",
+         "why": "Elena: «very slow»."
+        },
+        {
+         "n": 22,
+         "q": "the middle section",
+         "a": "B",
+         "why": "Sam: «the most exciting part»."
+        },
+        {
+         "n": 23,
+         "q": "the ending",
+         "a": "C",
+         "why": "Elena: «confusing»."
+        },
+        {
+         "n": 24,
+         "q": "the main character",
+         "a": "D",
+         "why": "Sam: «very realistic»."
+        },
+        {
+         "n": 25,
+         "q": "the setting",
+         "a": "E",
+         "why": "Sam: «felt believable»."
+        }
+       ]
+      },
+      {
+       "type": "mcq",
+       "title": "Questions 26–30",
+       "instr": "Choose the correct letter, A, B or C.",
+       "items": [
+        {
+         "n": 26,
+         "q": "Why did Sam choose this novel?",
+         "opts": [
+          "A It is short.",
+          "B It is famous.",
+          "C It is recent."
+         ],
+         "a": "A",
+         "why": "«Mostly because it is short»."
+        },
+        {
+         "n": 27,
+         "q": "When is the deadline?",
+         "opts": [
+          "A 2 May",
+          "B 12 May",
+          "C 20 May"
+         ],
+         "a": "B",
+         "why": "«The twelfth of May»."
+        },
+        {
+         "n": 28,
+         "q": "How long should the essay be?",
+         "opts": [
+          "A 1,000 words",
+          "B 2,000 words",
+          "C 3,000 words"
+         ],
+         "a": "B",
+         "why": "«About two thousand words»."
+        },
+        {
+         "n": 29,
+         "q": "How many sources are needed?",
+         "opts": [
+          "A three",
+          "B five",
+          "C ten"
+         ],
+         "a": "B",
+         "why": "«At least five»."
+        },
+        {
+         "n": 30,
+         "q": "Dr Brown advises the students to be",
+         "opts": [
+          "A critical of the characters",
+          "B funny",
+          "C curious about the characters"
+         ],
+         "a": "C",
+         "why": "«Be curious about them, not critical»."
+        }
+       ]
+      }
+     ],
+     "cast": {
+      "N": [
+       "British",
+       "f"
+      ],
+      "T": [
+       "British",
+       "m"
+      ],
+      "E": [
+       "American",
+       "f"
+      ],
+      "S": [
+       "Australian",
+       "m"
+      ]
+     }
+    },
+    {
+     "n": 4,
+     "title": "Part 4 · Лекция (коралловые рифы)",
+     "kind": "Sentence completion",
+     "intro": "You will hear a lecturer talking about coral reefs. Complete the sentences. Write ONE WORD AND/OR A NUMBER for each answer.",
+     "script": [
+      [
+       "N",
+       "Part 4. You will hear a lecturer talking about coral reefs. First you have some time to look at questions 31 to 40."
+      ],
+      [
+       "_",
+       30
+      ],
+      [
+       "N",
+       "Now listen carefully and answer questions 31 to 40."
+      ],
+      [
+       "A",
+       "Today I'd like to talk about coral reefs. Although they cover less than one per cent of the ocean floor, they are home to about a quarter of all marine species."
+      ],
+      [
+       "A",
+       "Corals are tiny animals that live in groups. They build hard skeletons from limestone, and over thousands of years these form a reef. The Great Barrier Reef in Australia is about two thousand three hundred kilometres long."
+      ],
+      [
+       "A",
+       "Corals get most of their food from algae that live inside them. These algae need sunlight, which is why reefs grow only in shallow water, usually less than fifty metres deep."
+      ],
+      [
+       "A",
+       "Reefs are threatened in several ways. The most serious threat is warming water, which causes bleaching, when corals turn white and may die."
+      ],
+      [
+       "A",
+       "Reefs also protect the coast. They can reduce the force of waves by up to ninety per cent."
+      ],
+      [
+       "A",
+       "Scientists are now growing young corals in nurseries and planting them on damaged reefs."
+      ],
+      [
+       "N",
+       "That is the end of Part 4. You now have thirty seconds to check your answers."
+      ],
+      [
+       "_",
+       30
+      ]
+     ],
+     "groups": [
+      {
+       "type": "sc",
+       "title": "Questions 31–40",
+       "instr": "Complete the sentences below. Write ONE WORD AND/OR A NUMBER for each answer.",
+       "items": [
+        {
+         "n": 31,
+         "q": "Coral reefs cover less than ________ per cent of the ocean floor.",
+         "a": [
+          "1",
+          "one"
+         ],
+         "why": "«Less than one per cent»."
+        },
+        {
+         "n": 32,
+         "q": "They are home to about a ________ of marine species.",
+         "a": [
+          "quarter",
+          "quarter of all",
+          "a quarter"
+         ],
+         "why": "«About a quarter»."
+        },
+        {
+         "n": 33,
+         "q": "Corals are tiny ________ that live in groups.",
+         "a": [
+          "animals"
+         ],
+         "why": "«Tiny animals»."
+        },
+        {
+         "n": 34,
+         "q": "Their skeletons are made of ________.",
+         "a": [
+          "limestone"
+         ],
+         "why": "«Hard skeletons from limestone»."
+        },
+        {
+         "n": 35,
+         "q": "The Great Barrier Reef is about ________ km long.",
+         "a": [
+          "2300",
+          "2,300",
+          "two thousand three hundred",
+          "2 300"
+         ],
+         "why": "«About two thousand three hundred»."
+        },
+        {
+         "n": 36,
+         "q": "Corals get food from ________ living inside them.",
+         "a": [
+          "algae"
+         ],
+         "why": "«Algae that live inside them»."
+        },
+        {
+         "n": 37,
+         "q": "Reefs usually grow in water less than ________ metres deep.",
+         "a": [
+          "50",
+          "fifty"
+         ],
+         "why": "«Less than fifty metres»."
+        },
+        {
+         "n": 38,
+         "q": "The most serious threat is ________ water.",
+         "a": [
+          "warming",
+          "warm"
+         ],
+         "why": "«Warming water»."
+        },
+        {
+         "n": 39,
+         "q": "Reefs can reduce the force of waves by up to ________ per cent.",
+         "a": [
+          "90",
+          "ninety"
+         ],
+         "why": "«Up to ninety per cent»."
+        },
+        {
+         "n": 40,
+         "q": "Young corals are grown in ________ and planted on damaged reefs.",
+         "a": [
+          "nurseries"
+         ],
+         "why": "«Growing young corals in nurseries»."
+        }
+       ]
+      }
+     ],
+     "cast": {
+      "N": [
+       "British",
+       "f"
+      ],
+      "A": [
+       "British",
+       "m"
+      ]
+     }
+    }
+   ]
+  }
+ ]
 }

@@ -1009,20 +1009,25 @@
     };
     setTimeout(next, 80);
   }
-  const LPART = [['Бытовой разговор', 'Заполни форму: имена, числа, адреса'], ['Монолог и план', 'Выбери ответ и подпиши план здания'], ['Обсуждение', 'Студенты и преподаватель: мнения и задачи'], ['Лекция', 'Академическая лекция, заметки с пропусками']];
+  const LPART = [['Бытовой разговор', 'Заполни форму: имена, числа, адреса'], ['Монолог', 'Рассказ о месте или услуге: выбор ответа, план, сопоставление'], ['Обсуждение', 'Студенты и преподаватель: мнения и задачи'], ['Лекция', 'Академическая лекция, заметки с пропусками']];
   const newSeen = (k) => { try { return !!localStorage.getItem('ielts_new_' + k); } catch (e) { return true; } };
   function viewListening() {
     try { localStorage.setItem('ielts_new_listen', '1'); } catch (e) { /* ignore */ }
     const p = P(); const best = (k) => { const rs = (p.listens || []).filter((r) => r.id === k); return rs.length ? rs.reduce((x, r) => (r.raw > x.raw ? r : x)) : null; };
     const row = (href, title, desc, tail) => '<a class="rowi" href="' + href + '"><div class="grow"><b>' + esc(title) + '</b><div class="mut" style="margin-top:2px">' + esc(desc) + '</div></div>' + (tail ? '<span class="mut">' + esc(tail) + '</span>' : '') + ico('chev', 'chev') + '</a>';
     let h = head('Аудирование', 'Как на экзамене: 4 части, 40 вопросов, запись звучит один раз');
-    h += LISTEN.tests.map((t) => { const b = best(t.id + '/all'); return '<div class="list cta">' + row('#listen/' + t.id, 'Полный тест · ' + t.title, '4 части · 40 вопросов · как на экзамене', b ? b.raw + '/' + b.total : '') + '</div>'; }).join('<div style="height:10px"></div>');
+    h += '<h3>Полные тесты</h3><div class="list">' + LISTEN.tests.map((t) => { const b = best(t.id + '/all'); return row('#listen/' + t.id, t.title, t.topic, b ? b.raw + '/' + b.total : ''); }).join('') + '</div>';
     const t0 = LISTEN.tests[0];
-    if (t0) h += '<h3>Отдельные части</h3><div class="list">' + t0.parts.map((pt, i) => { const b = best(t0.id + '/' + pt.n); return row('#listen/' + t0.id + '/' + pt.n, 'Part ' + pt.n + ' · ' + LPART[i][0], LPART[i][1], b ? b.raw + '/' + b.total : ''); }).join('') + '</div>';
-    h += '<h3>Тренировка слуха</h3><div class="list">' + row('#dictation', 'Диктант', 'Слушай предложения из своих карточек и пиши') + '</div>';
+    if (t0) h += '<h3>Отдельные части</h3><div class="list">' + t0.parts.map((pt, i) => '<a class="rowi" href="#" data-lpart="' + pt.n + '"><div class="grow"><b>Part ' + pt.n + ' · ' + LPART[i][0] + '</b><div class="mut" style="margin-top:2px">' + LPART[i][1] + '</div></div>' + ico('chev', 'chev') + '</a>').join('') + '</div>';
     h += '<h3>Как устроен экзамен</h3><div class="card stack"><div><b>30 минут</b> записи и ещё 10 минут на перенос ответов (на бумаге).</div><div><b>4 части по 10 вопросов</b>: разговор, монолог, обсуждение, лекция — от простого к сложному.</div><div>Запись звучит <b>один раз</b>. Перед каждой частью — 30 секунд на вопросы, после — 30 секунд на проверку.</div><div>Считаются <b>орфография</b> и лимит слов: «two» и «2» засчитываются, «teh» — нет.</div></div>';
     h += '<p class="mut" style="margin-top:14px">' + esc(LISTEN.note) + ' Реальные тесты — в Cambridge IELTS и на ielts.org.</p>';
     paint(h);
+    $$('[data-lpart]').forEach((a) => {
+      a.onclick = (e) => {
+        e.preventDefault(); const n = a.dataset.lpart;
+        openSheet('<h3 style="margin:4px 0 12px">Part ' + n + ' — из какого теста?</h3><div class="stack">' + LISTEN.tests.map((t) => { const b = best(t.id + '/' + n); const pt = t.parts.find((x) => String(x.n) === n); return '<a class="card mode" href="#listen/' + t.id + '/' + n + '"><span class="grow"><b>' + esc(t.title) + '</b><span class="mut">' + esc(pt ? pt.kind : '') + (b ? ' · лучший результат ' + b.raw + '/' + b.total : '') + '</span></span></a>'; }).join('') + '</div>', (el) => { el.querySelectorAll('a').forEach((x) => { x.onclick = () => closeSheet(); }); });
+      };
+    });
   }
   function planSvg(pl) {
     const tx = (o, t, c) => '<text class="' + c + '" x="' + (o.x + o.w / 2) + '" y="' + (o.y + o.h / 2) + '" dy=".35em">' + esc(t) + '</text>';
@@ -1055,11 +1060,10 @@
           return '<div class="rowi" style="display:block"><div><b>' + it.n + '.</b> ' + esc(it.q) + '</div>' + qInput(g, it, ans, done) + fb + '</div>';
         }).join('') + '</div>';
       });
-      if (done) h += '<details class="card" style="margin-top:12px"><summary><b>Скрипт</b> <span class="mut">— нажми на слово, чтобы увидеть перевод</span></summary><div class="stack" style="margin-top:10px">' + pt.script.filter((l) => l[0] !== '_').map((l) => '<p style="margin:0">' + tapW(String(l[1])) + '</p>').join('') + '</div></details>';
     });
     if (done) {
       const raw = items.filter(ok).length; const full = !pn;
-      h += '<div class="card" style="margin-top:18px;text-align:center"><div class="big">' + raw + ' / ' + items.length + '</div><div class="mut">' + (full ? '≈ band ' + E.rawToBand('listening', raw) + ' (приблизительно, по шкале Academic/General)' : 'Одна часть — band не считаем. Пройди все четыре части, чтобы оценить уровень.') + '</div></div><div class="stack" style="margin-top:12px"><button class="btn p" id="lerr">Добавить ошибки в журнал</button><button class="btn" id="lretry">Пройти заново</button></div>';
+      h += '<div class="card" style="margin-top:18px;text-align:center"><div class="big">' + raw + ' / ' + items.length + '</div><div class="mut">' + (full ? '≈ band ' + E.rawToBand('listening', raw) + ' (приблизительно, по шкале Academic/General)' : 'Одна часть — band не считаем. Пройди все четыре части, чтобы оценить уровень.') + '</div></div><div class="stack" style="margin-top:12px"><button class="btn p" id="lretry">Пройти заново</button></div>';
     } else h += '<div style="margin-top:18px"><button class="btn p" id="lsub">Сдать</button></div>';
     paint(h, !LS.painted); LS.painted = true;
     bindQ(ans);
@@ -1108,10 +1112,6 @@
         save(); LS.painted = false; viewListen(id, pn); window.scrollTo(0, 0);
       };
       if (un) confirmSheet('Без ответа: ' + un + '. Сдать всё равно?', 'Сдать', fin); else fin();
-    };
-    const le = $('#lerr'); if (le) le.onclick = () => {
-      let n = 0; items.filter((it) => !ok(it)).forEach((it) => { p.errors.push({ id: uid(), date: today(), tag: it.plan ? 'L-MAP' : LTAG[it.type], snippet: t.title + ' · Q' + it.n + ': ' + it.q.slice(0, 60), fix: 'ответ: ' + (Array.isArray(it.a) ? it.a[0] : it.a), nodrill: true }); n++; });
-      delete p.days[today()]; save(); le.disabled = true; toast('Записано ошибок: ' + n);
     };
     const lr = $('#lretry'); if (lr) lr.onclick = () => { LS.key = ''; viewListen(id, pn); window.scrollTo(0, 0); };
   }
@@ -1276,7 +1276,7 @@
 
   // ---------- маршрутизация ----------
   const TABS = [['today', 'Сегодня'], ['plan', 'План'], ['cards', 'Карточки'], ['errors', 'Ошибки']];
-  const MORE = [['progress', 'Прогресс', '📈', 'Пробные экзамены и выполнение плана'], ['writing', 'Письменная часть', '✍️', 'Эссе, графики и письма'], ['listening', 'Аудирование', '🎧', 'Тесты как на экзамене и диктант'], ['reading', 'Чтение', '📖', 'Тексты и вопросы формата IELTS'], ['res', 'Ресурсы', '📚', 'Материалы для подготовки'], ['set', 'Настройки', '⚙️', 'Профиль, цель и аккаунт']];
+  const MORE = [['progress', 'Прогресс', '📈', 'Пробные экзамены и выполнение плана'], ['writing', 'Письменная часть', '✍️', 'Эссе, графики и письма'], ['listening', 'Аудирование', '🎧', 'Тесты как на экзамене'], ['reading', 'Чтение', '📖', 'Тексты и вопросы формата IELTS'], ['res', 'Ресурсы', '📚', 'Материалы для подготовки'], ['set', 'Настройки', '⚙️', 'Профиль, цель и аккаунт']];
   const MORE_ALIAS = { write: 'writing', read: 'reading', listen: 'listening', dictation: 'listening' };
   function renderTabs(tab0) {
     let tab = tab0;
@@ -1325,6 +1325,7 @@
       const [c, r, d, rd, wr, ls] = await Promise.all([J('data/content.json'), J('data/resources.json'), J('data/deck.json'), J('data/reading.json'), J('data/writing.json'), J('data/listening.json').catch(() => LISTEN)]);
       try { LAUDIO = await J('data/listening_audio.json'); } catch (e) { LAUDIO = {}; }
       CONTENT = c; RES = r; DECK = d; DECKIDS = new Set(d.map((x) => x.id)); READ = rd; WRITING = wr; LISTEN = ls;
+      { const full = (ls.tests || []).filter((t) => t.parts.every((x) => LAUDIO[t.id + '/' + x.n])); if (full.length) LISTEN = Object.assign({}, ls, { tests: full }); } // тест показываем, только когда у всех его частей есть живая озвучка
     } catch (e) { $('#view').textContent = 'Не удалось загрузить данные: ' + e.message; return; }
     window.addEventListener('hashchange', () => route());
     if (!Cloud.available()) { $('#view').textContent = 'Не загрузилась библиотека входа. Обнови страницу.'; return; }
