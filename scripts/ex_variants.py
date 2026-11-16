@@ -58,6 +58,13 @@ def check():
         if bad: json.dump(bad, open(GEN + '/bad/' + name, 'w'), ensure_ascii=False, indent=1)
         elif os.path.exists(GEN + '/bad/' + name): os.remove(GEN + '/bad/' + name)
     print('карточек', tot, 'годных', good, 'брак', tot - good)
+    rules_check()
+def rules_check():
+    import subprocess
+    js = "const R=require('%s');const a=JSON.parse(require('fs').readFileSync(0,'utf8'));for(const [i,s] of a){R.check(s.replace(/\\[\\[|\\]\\]/g,'')).forEach(m=>console.log(i+'\\t'+m.rule.id+'\\t'+s))}" % os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app', 'js', 'rules.js'))
+    items = [(i, g['en']) for f in glob.glob(GEN + '/ok/b*.json') for i, got in json.load(open(f)).items() for g in got]
+    r = subprocess.run(['node', '-e', js], input=json.dumps(items), capture_output=True, text=True)
+    if r.stdout.strip(): print('ПРАВИЛА грамматики сработали (перепиши эти предложения):\n' + r.stdout)
 def merge():
     d = load(); byid = {c['id']: c for c in d}; n = 0
     for f in glob.glob(GEN + '/ok/b*.json'):
