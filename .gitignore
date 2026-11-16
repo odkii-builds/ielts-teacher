@@ -3,3 +3,5 @@ __pycache__/
 *.zip
 ielts-teacher-*.json
 .audio-cache/
+scripts/audio-kit.html
+scripts/audio-in/

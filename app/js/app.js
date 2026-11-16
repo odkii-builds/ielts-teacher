@@ -1010,7 +1010,9 @@
     setTimeout(next, 80);
   }
   const LPART = [['Бытовой разговор', 'Заполни форму: имена, числа, адреса'], ['Монолог и план', 'Выбери ответ и подпиши план здания'], ['Обсуждение', 'Студенты и преподаватель: мнения и задачи'], ['Лекция', 'Академическая лекция, заметки с пропусками']];
+  const newSeen = (k) => { try { return !!localStorage.getItem('ielts_new_' + k); } catch (e) { return true; } };
   function viewListening() {
+    try { localStorage.setItem('ielts_new_listen', '1'); } catch (e) { /* ignore */ }
     const p = P(); const best = (k) => { const rs = (p.listens || []).filter((r) => r.id === k); return rs.length ? rs.reduce((x, r) => (r.raw > x.raw ? r : x)) : null; };
     const row = (href, title, desc, tail) => '<a class="rowi" href="' + href + '"><div class="grow"><b>' + esc(title) + '</b><div class="mut" style="margin-top:2px">' + esc(desc) + '</div></div>' + (tail ? '<span class="mut">' + esc(tail) + '</span>' : '') + ico('chev', 'chev') + '</a>';
     let h = head('Аудирование', 'Как на экзамене: 4 части, 40 вопросов, запись звучит один раз');
@@ -1281,7 +1283,7 @@
     const t = $('#tabs'); t.hidden = false;
     tab = MORE_ALIAS[tab] || (tab === 'fix' ? 'errors' : tab === 'vw' ? 'cards' : tab === 't2' ? 'writing' : tab); const inMore = MORE.some((m) => m[0] === tab);
     t.innerHTML = TABS.map(([k, n]) => '<a href="#' + k + '" class="' + (k === tab ? 'on' : '') + '">' + ico(k) + n + '</a>').join('') + '<button id="tmore" class="' + (inMore ? 'on' : '') + '">' + ico('more') + (inMore ? MORE.find((m) => m[0] === tab)[1] : 'Ещё') + '</button>';
-    $('#tmore').onclick = () => openSheet('<div class="stack" style="padding-top:4px">' + MORE.map(([k, n, ic, d]) => '<a class="card mode" href="#' + k + '"><span class="mic">' + ic + '</span><span class="grow"><b>' + n + '</b><span class="mut">' + d + '</span></span></a>').join('') + '</div>', (el) => { el.querySelectorAll('a').forEach((a) => { a.onclick = () => closeSheet(); }); });
+    $('#tmore').onclick = () => openSheet('<div class="stack" style="padding-top:4px">' + MORE.map(([k, n, ic, d]) => '<a class="card mode" href="#' + k + '"><span class="mic">' + ic + '</span><span class="grow"><b>' + n + (k === 'listening' && !newSeen('listen') ? '<span class="nwi">Новое</span>' : '') + '</b><span class="mut">' + d + '</span></span></a>').join('') + '</div>', (el) => { el.querySelectorAll('a').forEach((a) => { a.onclick = () => closeSheet(); }); });
   }
   function route(animate) {
     if (!user) return viewAuth();
