@@ -353,3 +353,15 @@ test('drillQueue: раунды обходят все слова, выученн�
   const next = E.drillQueue(cards, t, 12, null, 'gap'); // все уже сегодня: очередь не пустеет
   assert.equal(next.length, 12);
 });
+
+test('перевод примера всегда соответствует показанному примеру (exOf/exTr)', () => {
+  const deck = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '../app/data/deck.json'), 'utf8'));
+  for (const c of deck) {
+    if (c.ex2r) assert.strictEqual(c.ex2r.length, (c.ex2 || []).length, c.t);
+    for (let rv = 0; rv < 4; rv++) {
+      const k = Object.assign({}, c, { rv });
+      const tr = E.exTr(k);
+      if (tr) assert.ok(E.exIdx(k) === 0 ? tr === c.exr : tr === c.ex2r[E.exIdx(k) - 1], c.t);
+    }
+  }
+});
