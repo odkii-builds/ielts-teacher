@@ -568,15 +568,15 @@
       return;
     }
     if (it.type === 'order') {
-      if (!it.o) { it.o = E.orderChunks(c); it.pl = []; }
+      if (!it.o) { it.o = E.orderChunks(c); it.pl = []; it.ex = E.exOf(c); it.exr = E.exTr(c); }
       if (!it.o) { d.i += 1; drawDrill(); return; }
       const o = it.o, n = o.blocks.length, answered = it.res != null;
       const line = it.pl.map((i) => '<button class="opt' + (answered ? (it.res === 'ok' ? ' ok' : ' bad') : '') + '" data-r="' + i + '"' + (answered ? ' disabled' : '') + '>' + esc(o.blocks[i]) + '</button>').join('');
       const pool = o.blocks.map((b, i) => '<button class="opt" data-a="' + i + '"' + (it.pl.includes(i) || answered ? ' style="visibility:hidden" disabled' : '') + '>' + esc(b) + '</button>').join('');
-      const hint = String(c.exr || '').replace(/\[\[|\]\]/g, '') || c.ru;
+      const hint = String(it.exr || '').replace(/\[\[|\]\]/g, '') || c.ru;
       body.innerHTML = '<div class="drill' + ent + '">' + dtop + dh('Собери предложение') + '<div class="flash" style="min-height:0;padding:16px 18px"><div style="font-size:16px;color:var(--mut)">' + esc(hint) + '</div></div>' +
         '<div class="blkline">' + (line || '<span class="mut">Нажимай на блоки по порядку</span>') + '</div><div class="blks">' + pool + '</div>' +
-        (answered ? '<div class="flash back" style="min-height:0;padding:14px 16px;font-size:17px"><div>' + hl(E.exOf(c)) + '</div></div><div style="margin-top:10px"><button class="btn p" id="dr_next">Дальше</button></div>'
+        (answered ? '<div class="flash back" style="min-height:0;padding:14px 16px;font-size:17px"><div>' + hl(it.ex) + '</div></div><div style="margin-top:10px"><button class="btn p" id="dr_next">Дальше</button></div>'
           : '<div style="margin-top:12px">' + (it.pl.length === n ? '<button class="btn p" id="dr_ok">Проверить</button>' : '') + (it.pl.length ? '<div style="text-align:center;margin-top:8px"><button class="link" id="dr_rs">Сбросить</button></div>' : '') + '</div>') + '</div>';
       bindX();
       $$('.blks .opt').forEach((b) => { b.onclick = () => { it.pl.push(+b.dataset.a); drawDrill(); }; });
