@@ -1,7 +1,7 @@
 /* Экраны: набор в клуб, слова из Reading в карточки, диагностика слов. */
 (function () {
   'use strict';
-  const N = window.Next = { views: {}, more: [['diag', 'Диагностика слов']], after: function () {}, };
+  const N = window.Next = { views: {}, more: [['diag', 'Диагностика слов', '🔍', 'Какие слова ты знаешь на самом деле']], after: function () {}, };
 
   const C = () => window.Ctx;
   const esc = (s) => C().esc(s);

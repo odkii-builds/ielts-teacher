@@ -175,3 +175,4 @@ mark.hl{background:rgba(250,204,21,.38);color:inherit;border-radius:4px;padding:
 a.mode{text-decoration:none;color:inherit}.mode .grow{flex:1;min-width:0}.mode .chip{flex:none}
 .plan{width:100%;height:auto;display:block}.plan .pf{fill:var(--s2);stroke:var(--line)}.plan .pc{fill:none;stroke:var(--line);stroke-dasharray:4 4}.plan .ps{fill:var(--s);stroke:var(--acc);stroke-width:1.5}.plan text{fill:var(--fg);font:600 12px -apple-system,system-ui,sans-serif;text-anchor:middle;dominant-baseline:middle}.plan .pl{font-size:20px;fill:var(--acc);font-weight:700}.plan .pt{fill:var(--mut);font-weight:500}
 details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-marker{display:none}
+.lset{margin:0 0 4px}.lset>summary{font-size:13px;padding:2px 0}
