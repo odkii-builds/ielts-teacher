@@ -464,7 +464,6 @@
     const tips = [];
     if (!used) tips.push('используй «' + c.t + '» в предложении');
     if (words.length < 5) tips.push('сделай предложение подробнее (минимум 5 слов)');
-    if (txt && !/[.!?]$/.test(txt)) tips.push('поставь точку в конце');
     const issues = Rules ? Rules.check(txt) : [];
     return { used, words: words.length, ok: used && tips.length === 0 && issues.length === 0, tips, issues };
   }

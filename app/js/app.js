@@ -355,12 +355,12 @@
   });
   // ---------- Проверка ошибок в своих предложениях (LanguageTool) ----------
   const LT_CAT = { TYPOS: 'Опечатка', GRAMMAR: 'Грамматика', COLLOCATIONS: 'Сочетание слов', CONFUSED_WORDS: 'Путаница слов', PUNCTUATION: 'Пунктуация', CASING: 'Регистр', STYLE: 'Стиль', REDUNDANCY: 'Лишнее', SEMANTICS: 'Смысл', TYPOGRAPHY: 'Оформление', MISC: 'Ошибка' };
-  async function ltCheck(text) {
-    try { const r = await fetch('https://api.languagetool.org/v2/check', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'language=en-GB&text=' + encodeURIComponent(text) }); if (!r.ok) return null; return (await r.json()).matches || []; } catch (e) { return null; }
+  async function ltCheck(text, retry) {
+    try { const r = await fetch('https://api.languagetool.org/v2/check', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'language=en-GB&text=' + encodeURIComponent(text) }); if (!r.ok) throw new Error('http ' + r.status); return (await r.json()).matches || []; } catch (e) { if (retry === false) return null; await new Promise((ok) => setTimeout(ok, 1500)); return ltCheck(text, false); }
   }
   function ltHtml(text, ms) {
     if (ms === undefined) return '<div class="mut" style="margin-top:8px">Проверяю ошибки…</div>';
-    if (ms === null) return '<div class="mut" style="margin-top:8px">Проверка ошибок недоступна (нет сети)</div>';
+    if (ms === null) return '<div class="mut" style="margin-top:8px">Проверка ошибок сейчас недоступна — сервис не ответил</div>';
     if (!ms.length) return '<div style="margin-top:8px;color:var(--ok);font-weight:600">Ошибок по правилам не найдено ✓</div>';
     let out = '', pos = 0; ms.slice().sort((a, b) => a.offset - b.offset).forEach((m) => { if (m.offset < pos) return; out += esc(text.slice(pos, m.offset)) + '<u class="err">' + esc(text.slice(m.offset, m.offset + m.length)) + '</u>'; pos = m.offset + m.length; }); out += esc(text.slice(pos));
     return '<div style="margin-top:8px;font-weight:600;color:var(--warn)">Найдено: ' + ms.length + '</div><div style="font-size:16px;margin:4px 0;line-height:1.6">' + out + '</div><ul style="margin:6px 0 0;padding-left:18px">' + ms.map((m) => {
@@ -496,7 +496,7 @@
       if (cst.step === 'q') h += '<textarea id="mys" style="margin-top:12px;min-height:90px" placeholder="Предложение со словом «' + esc(c.t) + '»" spellcheck="false" autocapitalize="sentences"></textarea><div style="margin-top:12px"><button class="btn p" id="chk">Проверить</button></div>';
       else {
         const r = cst.res; h += '<div class="card" style="margin-top:12px"><div class="mut">Твоё предложение:</div><div style="font-size:16px;margin:2px 0 10px">' + esc(cst.mine || '') + '</div><div style="font-weight:600;color:var(--' + (r.ok ? 'ok' : 'warn') + ')">' + (r.ok ? 'Хорошее предложение' : 'Можно лучше') + '</div>' + (r.tips.length ? '<ul class="mut" style="margin:6px 0 0;padding-left:18px">' + r.tips.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '') +
-          ltHtml(cst.mine || '', cst.lt) + '<div class="mut" style="margin-top:10px">Примеры в контексте:</div>' + E.exAll(c).concat(E.contexts(c, p.cards, 3)).map((x) => '<div class="exm" style="font-size:15px;margin-top:4px">' + hl(x) + '</div>').join('') + trLine(c) + '</div>' + rateRow() + mst;
+          ltHtml(cst.mine || '', cst.lt) + '<div class="mut" style="margin-top:10px">Примеры в контексте:</div>' + E.exAll(c).concat(E.contexts(c, p.cards, 3)).map((x) => '<div class="exm" style="font-size:15px;margin-top:4px">' + hl(x) + '</div>').join('') + '</div>' + rateRow() + mst;
       }
     }
     body.innerHTML = h + '</div>';
