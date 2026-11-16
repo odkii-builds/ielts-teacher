@@ -1055,7 +1055,7 @@
           return '<div class="rowi" style="display:block"><div><b>' + it.n + '.</b> ' + esc(it.q) + '</div>' + qInput(g, it, ans, done) + fb + '</div>';
         }).join('') + '</div>';
       });
-      if (done) h += '<details class="card" style="margin-top:12px"><summary><b>Скрипт</b> <span class="mut">— нажми на слово, чтобы увидеть перевод</span></summary><div class="stack" style="margin-top:10px">' + pt.script.map((l) => '<p style="margin:0">' + tapW(l[1]) + '</p>').join('') + '</div></details>';
+      if (done) h += '<details class="card" style="margin-top:12px"><summary><b>Скрипт</b> <span class="mut">— нажми на слово, чтобы увидеть перевод</span></summary><div class="stack" style="margin-top:10px">' + pt.script.filter((l) => l[0] !== '_').map((l) => '<p style="margin:0">' + tapW(String(l[1])) + '</p>').join('') + '</div></details>';
     });
     if (done) {
       const raw = items.filter(ok).length; const full = !pn;
