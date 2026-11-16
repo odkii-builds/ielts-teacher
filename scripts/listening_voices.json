@@ -1,0 +1,19 @@
+{
+  "_help": "Впиши id голосов из своей библиотеки ElevenLabs (раздел Voices, значок копирования id). Ключ вида «Акцент-пол»: f — женский, m — мужской. Нужны чистые, нейтральные, спокойные голоса без эмоций. Дикторов-«Narrator» берём British-f. Если акцента нет, поставь любой близкий, но тогда обнови acc в scripts, а не молча подменяй.",
+  "model": "eleven_multilingual_v2",
+  "stability": 0.55,
+  "similarity_boost": 0.75,
+  "speed": { "default": 1.0, "narrator": 0.95 },
+  "voices": {
+    "British-f": "",
+    "British-m": "",
+    "Australian-f": "",
+    "Australian-m": "",
+    "Canadian-f": "",
+    "Canadian-m": "",
+    "American-f": "",
+    "American-m": "",
+    "New Zealand-f": "",
+    "New Zealand-m": ""
+  }
+}

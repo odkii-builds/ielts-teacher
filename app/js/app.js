@@ -31,6 +31,7 @@
     right: '<path d="M9 5l7 7-7 7"/>',
     chev: '<path d="M9 5l7 7-7 7"/>',
     check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    gear: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
   };
   const ico = (n, cls) => '<svg class="i ' + (cls || '') + '" viewBox="0 0 24 24" aria-hidden="true">' + IC[n] + '</svg>';
 
@@ -980,11 +981,11 @@
   }
 
   // ---------- Аудирование ----------
-  let LISTEN = { tests: [], note: '' };
+  let LISTEN = { tests: [], note: '' }; let LAUDIO = {};
   const LS = { key: '', ans: {}, done: false, exam: true, rate: 1, played: {}, playing: 0, painted: false };
   const tts = { run: 0 };
   const speechOk = () => typeof speechSynthesis !== 'undefined' && typeof SpeechSynthesisUtterance !== 'undefined';
-  function stopSpeech() { tts.run++; LS.playing = 0; if (speechOk()) { try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } } }
+  function stopSpeech() { tts.run++; LS.playing = 0; if (LS.audio) { try { LS.audio.pause(); } catch (e) { /* ignore */ } LS.audio = null; } if (speechOk()) { try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } } }
   function enVoices() {
     if (!speechOk()) return [];
     const vs = speechSynthesis.getVoices().filter((v) => /^en/i.test(v.lang));
@@ -992,7 +993,7 @@
   }
   /** Читает реплики по очереди: у каждого говорящего свой голос (или своя высота тона). */
   function speakLines(lines, rate, onLine, onEnd) {
-    stopSpeech(); const run = tts.run; const spk = {}; const vs = enVoices(); let i = 0;
+    stopSpeech(); lines = lines.filter((l) => l[0] !== '_'); const run = tts.run; const spk = {}; const vs = enVoices(); let i = 0;
     const next = () => {
       if (run !== tts.run) return;
       if (i >= lines.length) { if (onEnd) onEnd(); return; }
@@ -1008,24 +1009,22 @@
     };
     setTimeout(next, 80);
   }
-  function bigList(items) {
-    return '<div class="stack">' + items.map((x) => '<a class="card mode" href="' + x[0] + '"><span class="mic">' + x[1] + '</span><span class="grow"><b>' + esc(x[2]) + '</b><span class="mut">' + esc(x[3]) + '</span></span>' + (x[4] ? '<span class="chip on">' + esc(x[4]) + '</span>' : '') + '</a>').join('') + '</div>';
-  }
-  const LPART = [['☎️', 'Бытовой разговор', 'Заполни форму: имена, числа, адреса'], ['🗺️', 'Монолог и план', 'Выбери ответ и подпиши план здания'], ['🎓', 'Обсуждение', 'Студенты и преподаватель: мнения и задачи'], ['🧑‍🏫', 'Лекция', 'Академическая лекция, заметки с пропусками']];
+  const LPART = [['Бытовой разговор', 'Заполни форму: имена, числа, адреса'], ['Монолог и план', 'Выбери ответ и подпиши план здания'], ['Обсуждение', 'Студенты и преподаватель: мнения и задачи'], ['Лекция', 'Академическая лекция, заметки с пропусками']];
   function viewListening() {
-    const p = P(); const best = (k) => { const rs = (p.listens || []).filter((r) => r.id === k); return rs.length ? rs.reduce((a, r) => (r.raw > a.raw ? r : a)) : null; };
+    const p = P(); const best = (k) => { const rs = (p.listens || []).filter((r) => r.id === k); return rs.length ? rs.reduce((x, r) => (r.raw > x.raw ? r : x)) : null; };
+    const row = (href, title, desc, tail) => '<a class="rowi" href="' + href + '"><div class="grow"><b>' + esc(title) + '</b><div class="mut" style="margin-top:2px">' + esc(desc) + '</div></div>' + (tail ? '<span class="mut">' + esc(tail) + '</span>' : '') + ico('chev', 'chev') + '</a>';
     let h = head('Аудирование', 'Как на экзамене: 4 части, 40 вопросов, запись звучит один раз');
-    h += '<h3 style="margin-top:0">Полный тест</h3>' + bigList(LISTEN.tests.map((t) => { const b = best(t.id + '/all'); return ['#listen/' + t.id, '🎧', t.title, t.topic + ' · 40 вопросов', b ? b.raw + '/' + b.total : '']; }));
+    h += LISTEN.tests.map((t) => { const b = best(t.id + '/all'); return '<div class="list cta">' + row('#listen/' + t.id, 'Полный тест · ' + t.title, '4 части · 40 вопросов · как на экзамене', b ? b.raw + '/' + b.total : '') + '</div>'; }).join('<div style="height:10px"></div>');
     const t0 = LISTEN.tests[0];
-    if (t0) h += '<h3>Одна часть</h3>' + bigList(t0.parts.map((pt, i) => { const b = best(t0.id + '/' + pt.n); return ['#listen/' + t0.id + '/' + pt.n, LPART[i][0], 'Part ' + pt.n + ' · ' + LPART[i][1], LPART[i][2], b ? b.raw + '/' + b.total : '']; }));
-    h += '<h3>Тренировка слуха</h3>' + bigList([['#dictation', '✍️', 'Диктант', 'Слушай предложения из своих карточек и пиши']]);
-    h += '<h3>Как устроен экзамен</h3><div class="card stack"><div><b>30 минут</b> записи и ещё 10 минут на перенос ответов (на бумаге).</div><div><b>4 части по 10 вопросов</b>: разговор, монолог, обсуждение, лекция — от простого к сложному.</div><div>Запись звучит <b>один раз</b>, ответы пишешь по ходу.</div><div>Считаются <b>орфография</b> и лимит слов: «two» и «2» засчитываются, «teh» — нет.</div></div>';
+    if (t0) h += '<h3>Отдельные части</h3><div class="list">' + t0.parts.map((pt, i) => { const b = best(t0.id + '/' + pt.n); return row('#listen/' + t0.id + '/' + pt.n, 'Part ' + pt.n + ' · ' + LPART[i][0], LPART[i][1], b ? b.raw + '/' + b.total : ''); }).join('') + '</div>';
+    h += '<h3>Тренировка слуха</h3><div class="list">' + row('#dictation', 'Диктант', 'Слушай предложения из своих карточек и пиши') + '</div>';
+    h += '<h3>Как устроен экзамен</h3><div class="card stack"><div><b>30 минут</b> записи и ещё 10 минут на перенос ответов (на бумаге).</div><div><b>4 части по 10 вопросов</b>: разговор, монолог, обсуждение, лекция — от простого к сложному.</div><div>Запись звучит <b>один раз</b>. Перед каждой частью — 30 секунд на вопросы, после — 30 секунд на проверку.</div><div>Считаются <b>орфография</b> и лимит слов: «two» и «2» засчитываются, «teh» — нет.</div></div>';
     h += '<p class="mut" style="margin-top:14px">' + esc(LISTEN.note) + ' Реальные тесты — в Cambridge IELTS и на ielts.org.</p>';
     paint(h);
   }
   function planSvg(pl) {
-    const tx = (o, t, c) => '<text class="' + c + '" x="' + (o.x + o.w / 2) + '" y="' + (o.y + o.h / 2) + '">' + esc(t) + '</text>';
-    let s = '<svg class="plan" viewBox="0 0 ' + pl.w + ' ' + pl.h + '" role="img" aria-label="План здания">';
+    const tx = (o, t, c) => '<text class="' + c + '" x="' + (o.x + o.w / 2) + '" y="' + (o.y + o.h / 2) + '" dy=".35em">' + esc(t) + '</text>';
+    let s = '<svg class="plan" viewBox="0 0 ' + pl.w + ' ' + pl.h + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="План здания">';
     pl.fixed.forEach((o) => { s += '<rect class="' + (o.corridor ? 'pc' : 'pf') + '" x="' + o.x + '" y="' + o.y + '" width="' + o.w + '" height="' + o.h + '" rx="6"/>' + (o.t ? tx(o, o.t, 'pt') : ''); });
     pl.spots.forEach((o) => { s += '<rect class="ps" x="' + o.x + '" y="' + o.y + '" width="' + o.w + '" height="' + o.h + '" rx="6"/>' + tx(o, o.l, 'pl'); });
     if (pl.entrance) { const e = pl.entrance; s += '<text class="pt" x="' + (e.x + e.w / 2) + '" y="' + (pl.h - 5) + '">▲ ' + esc(e.t) + '</text>'; }
@@ -1041,14 +1040,14 @@
     const items = []; parts.forEach((pt) => pt.groups.forEach((g) => g.items.forEach((it) => items.push(Object.assign({ type: g.type, plan: !!g.plan }, it)))));
     const ok = (it) => E.checkAnswer(it, ans[it.n]);
     let h = head(pn ? parts[0].title : t.title, esc(pn ? parts[0].kind : t.topic), back('#listening'));
-    h += '<details class="lset"><summary class="mut">Настройки записи</summary><div class="card stack" style="margin-top:8px"><div class="seg" id="lmode"><button type="button" data-v="1" class="' + (LS.exam ? 'on' : '') + '">Один раз</button><button type="button" data-v="0" class="' + (LS.exam ? '' : 'on') + '">Можно повторять</button></div><div class="seg" id="lrate">' + [[0.85, 'Медленнее'], [1, 'Обычно'], [1.15, 'Быстрее']].map((r) => '<button type="button" data-v="' + r[0] + '" class="' + (LS.rate === r[0] ? 'on' : '') + '">' + r[1] + '</button>').join('') + '</div></div></details>';
     if (!speechOk()) h += '<div class="card" style="margin-top:12px">На этом устройстве нет озвучки. Открой приложение в Safari или Chrome — или читай скрипт после сдачи ответов.</div>';
     parts.forEach((pt) => {
-      h += '<h3>' + esc(pt.title) + '</h3><div class="card stack"><p class="mut" style="margin:0">' + esc(pt.intro) + '</p><button class="btn p" data-lp="' + pt.n + '"></button><div class="mut" data-ls="' + pt.n + '"></div></div>';
+      h += '<h3>' + esc(pt.title) + '</h3><div class="card stack"><p class="mut" style="margin:0">' + esc(pt.intro) + '</p><div class="lrow"><button class="btn p" data-lp="' + pt.n + '"></button><button class="btn lgear" type="button" data-gear aria-label="Настройки записи">' + ico('gear') + '</button></div><div class="lbar"><i data-lb="' + pt.n + '"></i></div><div class="mut" data-ls="' + pt.n + '"></div></div>';
       pt.groups.forEach((g) => {
         h += '<h3 style="margin-top:18px">' + esc(g.title) + '</h3><p class="mut" style="margin:-4px 0 10px">' + esc(g.instr) + '</p>';
         if (g.plan) h += '<div class="card">' + planSvg(g.plan) + '</div><div style="height:10px"></div>';
         else if (g.type === 'mi') h += '<div class="card mut" style="margin-bottom:10px">' + g.options.map((o) => '<div><b>' + esc(o[0]) + '</b>&nbsp; ' + esc(o[1]) + '</div>').join('') + '</div>';
+        if (g.example) h += '<div class="card" style="margin-bottom:10px"><b>Example</b>&nbsp; ' + esc(g.example.q.replace('________', '')) + '<u>' + esc(g.example.a) + '</u></div>';
         h += '<div class="list">' + g.items.map((it) => {
           const fb = done ? '<div class="mut" style="margin-top:8px;color:var(--' + (ok(it) ? 'ok' : 'warn') + ')">' + (ok(it) ? '✓ Верно' : '✗ Верный ответ: <b>' + esc(Array.isArray(it.a) ? it.a[0] : it.a) + '</b>') + ' — ' + esc(it.why) + '</div>' : '';
           return '<div class="rowi" style="display:block"><div><b>' + it.n + '.</b> ' + esc(it.q) + '</div>' + qInput(g, it, ans, done) + fb + '</div>';
@@ -1076,13 +1075,29 @@
         const n = +b.dataset.lp; const pt = parts.find((x) => x.n === n);
         if (LS.playing === n) { stopSpeech(); LS.played[n] = true; refresh(); return; }
         LS.playing = n; refresh();
-        const st = $('[data-ls="' + n + '"]');
-        speakLines(pt.script, LS.rate, (i) => { if (st) st.textContent = 'Реплика ' + (i + 1) + ' из ' + pt.script.length; }, () => { LS.playing = 0; LS.played[n] = true; refresh(); });
-        LS.playing = n; // speakLines сбрасывает флаг через stopSpeech
+        const st = $('[data-ls="' + n + '"]'); const bar = $('[data-lb="' + n + '"]');
+        const src = LAUDIO[id + '/' + n];
+        const end = () => { LS.playing = 0; LS.audio = null; LS.played[n] = true; if (bar) bar.style.width = '0'; refresh(); };
+        if (src) {
+          stopSpeech(); const au = new Audio(src); au.playbackRate = LS.rate; au.preservesPitch = true; LS.audio = au; LS.playing = n; refresh();
+          const mm = (x) => Math.floor(x / 60) + ':' + String(Math.floor(x % 60)).padStart(2, '0');
+          au.ontimeupdate = () => { if (au.duration) { if (bar) bar.style.width = (100 * au.currentTime / au.duration) + '%'; if (st) st.textContent = mm(au.currentTime) + ' / ' + mm(au.duration); } };
+          au.onended = end;
+          au.onerror = () => { LS.audio = null; LS.playing = 0; refresh(); if (st) st.textContent = 'Не удалось загрузить запись. Проверь интернет и нажми ещё раз.'; };
+          au.play().catch(() => { LS.audio = null; LS.playing = 0; refresh(); if (st) st.textContent = 'Браузер не дал включить звук. Нажми ещё раз.'; });
+        } else {
+          speakLines(pt.script, LS.rate, (i) => { if (st) st.textContent = 'Реплика ' + (i + 1) + ' из ' + pt.script.length; }, end);
+          LS.playing = n; // speakLines сбрасывает флаг через stopSpeech
+        }
       };
     });
-    bindSeg('lmode', (v) => { LS.exam = v === '1'; refresh(); });
-    bindSeg('lrate', (v) => { LS.rate = parseFloat(v); });
+    $$('[data-gear]').forEach((b) => {
+      b.onclick = () => openSheet('<h3 style="margin:4px 0 14px">Настройки записи</h3><div class="stack"><div><div class="mut" style="margin-bottom:6px">Прослушивание</div><div class="seg" id="lmode"><button type="button" data-v="1" class="' + (LS.exam ? 'on' : '') + '">Один раз</button><button type="button" data-v="0" class="' + (LS.exam ? '' : 'on') + '">Можно повторять</button></div></div><div><div class="mut" style="margin-bottom:6px">Скорость</div><div class="seg" id="lrate">' + [[0.85, 'Медленнее'], [1, 'Обычно'], [1.15, 'Быстрее']].map((r) => '<button type="button" data-v="' + r[0] + '" class="' + (LS.rate === r[0] ? 'on' : '') + '">' + r[1] + '</button>').join('') + '</div></div><button class="btn p" type="button" id="lok">Готово</button></div>', () => {
+        bindSeg('lmode', (v) => { LS.exam = v === '1'; refresh(); });
+        bindSeg('lrate', (v) => { LS.rate = parseFloat(v); if (LS.audio) LS.audio.playbackRate = LS.rate; });
+        $('#lok').onclick = () => closeSheet();
+      });
+    });
     const sub = $('#lsub'); if (sub) sub.onclick = () => {
       const un = items.filter((it) => !String(ans[it.n] || '').trim()).length;
       const fin = () => {
@@ -1306,6 +1321,7 @@
     try {
       const J = (u) => fetch(u).then((x) => x.json());
       const [c, r, d, rd, wr, ls] = await Promise.all([J('data/content.json'), J('data/resources.json'), J('data/deck.json'), J('data/reading.json'), J('data/writing.json'), J('data/listening.json').catch(() => LISTEN)]);
+      try { LAUDIO = await J('data/listening_audio.json'); } catch (e) { LAUDIO = {}; }
       CONTENT = c; RES = r; DECK = d; DECKIDS = new Set(d.map((x) => x.id)); READ = rd; WRITING = wr; LISTEN = ls;
     } catch (e) { $('#view').textContent = 'Не удалось загрузить данные: ' + e.message; return; }
     window.addEventListener('hashchange', () => route());
