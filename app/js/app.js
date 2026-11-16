@@ -381,7 +381,7 @@
     const out = { active: DB.active, profiles: {} };
     Object.keys(DB.profiles).forEach((k) => {
       const p = DB.profiles[k]; const q = Object.assign({}, p);
-      q.cards = p.cards.filter((c) => !DECKIDS.has(c.id) || c.seen).map((c) => {
+      q.cards = p.cards.filter((c) => !DECKIDS.has(c.id) || c.seen || c.fav).map((c) => {
         if (!DECKIDS.has(c.id)) return c;
         const o = {}; Object.keys(c).forEach((key) => { if (!STATIC.includes(key)) o[key] = c[key]; }); return o;
       });
@@ -475,7 +475,7 @@
     if (cst.cur !== id) { cst.cur = id; cst.step = 'q'; cst.pick = null; cst.hint = false; cst.mq = E.isWord(c) && !c.mastered && E.lrMode(c) === 'mcq' ? E.mcq(c, p.cards) : null; }
     const word = E.isWord(c); const review = !!c.mastered; const mode = review ? 'flip' : E.lrMode(c);
     const gl = E.GROUP_LABEL[E.group(c)];
-    const lvl = grpBar(p) + '<div class="mut" style="text-align:center;margin-bottom:8px"><span class="chip on">' + esc(gl) + '</span> ' + (review ? 'Повторение выученного' : 'Уровень ' + (c.lv || 0) + ' из 5') + '</div>';
+    const lvl = grpBar(p) + '<div class="mut" style="text-align:center;margin-bottom:8px"><span class="chip on">' + esc(gl) + '</span> ' + (review ? 'Повторение выученного' : 'Уровень ' + (c.lv || 0) + ' из 5') + (word ? ' <button class="link favb" id="favb" aria-label="Избранное" aria-pressed="' + (c.fav ? 'true' : 'false') + '">' + (c.fav ? '★' : '☆') + '</button>' : '') + '</div>';
     const how = (t) => '<p class="mut" style="text-align:center;margin:0 0 10px;font-size:14px">' + t + '</p>';
     const mst = review ? '' : '<div style="text-align:center;margin-top:6px"><button class="link" id="mst">Выучил — больше не заучивать</button></div>';
     let h = '<div class="enter">' + lvl;
@@ -511,6 +511,7 @@
       cst.res = E.checkSentence(c, s); cst.mine = s; cst.lt = cst.res.issues.length ? cst.res.issues.slice() : undefined; c.my = (c.my || []).concat([s]).slice(-3); save(); cst.step = 'a'; drawLearn();
       ltCheck(s).then((ms) => { if (cst.mine === s && cst.step === 'a') { const own = (cst.res.issues || []).filter((x) => !(ms || []).some((m) => m.offset < x.offset + x.length && x.offset < m.offset + m.length)); cst.lt = ms === null && !own.length ? null : (ms || []).concat(own); drawLearn(); } });
     };
+    const fb = $('#favb'); if (fb) fb.onclick = () => { c.fav = !c.fav; if (!c.fav) delete c.fav; save(); fb.textContent = c.fav ? '★' : '☆'; fb.setAttribute('aria-pressed', c.fav ? 'true' : 'false'); toast(c.fav ? 'Добавлено в избранное' : 'Убрано из избранного'); };
     const m = $('#mst'); if (m) m.onclick = () => { if (!c.seen) p.newToday.n += 1; E.master(c, today()); sess.last = c.id; save(); cst.cur = null; toast('Выучено — повторю через 3 дня'); refill(p); drawCards(); };
   }
   const grpBar = (p) => '<div class="chips" id="gf" style="margin:0 -18px 12px">' + [['main', 'Основное'], ...E.GROUPS, ['all', 'Все']].map(([k, n]) => '<button data-g="' + k + '" class="' + (k === grpOf(p) ? 'on' : '') + '">' + esc(n) + '</button>').join('') + '</div>';
@@ -617,18 +618,19 @@
   function drawDeck() {
     const p = P();
     $('#cbody').innerHTML = '<input id="dq" type="search" placeholder="Поиск по слову или переводу" value="' + esc(deckQ) + '" autocomplete="off"><div class="chips" id="df" style="margin:12px -18px 14px">' +
-      [['all', 'Все'], ['work', 'В работе'], ['done', 'Выучено'], ['new', 'Новые']].map(([k, n]) => '<button data-f="' + k + '" class="' + (k === deckF ? 'on' : '') + '">' + n + '</button>').join('') + '</div><div class="chips" id="dgp" style="margin:-6px -18px 14px">' + [['all', 'Все группы'], ...E.GROUPS].map(([k, n]) => '<button data-g="' + k + '" class="' + (k === deckG ? 'on' : '') + '">' + esc(n) + '</button>').join('') + '</div><div id="dl"></div>';
+      [['all', 'Все'], ['work', 'В работе'], ['done', 'Выучено'], ['new', 'Новые'], ['fav', '★ Избранное']].map(([k, n]) => '<button data-f="' + k + '" class="' + (k === deckF ? 'on' : '') + '">' + n + '</button>').join('') + '</div><div class="chips" id="dgp" style="margin:-6px -18px 14px">' + [['all', 'Все группы'], ...E.GROUPS].map(([k, n]) => '<button data-g="' + k + '" class="' + (k === deckG ? 'on' : '') + '">' + esc(n) + '</button>').join('') + '</div><div id="dl"></div>';
     const draw = () => {
       const q = deckQ.toLowerCase();
-      const list = p.cards.filter((c) => (deckF === 'all' || (deckF === 'done' && c.mastered) || (deckF === 'work' && c.seen && !c.mastered) || (deckF === 'new' && !c.seen)) &&
+      const list = p.cards.filter((c) => (deckF === 'all' || (deckF === 'done' && c.mastered) || (deckF === 'work' && c.seen && !c.mastered) || (deckF === 'new' && !c.seen) || (deckF === 'fav' && c.fav)) &&
         (deckG === 'all' || E.group(c) === deckG) && (!q || ((c.t || c.f || '') + ' ' + (c.ru || c.b || '')).toLowerCase().includes(q)));
-      $('#dl').innerHTML = (list.length ? '<div class="list">' + list.slice(0, 80).map((c) => '<button class="rowi" data-c="' + esc(c.id) + '"><div class="grow"><b>' + esc(c.t || c.f) + '</b><div class="mut" style="margin-top:2px">' + esc(E.GROUP_LABEL[E.group(c)]) + ' · ' + esc(c.ru || String(c.b).slice(0, 60)) + '</div></div><span class="chip' + (c.mastered ? ' on' : '') + '">' + (c.mastered ? 'выучено' : c.seen ? 'ур. ' + (c.lv || 0) : 'новое') + '</span></button>').join('') + '</div>' : '<div class="mut" style="text-align:center">Ничего не найдено</div>') +
+      $('#dl').innerHTML = (list.length ? '<div class="list">' + list.slice(0, 80).map((c) => '<button class="rowi" data-c="' + esc(c.id) + '"><div class="grow"><b>' + (c.fav ? '★ ' : '') + esc(c.t || c.f) + '</b><div class="mut" style="margin-top:2px">' + esc(E.GROUP_LABEL[E.group(c)]) + ' · ' + esc(c.ru || String(c.b).slice(0, 60)) + '</div></div><span class="chip' + (c.mastered ? ' on' : '') + '">' + (c.mastered ? 'выучено' : c.seen ? 'ур. ' + (c.lv || 0) : 'новое') + '</span></button>').join('') + '</div>' : '<div class="mut" style="text-align:center">Ничего не найдено</div>') +
         (list.length > 80 ? '<p class="mut" style="text-align:center">Показаны первые 80 из ' + list.length + ' — уточни поиск</p>' : '');
       $$('[data-c]').forEach((b) => b.onclick = () => {
         const c = p.cards.find((x) => x.id === b.dataset.c);
         openSheet('<h2>' + esc(c.t || c.f) + '</h2>' + (E.isWord(c) ? '<p class="mut">' + (POS[c.pos] || '') + (c.cef ? ' · ' + c.cef : '') + ' · ' + esc(c.ru) + '</p><div class="card exm" style="font-size:16px">' + E.exAll(c).map(hl).join('<br>') + '</div>' : '<div class="card">' + esc(c.b) + '</div>') +
           (c.my && c.my.length ? '<h3>Мои предложения</h3><div class="stack">' + c.my.map((s) => '<div class="card" style="font-size:15px">' + esc(s) + '</div>').join('') + '</div>' : '') +
-          '<div style="margin-top:16px"><button class="btn' + (c.mastered ? '' : ' p') + '" id="dm">' + (c.mastered ? 'Вернуть в заучивание' : 'Отметить выученной') + '</button></div>', () => {
+          '<div style="margin-top:16px"><button class="btn" id="dfav" style="margin-bottom:8px">' + (c.fav ? '★ Убрать из избранного' : '☆ В избранное') + '</button><button class="btn' + (c.mastered ? '' : ' p') + '" id="dm">' + (c.mastered ? 'Вернуть в заучивание' : 'Отметить выученной') + '</button></div>', () => {
+          $('#dfav').onclick = () => { c.fav = !c.fav; if (!c.fav) delete c.fav; save(); closeSheet(); toast(c.fav ? 'Добавлено в избранное' : 'Убрано из избранного'); draw(); };
           $('#dm').onclick = () => { if (c.mastered) E.unmaster(c); else E.master(c, today()); sess = null; save(); closeSheet(); toast(c.mastered ? 'Выучено' : 'Снова в работе'); viewCards(); };
         });
       });
