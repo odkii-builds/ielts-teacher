@@ -337,7 +337,7 @@ test('колода: у карточек с ex2 три разных пример�
   withMore.forEach((c) => {
     const all = [c.ex].concat(c.ex2);
     assert.equal(new Set(all.map((s) => s.toLowerCase())).size, all.length, c.t + ': повтор предложения');
-    all.forEach((s) => assert.equal((s.match(/\[\[[^\[\]]+\]\]/g) || []).length, 1, c.t + ': нужна ровно одна форма [[…]]'));
+    all.forEach((s) => { const n = (s.match(/\[\[[^\[\]]+\]\]/g) || []).length; assert.ok(n === 1 || (n === 2 && /\.\.\./.test(c.t)), c.t + ': число форм [[…]]'); });
   });
 });
 
