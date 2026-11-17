@@ -4,6 +4,7 @@ CREATE TABLE data (id Utf8, d String, upd Uint64, PRIMARY KEY (id));
 -- Права и платные возможности (баланс проверок, Premium, бан)
 CREATE TABLE ent (id Utf8, credits Int64, prem Uint64, ban Uint8, free Int64, day Uint64, dcount Uint64, note Utf8, PRIMARY KEY (id));
 -- Лист ожидания клуба (выполнить один раз)
-CREATE TABLE waitlist (id Utf8, email Utf8, ts Uint64, PRIMARY KEY (id));
+CREATE TABLE waitlist (id Utf8, email Utf8, ts Uint64, tg Utf8, PRIMARY KEY (id));
+-- Если таблица waitlist уже создана без Telegram (выполнить один раз): ALTER TABLE waitlist ADD COLUMN tg Utf8;
 -- Коды подтверждения почты (выполнить один раз)
 CREATE TABLE codes (email Utf8, h Utf8, exp Uint64, n Uint64, last Uint64, PRIMARY KEY (email));

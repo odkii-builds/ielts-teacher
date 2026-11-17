@@ -9,6 +9,7 @@ Mod._load = function (r, ...a) {
 /* Права, платные проверки и админ-действия поверх index.js. Точка входа функции: main.handler */
 const base = require('./index');
 const { fillDays } = require('./stats');
+const { normTg } = require('./tg');
 const { q, verify, getUser, ok, bad, TypedValues, E } = base._;
 
 // ---------- Права и платные возможности (источник истины — сервер) ----------
@@ -50,24 +51,34 @@ module.exports.spend = spend; module.exports.refund = refund;
 const actions = {};
 actions.me = async (b, me) => ok({ ent: view(await getEnt(me.id), me) });
 // Лист ожидания клуба. join=true: встать в очередь (повтор не меняет место); join=false: только статус.
+// tg: ник Telegram «@ник». Для нового участника обязателен; тем, кто уже в очереди, его можно добавить или поменять (join не нужен).
 actions.club_wait = async (b, me) => {
   const I = { $i: TypedValues.utf8(me.id) };
-  const mine = await q('DECLARE $i AS Utf8; SELECT ts FROM waitlist WHERE id = $i;', I);
+  const hasTg = b.tg !== undefined && b.tg !== null && String(b.tg).trim() !== '';
+  const tg = hasTg ? normTg(b.tg) : '';
+  if (hasTg && !tg) throw bad('Telegram нужен в формате @ник: 5–32 символа, латиница, цифры и «_», без пробелов');
+  const mine = await q('DECLARE $i AS Utf8; SELECT ts, tg FROM waitlist WHERE id = $i;', I);
   let ts = mine[0] ? num(mine[0].ts) : 0;
+  let cur = mine[0] && mine[0].tg ? String(mine[0].tg) : '';
   if (!ts && b.join === true) {
+    if (!tg) throw bad('Укажите Telegram в формате @ник, чтобы мы могли написать, когда появятся места');
     ts = Date.now();
-    await q('DECLARE $i AS Utf8; DECLARE $e AS Utf8; DECLARE $t AS Uint64; UPSERT INTO waitlist (id, email, ts) VALUES ($i, $e, $t);', { ...I, $e: TypedValues.utf8(String(me.email || '')), $t: TypedValues.uint64(ts) });
+    await q('DECLARE $i AS Utf8; DECLARE $e AS Utf8; DECLARE $t AS Uint64; DECLARE $g AS Utf8; UPSERT INTO waitlist (id, email, ts, tg) VALUES ($i, $e, $t, $g);', { ...I, $e: TypedValues.utf8(String(me.email || '')), $t: TypedValues.uint64(ts), $g: TypedValues.utf8(tg) });
+    cur = tg;
+  } else if (ts && tg && tg !== cur) {
+    await q('DECLARE $i AS Utf8; DECLARE $g AS Utf8; UPSERT INTO waitlist (id, tg) VALUES ($i, $g);', { ...I, $g: TypedValues.utf8(tg) });
+    cur = tg;
   }
   const total = num((await q('SELECT COUNT(*) AS c FROM waitlist;'))[0].c);
   if (!ts) return ok({ joined: false, total });
   const pos = num((await q('DECLARE $t AS Uint64; SELECT COUNT(*) AS c FROM waitlist WHERE ts <= $t;', { $t: TypedValues.uint64(ts) }))[0].c);
-  return ok({ joined: true, pos, total });
+  return ok({ joined: true, pos, total, tg: cur });
 };
 const needAdmin = (me) => { if (!isAdmin(me)) throw bad('forbidden', 403); };
 actions.club_list = async (b, me) => {
   needAdmin(me);
-  const r = await q('SELECT email, ts FROM waitlist ORDER BY ts LIMIT 1000;');
-  return ok({ list: r.map((x) => ({ email: x.email, ts: num(x.ts) })) });
+  const r = await q('SELECT email, ts, tg FROM waitlist ORDER BY ts LIMIT 1000;');
+  return ok({ list: r.map((x) => ({ email: x.email, tg: x.tg || '', ts: num(x.ts) })) });
 };
 actions.admin_list = async (b, me) => {
   needAdmin(me);

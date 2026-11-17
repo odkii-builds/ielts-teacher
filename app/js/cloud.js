@@ -40,8 +40,9 @@ window.Cloud = (function () {
     onAuth: (fn) => { subs.push(fn); },
     // Права и баланс ИИ-проверок — всегда с сервера (источник истины)
     async me() { return (await call('me', { token: tok() })).ent; },
-    // Лист ожидания клуба: join=true встаёт в очередь (повтор безопасен), join=false только статус
-    async clubWait(join) { return call('club_wait', { token: tok(), join: !!join }); },
+    // Лист ожидания клуба: join=true встаёт в очередь (повтор безопасен), join=false только статус.
+    // tg: ник Telegram «@ник» (при join обязателен; уже записанным его можно добавить или поменять)
+    async clubWait(join, tg) { return call('club_wait', { token: tok(), join: !!join, tg: tg || undefined }); },
     async pull() {
       const j = await call('pull', { token: tok() });
       return j.row || null;
