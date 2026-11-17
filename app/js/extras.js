@@ -9,7 +9,7 @@
   const ST = { unk: 'Не знаю значение', pas: 'Понимаю, но не использую', str: 'Не понимаю конструкцию' };
   const DST = { use: 'Знаю и использую', some: 'Иногда использую', pas: 'Понимаю, но не употребляю', fgt: 'Забыл', new: 'Вижу впервые', unsure: 'Затрудняюсь' };
   const KIND = { t2: 'Task 2', t1: 'Task 1', gt: 'Письмо' };
-  const S = () => { const p = C().P(); const n = p.nx = p.nx || {}; n.marks = n.marks || []; n.diag = n.diag || {}; n.hideW = n.hideW || 0; return n; };
+  const S = () => { const p = C().P(); const n = p.nx = p.nx || {}; n.marks = n.marks || []; n.diag = n.diag || {}; n.hideW = n.hideW || 0; n.hideTg = n.hideTg || 0; return n; };
   const copy = (t, msg) => {
     const ok = () => C().toast(msg || 'Скопировано');
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, () => C().toast('Не удалось скопировать'));
@@ -20,44 +20,89 @@
 
 
   // ---------- баннер набора в клуб ----------
+  // Ник Telegram «@ник», без пробелов (5–32 символа: латиница, цифры, «_», первая — буква). Правило то же, что в backend/yc/tg.js.
+  const tgNorm = (s) => { let t = String(s == null ? '' : s).trim(); if (!t) return ''; if (t[0] !== '@') t = '@' + t; return /^@[A-Za-z][A-Za-z0-9_]{4,31}$/.test(t) ? t : ''; };
+  // В очереди, но Telegram ещё не указан: просим добавить (баннер и окно клуба)
+  const needTg = () => { const s = S(); return !!s.wl && !(s.wls && s.wls.tg); };
   function bannerHtml() {
-    const inq = S().wl;
+    const inq = S().wl, nt = needTg();
+    const title = inq ? (nt ? 'Добавь свой Telegram' : 'Вы в листе ожидания') : 'Запишись в лист ожидания';
+    const sub = inq ? (nt ? 'Чтобы мы могли написать тебе, когда появятся свободные места.' : 'Дадим знать, когда откроем места.') : 'Места заняты. Напишем первым, когда откроем следующий набор.';
+    const label = inq ? (nt ? 'Добавить Telegram' : 'Вы в очереди ✓') : 'Встать в очередь';
     return '<div class="nbanner" id="nbn"><button class="nb-x" id="nbx" aria-label="Скрыть">×</button><img class="nb-i" src="img/club-w.jpg" alt="IELTS Teacher Club" width="768" height="512" decoding="async">' +
-      '<div class="nb-c"><span class="nb-tag">Набор закрыт</span><b class="nb-t">' + (inq ? 'Вы в листе ожидания' : 'Запишись в лист ожидания') + '</b><span class="nb-s">' + (inq ? 'Дадим знать, когда откроем места.' : 'Места заняты. Напишем первым, когда откроем следующий набор.') + '</span>' +
-      '<button class="btn sm nb-b" id="nbo" style="' + (inq ? '' : 'background:linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2);color:#fff;') + '">' + (inq ? 'Вы в очереди ✓' : 'Встать в очередь') + '</button></div></div>';
+      '<div class="nb-c"><span class="nb-tag">Набор закрыт</span><b class="nb-t">' + title + '</b><span class="nb-s">' + sub + '</span>' +
+      '<button class="btn sm nb-b" id="nbo" style="' + (inq && !nt ? '' : 'background:linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2);color:#fff;') + '">' + label + '</button></div></div>';
   }
   function clubSheet() {
     const mask = (em) => { const m = /^(.)[^@]*(@.+)$/.exec(String(em || '')); return m ? m[1] + '***' + m[2] : ''; };
     const row = (t, d) => '<div class="rowi" style="align-items:flex-start"><span class="grow"><b>' + t + '</b><div class="mut" style="margin-top:2px;font-size:13px">' + d + '</div></span></div>';
     const info = '<div class="list">' + row('Еженедельные созвоны', 'Живое общение с участниками раз в неделю') + row('Ежедневные цели и чек-ины', 'Каждый день фиксируешь план и результат, не бросаешь на полпути') + row('Ручная проверка работ', 'Эссе и письма смотрит человек, а не только программа') + row('Темы в группе', 'Отдельные ветки для эссе, материалов и чек-инов') + row('Отбор по целям', 'Берём тех, у кого есть конкретная цель по IELTS') + '</div>';
     const head = '<h2 style="margin:0 0 6px">IELTS Teacher Club</h2><p class="mut" style="margin:0 0 12px">Небольшая закрытая группа для тех, кто готовится к IELTS всерьёз. Отбор бесплатный.</p>' + info;
+    const form = (val, btnId, btnLabel) => '<div style="margin-top:14px"><label for="nwt" style="display:block;font-weight:600;margin-bottom:6px">Telegram</label>' +
+      '<input id="nwt" type="text" placeholder="@nickname" value="' + esc(val || '') + '" maxlength="33" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="done">' +
+      '<div class="mut" id="nwe" style="min-height:18px;margin-top:6px">Формат: @ник, без пробелов. Свой ник видно в Telegram: Настройки → Имя пользователя.</div></div>' +
+      '<div class="stack" style="margin-top:8px"><button class="btn p" id="' + btnId + '" disabled style="background:linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2);color:#fff">' + btnLabel + '</button></div>';
     const draw = (st) => {
+      const joined = !!(st && st.joined), tg = joined && st.tg ? st.tg : '', editing = !!(st && st.edit);
       let body;
-      if (st && st.joined) body = '<div class="card" style="margin-top:14px"><b id="nwpos">' + (st.pos ? 'Вы в очереди · №' + st.pos + ' из ' + st.total : 'Вы в очереди') + '</b><div class="mut" style="margin-top:4px">Когда откроем места, дадим знать в приложении и на e-mail аккаунта' + (st.email ? ' (' + esc(st.email) + ')' : '') + '.</div></div><div class="stack" style="margin-top:12px"><button class="btn" id="nwc">Закрыть</button></div>';
-      else if (st && st.err) body = '<p class="mut" style="margin:14px 0 8px">' + esc(st.err) + '</p><div class="stack"><button class="btn p" id="nwj">Попробовать ещё раз</button></div>';
-      else body = '<p class="mut" style="margin:14px 0 8px">Сейчас все места заняты. Очередь даёт приоритет: места следующего набора мы сначала предложим вам. Нажимая кнопку, вы соглашаетесь получить сообщение об открытии набора.</p><div class="stack"><button class="btn p" id="nwj" style="background:linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2);color:#fff">Встать в очередь</button></div>';
+      if (joined) {
+        const card = '<div class="card" style="margin-top:14px"><b id="nwpos">' + (st.pos ? 'Вы в очереди · №' + st.pos + ' из ' + st.total : 'Вы в очереди') + '</b><div class="mut" style="margin-top:4px">Когда откроем места, дадим знать в приложении, на e-mail аккаунта' + (st.email ? ' (' + esc(st.email) + ')' : '') + ' и в Telegram.</div>' +
+          (tg && !editing ? '<div style="margin-top:10px"><span class="mut">Telegram:</span> <b id="nwtg">' + esc(tg) + '</b> <button class="btn sm" id="nwed" style="margin-left:6px">Изменить</button></div>' : '') + '</div>';
+        if (!tg) body = card + '<p class="mut" style="margin:14px 0 0">Добавьте Telegram, чтобы мы могли написать вам, если появятся свободные места.</p>' + form('', 'nws', 'Сохранить') + '<div class="stack" style="margin-top:8px"><button class="btn" id="nwc">Закрыть</button></div>';
+        else if (editing) body = card + form(tg, 'nws', 'Сохранить') + '<div class="stack" style="margin-top:8px"><button class="btn" id="nwx">Отмена</button></div>';
+        else body = card + '<div class="stack" style="margin-top:12px"><button class="btn" id="nwc">Закрыть</button></div>';
+      } else body = '<p class="mut" style="margin:14px 0 0">Сейчас все места заняты. Очередь даёт приоритет: места следующего набора мы сначала предложим вам.</p>' + form('', 'nwj', 'Встать в очередь') +
+        '<p class="mut" style="margin:10px 0 0;font-size:12px">Нажимая кнопку, вы соглашаетесь, что мы напишем вам в Telegram и на e-mail, когда откроется набор.</p>';
       C().openSheet(head + body, (el) => {
-        const j = el.querySelector('#nwj'), c = el.querySelector('#nwc');
+        const j = el.querySelector('#nwj'), sv = el.querySelector('#nws'), c = el.querySelector('#nwc'), x = el.querySelector('#nwx'), ed = el.querySelector('#nwed');
+        const inp = el.querySelector('#nwt'), er = el.querySelector('#nwe'); const go = j || sv;
+        const hint = er ? er.textContent : '';
         if (c) c.onclick = () => C().closeSheet();
-        if (j) j.onclick = async () => {
-          j.disabled = true; j.textContent = 'Записываю…';
-          try { const r = await window.Cloud.clubWait(true); S().wl = 1; const u = await window.Cloud.session(); S().wls = { pos: r.pos, total: r.total, email: u ? mask(u.user.email) : '' }; C().save(); draw(Object.assign({ joined: true }, S().wls)); }
-          catch (er) { draw({ err: /Нет связи/.test(er.message) ? 'Нет связи. Проверьте интернет и попробуйте ещё раз.' : 'Не получилось записаться. Попробуйте чуть позже.' }); }
-        };
+        if (x) x.onclick = () => draw(Object.assign({}, st, { edit: false }));
+        if (ed) ed.onclick = () => draw(Object.assign({}, st, { edit: true }));
+        if (inp && go) {
+          const fail = (m) => { er.textContent = m; er.style.color = '#dc2626'; };
+          const check = () => {
+            const v = inp.value.trim(), ok = !!tgNorm(v);
+            go.disabled = !ok;
+            if (!v || ok) { er.textContent = hint; er.style.color = ''; } else fail('Проверьте формат: @ник, 5–32 символа, латиница, цифры и «_», без пробелов');
+            return ok;
+          };
+          inp.oninput = check; inp.onkeydown = (e) => { if (e.key === 'Enter' && !go.disabled) { e.preventDefault(); go.click(); } };
+          if (tgNorm(inp.value)) go.disabled = false;
+          if (editing || (joined && !tg)) setTimeout(() => inp.focus(), 380);
+          go.onclick = async () => {
+            const v = tgNorm(inp.value); if (!v) { check(); return; }
+            const label = go.textContent; go.disabled = true; go.textContent = j ? 'Записываю…' : 'Сохраняю…'; inp.disabled = true;
+            try {
+              const r = await window.Cloud.clubWait(!!j, v);
+              if (!r.joined) { S().wl = 0; S().wls = null; C().save(); draw(null); return; }
+              S().wl = 1; const u = await window.Cloud.session();
+              S().wls = { pos: r.pos, total: r.total, email: u ? mask(u.user.email) : '', tg: r.tg || v }; C().save();
+              draw(Object.assign({ joined: true }, S().wls));
+            } catch (er2) {
+              inp.disabled = false; go.disabled = false; go.textContent = label;
+              fail(/Нет связи/.test(er2.message) ? 'Нет связи. Проверьте интернет и попробуйте ещё раз.' : (/Telegram/.test(er2.message) ? er2.message : 'Не получилось сохранить. Попробуйте чуть позже.'));
+            }
+          };
+        }
       });
     };
     // уже в очереди: сразу рисуем итоговый вид (из кэша), без мигания «Встать в очередь»; цифры обновляем на месте
     draw(S().wl ? Object.assign({ joined: true }, S().wls || {}) : null);
     if (S().wl) window.Cloud.clubWait(false).then(async (r) => {
-      if (!r.joined) { S().wl = 0; draw(null); return; }
-      const u = await window.Cloud.session(); S().wls = { pos: r.pos, total: r.total, email: u ? mask(u.user.email) : '' }; C().save();
+      if (!r.joined) { S().wl = 0; S().wls = null; C().save(); draw(null); return; }
+      const had = !!(S().wls && S().wls.tg);
+      const u = await window.Cloud.session(); S().wls = { pos: r.pos, total: r.total, email: u ? mask(u.user.email) : '', tg: r.tg || '' }; C().save();
+      if (!had && r.tg) { draw(Object.assign({ joined: true }, S().wls)); return; } // Telegram уже есть на сервере (добавлен с другого устройства)
       const el = document.getElementById('nwpos'); if (el) el.textContent = 'Вы в очереди · №' + r.pos + ' из ' + r.total;
     }).catch(() => {});
   }
   function bindBanner(v) {
     const b = v.querySelector('#nbn'); if (!b) return;
     v.querySelector('#nbo').onclick = clubSheet;
-    v.querySelector('#nbx').onclick = () => { S().hideW = Date.now() + 7 * 864e5; C().save(); b.remove(); };
+    // «Добавь Telegram» скрываем на 2 дня, обычный баннер на 7
+    v.querySelector('#nbx').onclick = () => { if (needTg()) S().hideTg = Date.now() + 2 * 864e5; else S().hideW = Date.now() + 7 * 864e5; C().save(); b.remove(); };
   }
 
   // ---------- Reading: выделил слово — оно попало в карточки на повторение ----------
@@ -172,7 +217,7 @@
 
   N.after = function (v) {
     const h = location.hash || '#today'; const p = C() && C().P(); if (!p) return; const s = S();
-    if (/^#(today)?$/.test(h) && Date.now() > s.hideW) { const hd = v.querySelector('.head'); if (hd) { hd.insertAdjacentHTML('afterend', bannerHtml()); bindBanner(v); } }
+    if (/^#(today)?$/.test(h) && Date.now() > (needTg() ? s.hideTg : s.hideW)) { const hd = v.querySelector('.head'); if (hd) { hd.insertAdjacentHTML('afterend', bannerHtml()); bindBanner(v); } }
     if (/^#read\//.test(h)) decorate(v); else bar.hidden = true;
   };
 })();
