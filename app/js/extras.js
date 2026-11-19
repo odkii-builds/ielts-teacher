@@ -6,6 +6,7 @@
   const C = () => window.Ctx;
   const esc = (s) => C().esc(s);
   const CLUB = { spots: 3, dm: 'https://ig.me/m/odkii.builds' };
+  const CLUB_CONFIRM_SECONDS = 15;
   const ST = { unk: 'Не знаю значение', pas: 'Понимаю, но не использую', str: 'Не понимаю конструкцию' };
   const DST = { use: 'Знаю и использую', some: 'Иногда использую', pas: 'Понимаю, но не употребляю', fgt: 'Забыл', new: 'Вижу впервые', unsure: 'Затрудняюсь' };
   const KIND = { t2: 'Task 2', t1: 'Task 1', gt: 'Письмо' };
@@ -21,27 +22,31 @@
 
   // ---------- баннер набора в клуб ----------
   // Ник Telegram «@ник», без пробелов (5–32 символа: латиница, цифры, «_», первая — буква). Правило то же, что в backend/yc/tg.js.
-  const tgNorm = (s) => { let t = String(s == null ? '' : s).trim(); if (!t) return ''; if (t[0] !== '@') t = '@' + t; return /^@[A-Za-z][A-Za-z0-9_]{4,31}$/.test(t) ? t : ''; };
+  const tgNorm = (s) => { let t = String(s == null ? '' : s).trim().replace(/^(?:https?:\/\/)?t\.me\/([A-Za-z0-9_]+)\/?$/i, '$1'); if (!t) return ''; if (t[0] !== '@') t = '@' + t; return /^@[A-Za-z][A-Za-z0-9_]{4,31}$/.test(t) ? t : ''; };
   // В очереди, но Telegram ещё не указан: просим добавить (баннер и окно клуба)
   const needTg = () => { const s = S(); return !!s.wl && !(s.wls && s.wls.tg); };
   function bannerHtml() {
     const inq = S().wl, nt = needTg();
-    const title = inq ? (nt ? 'Добавь свой Telegram' : 'Вы в листе ожидания') : 'Запишись в лист ожидания';
-    const sub = inq ? (nt ? 'Чтобы мы могли написать тебе, когда появятся свободные места.' : 'Дадим знать, когда откроем места.') : 'Места заняты. Напишем первым, когда откроем следующий набор.';
-    const label = inq ? (nt ? 'Добавить Telegram' : 'Вы в очереди ✓') : 'Встать в очередь';
+    const title = inq ? (nt ? 'Добавь свой Telegram' : 'Вы в листе ожидания') : 'Клуб тебе подходит?';
+    const sub = inq ? (nt ? 'Чтобы мы могли написать тебе, когда появятся свободные места.' : 'Дадим знать, когда откроем места.') : 'Прочитай, как всё устроено, и подтверди участие.';
+    const label = inq ? (nt ? 'Добавить Telegram' : 'Вы в очереди ✓') : 'Подтвердить участие';
     return '<div class="nbanner" id="nbn"><button class="nb-x" id="nbx" aria-label="Скрыть">×</button><img class="nb-i" src="img/club-w.jpg" alt="IELTS Teacher Club" width="768" height="512" decoding="async">' +
       '<div class="nb-c"><span class="nb-tag">Набор закрыт</span><b class="nb-t">' + title + '</b><span class="nb-s">' + sub + '</span>' +
       '<button class="btn sm nb-b" id="nbo" style="' + (inq && !nt ? '' : 'background:linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2);color:#fff;') + '">' + label + '</button></div></div>';
   }
   function clubSheet() {
     const mask = (em) => { const m = /^(.)[^@]*(@.+)$/.exec(String(em || '')); return m ? m[1] + '***' + m[2] : ''; };
-    const row = (t, d) => '<div class="rowi" style="align-items:flex-start"><span class="grow"><b>' + t + '</b><div class="mut" style="margin-top:2px;font-size:13px">' + d + '</div></span></div>';
-    const info = '<div class="list">' + row('Еженедельные созвоны', 'Живое общение с участниками раз в неделю') + row('Ежедневные цели и чек-ины', 'Каждый день фиксируешь план и результат, не бросаешь на полпути') + row('Ручная проверка работ', 'Эссе и письма смотрит человек, а не только программа') + row('Темы в группе', 'Отдельные ветки для эссе, материалов и чек-инов') + row('Отбор по целям', 'Берём тех, у кого есть конкретная цель по IELTS') + '</div>';
-    const head = '<h2 style="margin:0 0 6px">IELTS Teacher Club</h2><p class="mut" style="margin:0 0 12px">Небольшая закрытая группа для тех, кто готовится к IELTS всерьёз. Отбор бесплатный.</p>' + info;
-    const form = (val, btnId, btnLabel) => '<div style="margin-top:14px"><label for="nwt" style="display:block;font-weight:600;margin-bottom:6px">Telegram</label>' +
-      '<input id="nwt" type="text" placeholder="@nickname" value="' + esc(val || '') + '" maxlength="33" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="done">' +
-      '<div class="mut" id="nwe" style="min-height:18px;margin-top:6px">Формат: @ник, без пробелов. Свой ник видно в Telegram: Настройки → Имя пользователя.</div></div>' +
-      '<div class="stack" style="margin-top:8px"><button class="btn p" id="' + btnId + '" disabled style="background:linear-gradient(110deg,#0045fd,#3d9bff,#ff5fa2);color:#fff">' + btnLabel + '</button></div>';
+    const row = (path, title, detail) => '<div class="rowi"><svg class="i" aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" style="flex:none;color:var(--acc)"><path d="' + path + '"/></svg><div class="grow"><b>' + title + '</b><div class="mut">' + detail + '</div></div></div>';
+    const head = '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h2 style="margin:0">IELTS Teacher Club</h2><span class="chip">Места заняты</span></div><p class="mut">Закрытая группа для регулярной подготовки</p><div class="list">' +
+      row('M4 6h16v15H4z M8 3v5m8-5v5M4 10h16m-12 5 3 3 5-6', 'Дисциплина', 'Чек-ины помогают заниматься регулярно') +
+      row('M14 4H5v16h14v-8M10 15l1-4 8-8 3 3-8 8z', 'Обратная связь', 'Разбор показывает, где именно теряются баллы') +
+      row('M4 4h13v10H9l-5 4z M10 17h6l4 4V8', 'Живое общение', 'Небольшая группа, вопросы и общий созвон') +
+      row('M12 3l2.3 6.7L21 12l-6.7 2.3L12 21l-2.3-6.7L3 12l6.7-2.3z', 'Пробуешь новое раньше других', 'Доступ к функциям IELTS Teacher до релиза') +
+      '</div><p class="mut">3 дня без чек-инов или 2 пропущенных созвона подряд — место переходит следующему.</p>';
+    const form = (val, btnId, btnLabel, timed) => '<div style="margin-top:14px"><label for="nwt" style="display:block;font-weight:600;margin-bottom:6px">Telegram</label>' +
+      '<input id="nwt" type="text" placeholder="@nickname" value="' + esc(val || '') + '" maxlength="64" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="done">' +
+      '<div class="mut" id="nwe" style="min-height:18px;margin-top:6px">Введи @ник или ссылку t.me/ник.</div></div>' +
+      '<div class="stack" style="margin-top:8px"><button class="btn p" id="' + btnId + '" disabled>' + (timed ? btnLabel + ' · ' + CLUB_CONFIRM_SECONDS + ' сек' : btnLabel) + '</button></div>';
     const draw = (st) => {
       const joined = !!(st && st.joined), tg = joined && st.tg ? st.tg : '', editing = !!(st && st.edit);
       let body;
@@ -51,27 +56,41 @@
         if (!tg) body = card + '<p class="mut" style="margin:14px 0 0">Добавьте Telegram, чтобы мы могли написать вам, если появятся свободные места.</p>' + form('', 'nws', 'Сохранить') + '<div class="stack" style="margin-top:8px"><button class="btn" id="nwc">Закрыть</button></div>';
         else if (editing) body = card + form(tg, 'nws', 'Сохранить') + '<div class="stack" style="margin-top:8px"><button class="btn" id="nwx">Отмена</button></div>';
         else body = card + '<div class="stack" style="margin-top:12px"><button class="btn" id="nwc">Закрыть</button></div>';
-      } else body = '<p class="mut" style="margin:14px 0 0">Сейчас все места заняты. Очередь даёт приоритет: места следующего набора мы сначала предложим вам.</p>' + form('', 'nwj', 'Встать в очередь') +
-        '<p class="mut" style="margin:10px 0 0;font-size:12px">Нажимая кнопку, вы соглашаетесь, что мы напишем вам в Telegram и на e-mail, когда откроется набор.</p>';
+      } else body = '<p class="mut" style="margin:14px 0 0">Подтверждение добавит тебя в лист ожидания.</p>' + form('', 'nwj', 'Подтвердить участие', true) +
+        '<p class="mut" style="margin:10px 0 0;font-size:12px">Подтверждая участие, ты принимаешь правила активности и соглашаешься, что мы напишем тебе в Telegram и на e-mail, когда откроется набор.</p>';
       C().openSheet(head + body, (el) => {
         const j = el.querySelector('#nwj'), sv = el.querySelector('#nws'), c = el.querySelector('#nwc'), x = el.querySelector('#nwx'), ed = el.querySelector('#nwed');
         const inp = el.querySelector('#nwt'), er = el.querySelector('#nwe'); const go = j || sv;
+        let wait = j ? CLUB_CONFIRM_SECONDS : 0;
         const hint = er ? er.textContent : '';
         if (c) c.onclick = () => C().closeSheet();
         if (x) x.onclick = () => draw(Object.assign({}, st, { edit: false }));
         if (ed) ed.onclick = () => draw(Object.assign({}, st, { edit: true }));
         if (inp && go) {
           const fail = (m) => { er.textContent = m; er.style.color = '#dc2626'; };
+          const countdown = () => {
+            if (!j) return;
+            j.textContent = wait > 0 ? 'Подтвердить участие · ' + wait + ' сек' : 'Подтвердить участие';
+          };
           const check = () => {
             const v = inp.value.trim(), ok = !!tgNorm(v);
-            go.disabled = !ok;
+            go.disabled = !ok || wait > 0;
             if (!v || ok) { er.textContent = hint; er.style.color = ''; } else fail('Проверьте формат: @ник, 5–32 символа, латиница, цифры и «_», без пробелов');
             return ok;
           };
           inp.oninput = check; inp.onkeydown = (e) => { if (e.key === 'Enter' && !go.disabled) { e.preventDefault(); go.click(); } };
-          if (tgNorm(inp.value)) go.disabled = false;
+          if (j) {
+            countdown();
+            const timer = setInterval(() => {
+              if (!document.body.contains(j)) { clearInterval(timer); return; }
+              wait = Math.max(0, wait - 1); countdown(); check();
+              if (!wait) clearInterval(timer);
+            }, 1000);
+          }
+          check();
           if (editing || (joined && !tg)) setTimeout(() => inp.focus(), 380);
           go.onclick = async () => {
+            if (wait > 0 || inp.disabled) return;
             const v = tgNorm(inp.value); if (!v) { check(); return; }
             const label = go.textContent; go.disabled = true; go.textContent = j ? 'Записываю…' : 'Сохраняю…'; inp.disabled = true;
             try {
