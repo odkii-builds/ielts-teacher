@@ -234,6 +234,24 @@
     };
   };
 
+  N.views['club-invite'] = async function () {
+    const ctx = C();
+    ctx.paint(ctx.head('Приглашение в клуб', 'IELTS Teacher Club') + '<p id="inviteStatus" role="status">Проверяем приглашение…</p><button id="acceptInvite" class="btn p" hidden>Подтвердить участие</button>');
+    const status = document.querySelector('#inviteStatus'), button = document.querySelector('#acceptInvite');
+    async function refresh(accept) {
+      button.disabled = true;
+      try {
+        const {until,accepted} = await window.Cloud.clubInvitation(accept);
+        const available = until > Date.now() && !accepted;
+        status.textContent = accepted ? 'Ты подтвердил участие. Организатор увидит ответ в админке.' : available ? 'Подтверди участие до '+new Date(until).toLocaleString('ru-RU')+'.' : until ? 'Срок приглашения истёк.' : 'Приглашение ещё не выдано.';
+        button.hidden = !available;
+      } catch (error) {status.textContent = error.message;}
+      finally {button.disabled = false;}
+    }
+    button.onclick = () => refresh(true);
+    await refresh(false);
+  };
+
   N.after = function (v) {
     const h = location.hash || '#today'; const p = C() && C().P(); if (!p) return; const s = S();
     if (/^#(today)?$/.test(h) && Date.now() > (needTg() ? s.hideTg : s.hideW)) { const hd = v.querySelector('.head'); if (hd) { hd.insertAdjacentHTML('afterend', bannerHtml()); bindBanner(v); } }

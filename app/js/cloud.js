@@ -43,6 +43,7 @@ window.Cloud = (function () {
     // Лист ожидания клуба: join=true встаёт в очередь (повтор безопасен), join=false только статус.
     // tg: ник Telegram «@ник» (при join обязателен; уже записанным его можно добавить или поменять)
     async clubWait(join, tg) { return call('club_wait', { token: tok(), join: !!join, tg: tg || undefined }); },
+    async clubInvitation(accept) { return call('club_invitation', {token: tok(), accept}); },
     async pull() {
       const j = await call('pull', { token: tok() });
       return j.row || null;
