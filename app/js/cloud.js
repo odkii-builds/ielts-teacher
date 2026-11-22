@@ -32,6 +32,8 @@ window.Cloud = (function () {
   return {
     available: () => true,
     async session() { const t = tok(), u = t && who(t); return u ? { user: u, access_token: t } : null; },
+    resetCode: email => call('reset_code', { email }),
+    resetPassword: (email, password, code) => auth('reset_password', email, password, code),
     signIn: (email, password) => auth('login', email, password),
     signUp: (email, password, code) => auth('signup', email, password, code),
     // Шаг 1 регистрации: сервер сам решает, нужен ли код (required) и отправляет письмо
