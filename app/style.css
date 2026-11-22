@@ -184,3 +184,20 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
 
 #tabs a,#tabs button{position:relative}.ndot{position:absolute;top:7px;left:calc(50% + 9px);width:9px;height:9px;border-radius:50%;background:#0045fd;box-shadow:0 0 0 2px var(--bg);pointer-events:none}
 .favb{font-size:20px;padding:0 6px;vertical-align:middle;text-decoration:none}
+
+.auth.recovery{max-width:420px;margin:0 auto;padding-top:clamp(16px,5vh,48px)}
+.recovery .recovery-back{display:flex;align-items:center;gap:4px;padding:4px 0;margin-bottom:20px;color:var(--mut)}
+.recovery-back .i{width:16px;height:16px}
+.recovery .logo{display:block;width:56px;height:56px;margin-bottom:14px}
+.recovery h1{margin:0}
+.recovery form{margin-top:18px}
+.recovery label{display:block;font-weight:600;font-size:14px;margin:16px 0 7px}
+.recovery .recovery-address{color:var(--mut);line-height:1.5;margin:0;overflow-wrap:anywhere}
+.recovery-address strong{font-weight:600}
+.recovery .edit-address{padding:4px 0}
+.recovery input{margin-bottom:0}
+.recovery .recovery-code{font-size:22px;letter-spacing:.32em;font-variant-numeric:tabular-nums}
+.recovery .err:empty{display:none}
+.recovery #asub{margin-top:18px;width:100%}
+.recovery .recovery-resend{display:block;margin:8px auto 0}
+.recovery .recovery-resend:disabled{color:var(--mut);opacity:1}

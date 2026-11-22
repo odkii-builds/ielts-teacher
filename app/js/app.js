@@ -1231,18 +1231,36 @@
     $('#pf').onsubmit = (e) => { e.preventDefault(); const f = readProfileForm(); if (placeDone) f.placement = placeDone; newProfile(f); placeDone = null; sess = null; location.hash = '#today'; route(); };
   }
 
+  const passwordEyeIcon = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="sl" d="M4 4l16 16"/></svg>';
   // Шаг 2 регистрации: код из письма
   function codeStep(em, pw, reset = false) {
-    $('#af').innerHTML = '<p style="font-size:17px;margin:0 0 6px">Мы отправили код на <b>' + esc(em) + '</b></p><p class="mut" style="margin:0 0 14px">Введите 6 цифр из письма. Не пришло? Проверьте «Спам».</p><input id="acode" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="000000" style="text-align:center;font-size:24px;letter-spacing:8px" required><div class="err" id="aerr"></div><button class="btn p" id="asub" type="submit">Подтвердить</button><div style="text-align:center;margin-top:8px"><button class="link" id="ares" type="button" disabled></button></div><div style="text-align:center;margin-top:4px"><button class="link" id="aback" type="button">Изменить почту</button></div>';
     if (reset) {
-      $('#af p').textContent = 'Если аккаунт существует, код придёт на ' + em;
-      $('#aerr').insertAdjacentHTML('beforebegin', '<input id="resetPassword" type="password" minlength="6" maxlength="200" required autocomplete="new-password" placeholder="Новый пароль"><label><input type="checkbox" id="showReset"> Показать пароль</label>');
-      $('#showReset').onchange = () => { $('#resetPassword').type = $('#showReset').checked ? 'text' : 'password'; };
-      $('#asub').textContent = 'Сохранить и войти';
+      $('#af').innerHTML = `
+        <p class="recovery-address">Если аккаунт существует, код придёт на <strong>${esc(em)}</strong></p>
+        <button class="link edit-address" id="aback" type="button">Изменить почту</button>
+        <label for="acode">Код из письма</label>
+        <input id="acode" class="recovery-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000" required>
+        <label for="resetPassword">Новый пароль</label>
+        <div class="pw"><input id="resetPassword" type="password" autocomplete="new-password" minlength="6" maxlength="200" placeholder="Минимум 6 символов" required>
+          <button id="showReset" type="button" class="eye" aria-label="Показать пароль" aria-pressed="false">${passwordEyeIcon}</button></div>
+        <div class="err" id="aerr" role="status"></div>
+        <button class="btn p" id="asub" type="submit">Сохранить и войти</button>
+        <button class="link recovery-resend" id="ares" type="button" disabled></button>`;
+      $('#showReset').onclick = () => {
+        const field = $('#resetPassword'), button = $('#showReset');
+        const visible = field.type === 'password';
+        field.type = visible ? 'text' : 'password';
+        button.classList.toggle('on', visible);
+        button.setAttribute('aria-pressed', String(visible));
+        button.setAttribute('aria-label', visible ? 'Скрыть пароль' : 'Показать пароль');
+      };
+    } else {
+      $('#af').innerHTML = '<p style="font-size:17px;margin:0 0 6px">Мы отправили код на <b>' + esc(em) + '</b></p><p class="mut" style="margin:0 0 14px">Введите 6 цифр из письма. Не пришло? Проверьте «Спам».</p><input id="acode" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="000000" style="text-align:center;font-size:24px;letter-spacing:8px" required><div class="err" id="aerr"></div><button class="btn p" id="asub" type="submit">Подтвердить</button><div style="text-align:center;margin-top:8px"><button class="link" id="ares" type="button" disabled></button></div><div style="text-align:center;margin-top:4px"><button class="link" id="aback" type="button">Изменить почту</button></div>';
     }
     const inp = $('#acode'); inp.focus();
+    const resend = $('#ares');
     let t = 60, iv = null;
-    const tick = () => { const r = $('#ares'); if (!r) { clearInterval(iv); return; } if (t > 0) { r.disabled = true; r.textContent = 'Отправить код ещё раз через ' + t + ' с'; t--; } else { clearInterval(iv); r.disabled = false; r.textContent = 'Отправить код ещё раз'; } };
+    const tick = () => { const r = resend; if (!r.isConnected) { clearInterval(iv); return; } if (t > 0) { r.disabled = true; r.textContent = 'Отправить код ещё раз через ' + t + ' с'; t--; } else { clearInterval(iv); r.disabled = false; r.textContent = 'Отправить код ещё раз'; } };
     iv = setInterval(tick, 1000); tick();
     $('#ares').onclick = async () => { t = 60; iv = setInterval(tick, 1000); tick(); try { await (reset ? Cloud.resetCode(em) : Cloud.signupCode(em)); $('#aerr').style.color = ''; $('#aerr').textContent = 'Код отправлен ещё раз'; } catch (e) { $('#aerr').textContent = String(e.message || e); } };
     $('#aback').onclick = () => { clearInterval(iv); if (reset) recoverPassword(em); else viewAuth(); };
@@ -1258,7 +1276,15 @@
   }
 
   function recoverPassword(email) {
-    paint('<div class="auth"><h1>Восстановить пароль</h1><form id="af"><input id="ae" type="email" autocomplete="email" placeholder="Email" required><div class="err" id="aerr"></div><button class="btn p" type="submit" id="asub">Получить код</button></form><button class="link" type="button" id="backLogin">Вернуться ко входу</button></div>');
+    paint(`<div class="auth recovery">
+      <button class="link recovery-back" type="button" id="backLogin">${ico('left')} Ко входу</button>
+      <img class="logo" src="img/logo.png?v=2" alt="IELTS Teacher" width="56" height="56">
+      <h1>Восстановить пароль</h1>
+      <form id="af"><label for="ae">Почта аккаунта</label>
+        <input id="ae" type="email" autocomplete="email" placeholder="name@example.com" required>
+        <div class="err" id="aerr" role="status"></div>
+        <button class="btn p" type="submit" id="asub">Получить код</button>
+      </form></div>`);
     $('#ae').value = email;
     $('#backLogin').onclick = viewAuth;
     const form = $('#af');
@@ -1279,7 +1305,7 @@
   function viewAuth() {
     $('#tabs').hidden = true;
     let signup = false;
-    paint('<div class="auth"><img class="logo" src="img/logo.png?v=2" alt="IELTS" width="88" height="88"><h1>IELTS Teacher</h1><p class="sub">Войди — данные будут на всех твоих устройствах</p><form id="af"><input id="ae" type="email" inputmode="email" autocomplete="email" autocapitalize="none" autocorrect="off" placeholder="Email" required><div class="pw"><input id="ap" type="password" autocomplete="current-password" placeholder="Пароль" minlength="6" required><button type="button" id="aeye" class="eye" aria-label="Показать пароль" aria-pressed="false"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="sl" d="M4 4l16 16"/></svg></button></div><div class="err" id="aerr"></div><label class="mut" id="anote" hidden style="font-size:14px;margin:0 0 10px;display:none;gap:8px;align-items:flex-start"><input id="acons" type="checkbox" style="margin-top:3px;flex:none"><span>Я согласен(на) на <a href="https://pay.odkii-builds.ru/#consent" target="_blank" rel="noopener">обработку персональных данных</a> и принимаю <a href="https://pay.odkii-builds.ru/#policy" target="_blank" rel="noopener">политику конфиденциальности</a>. Данные хранятся в России.</span></label><button class="btn p" id="asub" type="submit">Войти</button></form><div style="text-align:center;margin-top:8px"><button class="link" id="forgot" type="button">Забыли пароль?</button><br><button class="link" id="atog" type="button">Нет аккаунта? Создать</button></div><p class="mut" style="font-size:12px;margin-top:18px;text-align:center">Бесплатный проект с открытым кодом (<a href="https://github.com/odkii-builds/ielts-teacher" target="_blank" rel="noopener">GitHub</a>). Не связан с IDP, British Council, Cambridge и, Oxford. Материалы написаны самостоятельно, списки слов — по открытым данным Oxford.</p></div>');
+    paint('<div class="auth"><img class="logo" src="img/logo.png?v=2" alt="IELTS" width="88" height="88"><h1>IELTS Teacher</h1><p class="sub">Войди — данные будут на всех твоих устройствах</p><form id="af"><input id="ae" type="email" inputmode="email" autocomplete="email" autocapitalize="none" autocorrect="off" placeholder="Email" required><div class="pw"><input id="ap" type="password" autocomplete="current-password" placeholder="Пароль" minlength="6" required><button type="button" id="aeye" class="eye" aria-label="Показать пароль" aria-pressed="false">'+passwordEyeIcon+'</button></div><div class="err" id="aerr"></div><label class="mut" id="anote" hidden style="font-size:14px;margin:0 0 10px;display:none;gap:8px;align-items:flex-start"><input id="acons" type="checkbox" style="margin-top:3px;flex:none"><span>Я согласен(на) на <a href="https://pay.odkii-builds.ru/#consent" target="_blank" rel="noopener">обработку персональных данных</a> и принимаю <a href="https://pay.odkii-builds.ru/#policy" target="_blank" rel="noopener">политику конфиденциальности</a>. Данные хранятся в России.</span></label><button class="btn p" id="asub" type="submit">Войти</button></form><div style="text-align:center;margin-top:8px"><button class="link" id="forgot" type="button">Забыли пароль?</button><br><button class="link" id="atog" type="button">Нет аккаунта? Создать</button></div><p class="mut" style="font-size:12px;margin-top:18px;text-align:center">Бесплатный проект с открытым кодом (<a href="https://github.com/odkii-builds/ielts-teacher" target="_blank" rel="noopener">GitHub</a>). Не связан с IDP, British Council, Cambridge и, Oxford. Материалы написаны самостоятельно, списки слов — по открытым данным Oxford.</p></div>');
     $('#forgot').onclick = () => recoverPassword($('#ae').value.trim());
     $('#atog').onclick = () => { signup = !signup; $('#forgot').hidden = signup; $('#asub').textContent = signup ? 'Создать аккаунт' : 'Войти'; $('#atog').textContent = signup ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Создать'; $('#ap').autocomplete = signup ? 'new-password' : 'current-password'; $('#aerr').textContent = ''; $('#anote').hidden = !signup; $('#anote').style.display = signup ? 'flex' : 'none'; };
     $('#aeye').onclick = () => { const i = $('#ap'), on = i.type === 'password'; i.type = on ? 'text' : 'password'; $('#aeye').classList.toggle('on', on); $('#aeye').setAttribute('aria-pressed', on); $('#aeye').setAttribute('aria-label', on ? 'Скрыть пароль' : 'Показать пароль'); };
