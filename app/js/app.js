@@ -20,6 +20,8 @@
 
   // ---------- иконки ----------
   const IC = {
+    listening: '<path d="M4 15v-3a8 8 0 0116 0v3"/><rect x="3" y="12" width="4" height="8" rx="2"/><rect x="17" y="12" width="4" height="8" rx="2"/>',
+    writing: '<path d="m4 20 4-1 12-12-3-3L5 16zM14 7l3 3"/>',
     today: '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/>',
     plan: '<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
     cards: '<rect x="3.5" y="7" width="14" height="13" rx="3"/><path d="M7 4h12a1.5 1.5 0 0 1 1.5 1.5V16"/>',
@@ -1328,16 +1330,15 @@
   }
 
   // ---------- маршрутизация ----------
-  const TABS = [['today', 'Сегодня'], ['plan', 'План'], ['cards', 'Карточки'], ['errors', 'Ошибки']];
-  const MORE = [['progress', 'Прогресс', '📈', 'Пробные экзамены и выполнение плана'], ['writing', 'Письменная часть', '✍️', 'Эссе, графики и письма'], ['listening', 'Аудирование', '🎧', 'Тесты как на экзамене'], ['reading', 'Чтение', '📖', 'Тексты и вопросы формата IELTS'], ['res', 'Ресурсы', '📚', 'Материалы для подготовки'], ['set', 'Настройки', '⚙️', 'Профиль, цель и аккаунт']];
+  const TABS = [['today', 'Сегодня'], ['listening', 'Аудирование'], ['writing', 'Письмо'], ['cards', 'Карточки']];
+  const MORE = [['progress', 'Прогресс', '📈', 'Пробные экзамены и выполнение плана'], ['plan', 'План', '📅', 'Занятия по дням'], ['errors', 'Ошибки', '📝', 'Журнал ошибок и повторение'], ['reading', 'Чтение', '📖', 'Тексты и вопросы формата IELTS'], ['res', 'Ресурсы', '📚', 'Материалы для подготовки'], ['set', 'Настройки', '⚙️', 'Профиль, цель и аккаунт']];
   const MORE_ALIAS = { write: 'writing', read: 'reading', listen: 'listening', dictation: 'listening' };
   function renderTabs(tab0) {
     let tab = tab0;
     const t = $('#tabs'); t.hidden = false;
     tab = MORE_ALIAS[tab] || (tab === 'fix' ? 'errors' : tab === 'vw' ? 'cards' : tab === 't2' ? 'writing' : tab); const inMore = MORE.some((m) => m[0] === tab);
-    t.innerHTML = TABS.map(([k, n]) => '<a href="#' + k + '" class="' + (k === tab ? 'on' : '') + '">' + ico(k) + n + (k === 'cards' && !newSeen('drill') ? '<i class="ndot"></i>' : '') + '</a>').join('') + '<button id="tmore" class="' + (inMore ? 'on' : '') + '">' + ico('more') + (inMore ? MORE.find((m) => m[0] === tab)[1] : 'Ещё') + (!newSeen('listen') ? '<i class="ndot"></i>' : '') + '</button>';
-    $('#tmore').onclick = () => { const had = !newSeen('listen'); try { localStorage.setItem('ielts_new_listen', '1'); } catch (e) { /* ignore */ } $$('#tmore .ndot').forEach((e) => e.remove()); openMore(had); };
-    const openMore = (had) => openSheet('<div class="stack" style="padding-top:4px">' + MORE.map(([k, n, ic, d]) => '<a class="card mode" href="#' + k + '"><span class="mic">' + ic + '</span><span class="grow"><b>' + n + (k === 'listening' && had ? '<span class="nwi">Новое</span>' : '') + '</b><span class="mut">' + d + '</span></span></a>').join('') + '</div>', (el) => { el.querySelectorAll('a').forEach((a) => { a.onclick = () => closeSheet(); }); });
+    t.innerHTML = TABS.map(([k, n]) => '<a href="#' + k + '" class="' + (k === tab ? 'on' : '') + '">' + ico(k) + n + (k === 'cards' && !newSeen('drill') ? '<i class="ndot"></i>' : '') + '</a>').join('') + '<button id="tmore" class="' + (inMore ? 'on' : '') + '">' + ico('more') + (inMore ? MORE.find((m) => m[0] === tab)[1] : 'Ещё') + '</button>';
+    $('#tmore').onclick = () => openSheet('<div class="stack" style="padding-top:4px">' + MORE.map(([k, n, ic, d]) => '<a class="card mode" href="#' + k + '"><span class="mic">' + ic + '</span><span class="grow"><b>' + n + '</b><span class="mut">' + d + '</span></span></a>').join('') + '</div>', (el) => { el.querySelectorAll('a').forEach((a) => { a.onclick = () => closeSheet(); }); });
   }
   function route(animate) {
     if (!user) return viewAuth();
