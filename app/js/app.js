@@ -330,7 +330,7 @@
   ['gesturestart', 'gesturechange', 'gestureend'].forEach((n) => document.addEventListener(n, (ev) => ev.preventDefault())); // iOS: без щипкового зума
   // ---------- Попап слова: перевод + транскрипция ----------
   let LEX = null, lexP = null;
-  const lexLoad = () => lexP || (lexP = fetch('data/lex.json').then((r) => r.json()).then((j) => (LEX = j)).catch(() => (LEX = {})));
+  const lexLoad = () => lexP || (lexP = fetch('data/lex.json?v=2').then((r) => { if (!r.ok) throw Error('dictionary'); return r.json(); }).then((j) => (LEX = j)).catch(() => { lexP = null; return {}; }));
   const onlineTr = async (w) => {
     const k = 'tr_' + w; try { const c = localStorage.getItem(k); if (c) return c; } catch (e) { /* */ }
     try { const j = await (await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(w) + '&langpair=en|ru')).json(); const t = j && j.responseData && j.responseData.translatedText; if (t && !/MYMEMORY|INVALID|QUERY/i.test(t)) { try { localStorage.setItem(k, t); } catch (e) { /* */ } return t.toLowerCase(); } } catch (e) { /* */ }
@@ -348,7 +348,7 @@
     const lx = await lexLoad(); const e = lx[w] || lx[w.replace(/['’]s$/, '')] || [];
     let tr = e[1] || '', online = false; if (!tr) { tr = await onlineTr(w); online = !!tr; }
     if (!$('#wpop') || $('#wpop') !== pop) return;
-    pop.innerHTML = '<div class="wp1"><b>' + esc(w) + '</b>' + (e[0] ? ' <span class="mut">' + esc(e[0]) + '</span>' : '') + '<button class="link" id="wsp" aria-label="Произношение">🔊</button></div><div class="wtr">' + (tr ? esc(tr) : '<span class="mut">перевод не найден</span>') + '</div>' + (online ? '<div class="mut" style="font-size:12px;margin-top:2px">машинный перевод, без учёта контекста</div>' : '');
+    pop.innerHTML = '<div class="wp1"><b>' + esc(w) + '</b>' + (e[0] ? ' <span class="mut">' + esc(e[0]) + '</span>' : '') + '<button class="link" id="wsp" aria-label="Произношение">🔊</button></div><div class="wtr">' + (tr ? esc(tr) : '<span class="mut">Не удалось получить перевод. Нажми на слово ещё раз.</span>') + '</div>' + (online ? '<div class="mut" style="font-size:12px;margin-top:2px">машинный перевод, без учёта контекста</div>' : '');
     $('#wsp').onclick = (ev) => { ev.stopPropagation(); speak(w); }; place();
   }
   document.addEventListener('click', (ev) => {
