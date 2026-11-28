@@ -279,14 +279,14 @@
     let h = head(isToday ? 'Сегодня' : fmtD(date), sub, nav).replace('<div><h1>', '<div class="hl"><img class="logo" src="img/logo.png?v=2" alt="" width="40" height="40"><div><h1>').replace('</div><div class="acts">', '</div></div><div class="acts">');
     h += '<div class="sum"><span id="sdn">' + s0.dn + ' из ' + d.total + ' мин</span><span id="spc">' + s0.pct + '%</span></div><div class="bar" style="margin-bottom:16px"><i id="sbar" style="width:' + s0.pct + '%"></i></div>';
     const fdue = isToday ? E.errDue(p.errors, today()).length : 0;
-    if (fdue) h += fixBanner(fdue);
     if (isToday) h += studyRow();
-    if (isToday) h += aiRow();
     h += '<div class="list">' + d.tasks.map((t) => {
       const more = (t.desc ? '<p>' + esc(t.desc) + '</p>' : '') + (t.resource ? '<div>' + resLine(t.resource) + '</div>' : '');
       return '<div class="task' + (done[t.id] ? ' done' : '') + '" data-id="' + esc(t.id) + '"><button class="cb" aria-label="Готово" aria-pressed="' + !!done[t.id] + '"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>' +
         '<div><button class="tbody"><div class="ttl">' + esc(t.title) + '</div><div class="tmeta">' + t.minutes + ' мин · ' + esc(SKN[t.skill] || t.skill) + '</div></button>' + (more ? '<div class="more"><div>' + more + '</div></div>' : '') + '</div></div>';
     }).join('') + '</div>';
+    if (isToday) h += '<div class="tools">' + (fdue ? '<a class="tl" href="#fix"><span class="ti ti-f">' + ico('errors') + '</span><span class="grow"><b>Исправь свои ошибки</b><span class="mut">Повтор фраз из твоих эссе</span></span><span class="tb">' + fdue + '</span>' + ico('chev', 'chev') + '</a>' : '') +
+      '<button class="tl" data-ai="1"><span class="ti ti-a">' + ico('plus') + '</span><span class="grow"><b>Загрузить отчёт ИИ</b><span class="mut">Вставь ответ проверяющего — баллы сохранятся</span></span>' + ico('chev', 'chev') + '</button></div>';
     h += '<div style="text-align:center;margin-top:8px"><button class="link" data-gl="1">Что значат слова и буквы?</button></div>';
     paint(h); if (isToday) initStudy();
     $('#dprev').onclick = () => { viewDate = E.addDays(date, -1); route(); };
@@ -818,14 +818,22 @@
   function viewWriting() {
     const p = P(); const W = WRITING;
     const doneIds = new Set(p.writes.map((w) => w.id));
-    let h = head('Письменная часть', 'Задания в формате IELTS', '<button class="btn sm" id="wimp">Оценка ИИ</button>') + '<div class="list cta" style="margin-bottom:14px"><a class="rowi" href="#t2"><div class="grow"><b>Как писать эссе на 8+</b><div class="mut" style="margin-top:2px">Шесть типов предложений, план за 5 минут, чек-лист</div></div>' + ico('chev', 'chev') + '</a></div>' + seg('wg', [['t2', 'Задание 2 (эссе)'], ['t1', 'Задание 1 (график)'], ['gt', 'Письма'], ['free', 'Своё']], wGroup) + '<div id="wl" style="margin-top:16px"></div>';
+    Shelf.css();
+    let h = '<div class="lb-sec lb-sec-W">' + head('Письмо', 'Задания в формате IELTS', '<button class="btn sm" id="wimp">Оценка ИИ</button>') + '</div>' + seg('wg', [['t2', 'Эссе'], ['t1', 'График'], ['gt', 'Письма'], ['free', 'Своё']], wGroup) + '<div id="wl" style="margin-top:16px"></div>';
     if (p.subs.length) h += '<h3>Оценки</h3><div class="list">' + p.subs.slice().reverse().slice(0, 15).map((s) => '<div class="rowi"><div class="grow"><b>' + esc((KINDS.find((k) => k[0] === s.kind) || [0, s.kind])[1]) + '</b> <span class="mut">· ' + esc(fmtD(s.date)) + (s.note ? ' · ' + esc(s.note) : '') + '</span></div><b>' + esc(s.avg) + '</b></div>').join('') + '</div>';
     paint(h);
     $('#wimp').onclick = () => importSheet(p, wGroup === 't1' ? 't1' : wGroup === 'gt' ? 'gt' : 't2', '');
     const row = (t, title, sub) => '<a class="rowi" href="#write/' + t.id + '"><div class="grow"><b>' + esc(title) + '</b><div class="mut" style="margin-top:2px">' + esc(sub) + '</div></div>' + (doneIds.has(t.id) ? '<span class="chip on">✓</span>' : ico('chev', 'chev')) + '</a>';
+    const KT1 = { table: 'таблица', pie: 'круговая', bar: 'столбцы', line: 'график', process: 'процесс', map: 'карта' };
+    // Последняя плитка сетки эссе — гайд «Как писать эссе на 8+»
+    const guide = '<a class="lb-card lb-more" href="#t2"><span class="m">✦</span><b>Как писать эссе на 8+</b><span>план за 5 минут и чек-лист ›</span></a>';
+    const cards = (list, task, title, sub, icon, tail) => '<div class="lb-grid">' + list.map((t, i) => Shelf.wCard({ id: t.id, n: i + 1, task: typeof task === 'function' ? task(t) : task, title: title(t), sub: sub(t), done: doneIds.has(t.id), icon })).join('') + (tail || '') + '</div>';
     const draw = () => {
       let html;
-      if (wGroup === 't2') html = '<div class="list">' + W.task2.map((t) => row(t, t.topic + ' · ' + W.types[t.type], t.q.slice(0, 90) + '…')).join('') + '</div>';
+      if (wGroup === 't2') html = cards(W.task2, 'Task 2', (t) => t.topic, (t) => W.types[t.type] || '', '', guide);
+      else if (wGroup === 't1') html = cards(W.task1, 'Task 1', (t) => t.title, (t) => KT1[t.kind] || '');
+      else if (wGroup === 'gt') { const to = (t) => { const m = /letter to ((?:an? |the |your )?[^.]+?)\./i.exec(t.q); return m ? 'To ' + m[1] : 'Letter'; }; html = cards(W.gt, (t) => t.tone, to, (t) => t.q.split('.')[0], 'mail'); }
+      else if (wGroup === 't2') html = '<div class="list">' + W.task2.map((t) => row(t, t.topic + ' · ' + W.types[t.type], t.q.slice(0, 90) + '…')).join('') + '</div>';
       else if (wGroup === 't1') html = '<div class="list">' + W.task1.map((t) => row(t, t.title, t.kind === 'table' ? 'таблица' : t.kind === 'pie' ? 'круговые диаграммы' : t.kind === 'bar' ? 'столбчатая диаграмма' : 'линейный график')).join('') + '</div>';
       else if (wGroup === 'gt') html = '<div class="list">' + W.gt.map((t) => row(t, t.tone + ' letter', t.q.slice(0, 90) + '…')).join('') + '</div>';
       else html = '<div class="card"><p style="margin:0 0 12px" class="mut">Свой вопрос или тема (из учебника, пробного теста, запись речи в тексте): получишь анализ текста и промпт для ИИ-проверки.</p><a class="btn p" href="#write/free" style="display:grid;place-items:center;text-decoration:none">Открыть редактор</a></div>';
@@ -941,10 +949,13 @@
   }
   function viewReading() {
     const p = P();
-    let h = head('Чтение', READ.tests.length + ' учебных текстов по формату Academic') + '<div class="list">' + READ.tests.map((t) => {
+    const items = READ.tests.map((t, i) => {
       const n = t.groups.reduce((a, g) => a + g.items.length, 0); const rs = p.reads.filter((r) => r.id === t.id); const best = rs.length ? rs.reduce((a, r) => (r.raw > a.raw ? r : a)) : null;
-      return '<a class="rowi" href="#read/' + t.id + '"><div class="grow"><b>' + esc(t.title) + '</b><div class="mut" style="margin-top:2px">' + esc(t.topic) + ' · ' + n + ' вопросов · ' + t.minutes + ' мин</div></div>' + (best ? '<span class="chip on">' + best.raw + '/' + best.total + '</span>' : ico('chev', 'chev')) + '</a>';
-    }).join('') + '</div><p class="mut" style="margin-top:14px">' + esc(READ.note) + ' Реальные тесты — в Cambridge IELTS и на ielts.org.</p>';
+      return { id: t.id, n: i + 1, title: t.title, href: '#read/' + t.id, tag: best ? best.raw + '/' + best.total : '', sub: n + ' вопросов · ' + t.minutes + ' мин', meta: { topic: t.topic } };
+    });
+    const done = items.filter((x) => x.tag).length;
+    let h = '<div class="lb-sec lb-sec-R">' + head('Чтение', READ.tests.length + ' текстов в формате Academic' + (done ? ' · пройдено ' + done : '')) + '</div>' + Shelf.grid('R', items) +
+      '<p class="mut" style="margin-top:14px">' + esc(READ.note) + ' Реальные тесты — в Cambridge IELTS и на ielts.org.</p>';
     paint(h);
   }
   function viewRead(id) {
@@ -1019,8 +1030,8 @@
     try { localStorage.setItem('ielts_new_listen', '1'); } catch (e) { /* ignore */ } $$('#tmore .ndot').forEach((e) => e.remove());
     const p = P(); const best = (k) => { const rs = (p.listens || []).filter((r) => r.id === k); return rs.length ? rs.reduce((x, r) => (r.raw > x.raw ? r : x)) : null; };
     const row = (href, title, desc, tail) => '<a class="rowi" href="' + href + '"><div class="grow"><b>' + esc(title) + '</b><div class="mut" style="margin-top:2px">' + esc(desc) + '</div></div>' + (tail ? '<span class="mut">' + esc(tail) + '</span>' : '') + ico('chev', 'chev') + '</a>';
-    let h = head('Аудирование', 'Как на экзамене: 4 части, 40 вопросов, запись звучит один раз');
-    h += '<h3>Полные тесты</h3>' + LISTEN.tests.map((t) => { const b = best(t.id + '/all'); return '<div class="list cta" style="margin-bottom:10px">' + row('#listen/' + t.id, t.title, t.topic, b ? b.raw + '/' + b.total : '') + '</div>'; }).join('');
+    let h = '<div class="lb-sec lb-sec-L">' + head('Аудирование', 'Как на экзамене: 4 части, 40 вопросов, запись звучит один раз') + '</div>';
+    h += '<h3>Полные тесты</h3>' + Shelf.grid('L', LISTEN.tests.map((t, i) => { const b = best(t.id + '/all'); return { id: t.id, n: i + 1, title: t.title, sub: t.topic, href: '#listen/' + t.id, tag: b ? b.raw + '/' + b.total : '4 части · 30 мин' }; }));
     const t0 = LISTEN.tests[0];
     if (t0) h += '<h3>Отдельные части</h3><div class="list">' + t0.parts.map((pt, i) => '<a class="rowi" href="#" data-lpart="' + pt.n + '"><div class="grow"><b>Part ' + pt.n + ' · ' + LPART[i][0] + '</b><div class="mut" style="margin-top:2px">' + LPART[i][1] + '</div></div>' + ico('chev', 'chev') + '</a>').join('') + '</div>';
     h += '<h3>Как устроен экзамен</h3><div class="card stack"><div><b>30 минут</b> записи и ещё 10 минут на перенос ответов (на бумаге).</div><div><b>4 части по 10 вопросов</b>: разговор, монолог, обсуждение, лекция — от простого к сложному.</div><div>Запись звучит <b>один раз</b>. Перед каждой частью — 30 секунд на вопросы, после — 30 секунд на проверку.</div><div>Считаются <b>орфография</b> и лимит слов: «two» и «2» засчитываются, «teh» — нет.</div></div>';
